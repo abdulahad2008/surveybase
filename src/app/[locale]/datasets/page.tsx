@@ -101,7 +101,7 @@ export default async function DatasetsPage({
         <NumberField name="sampleMin" label={t("filterSampleMin")} value={filters.sampleMin} />
         <NumberField name="sampleMax" label={t("filterSampleMax")} value={filters.sampleMax} />
 
-        <div className="col-span-2 flex items-end gap-2 sm:col-span-3 lg:col-span-4">
+        <div className="col-span-2 flex flex-wrap items-end gap-2 sm:col-span-3 lg:col-span-4">
           <button
             type="submit"
             className="rounded bg-black px-4 py-2 font-medium text-white dark:bg-white dark:text-black"

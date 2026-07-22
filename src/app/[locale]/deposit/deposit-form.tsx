@@ -51,7 +51,10 @@ export function DepositForm({ locale }: { locale: Locale }) {
       <p className="text-sm text-gray-600 dark:text-gray-400">{t("intro")}</p>
 
       {state.error && (
-        <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+        <p
+          role="alert"
+          className="rounded bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300"
+        >
           {t(state.error)}
         </p>
       )}
@@ -100,7 +103,7 @@ export function DepositForm({ locale }: { locale: Locale }) {
           <option value="CC-BY">CC-BY</option>
           <option value="CC-BY-SA">CC-BY-SA</option>
           <option value="CC0">CC0</option>
-          <option value="Other">Other</option>
+          <option value="Other">{t("licenseOther")}</option>
         </select>
       </Field>
       <Field label={t("fieldQuestionnaireText")}>

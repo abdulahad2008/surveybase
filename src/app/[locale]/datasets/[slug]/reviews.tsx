@@ -58,7 +58,7 @@ export function Reviews({
               className="rounded border border-gray-200 p-3 text-sm dark:border-gray-800"
             >
               <div className="flex items-center gap-2">
-                <span className="font-medium">{r.reviewer?.name ?? "Anonymous"}</span>
+                <span className="font-medium">{r.reviewer?.name ?? t("anonymousReviewer")}</span>
                 <Stars rating={r.rating} />
               </div>
               {r.comment && <p className="mt-1 text-gray-600 dark:text-gray-400">{r.comment}</p>}
@@ -77,7 +77,10 @@ export function Reviews({
           </p>
 
           {state.error && (
-            <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+            <p
+              role="alert"
+              className="rounded bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300"
+            >
               {t(state.error)}
             </p>
           )}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   type ColumnDef,
   type SortingState,
@@ -12,6 +13,7 @@ import {
 } from "@tanstack/react-table";
 
 export function DataTable({ headers, rows }: { headers: string[]; rows: Record<string, string>[] }) {
+  const t = useTranslations("Dataset");
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const columns: ColumnDef<Record<string, string>>[] = headers.map((header) => ({
@@ -38,16 +40,25 @@ export function DataTable({ headers, rows }: { headers: string[]; rows: Record<s
           <thead className="bg-gray-50 dark:bg-gray-900">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    className="cursor-pointer select-none whitespace-nowrap px-3 py-2 font-medium"
-                    onClick={header.column.getToggleSortingHandler()}
-                  >
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                    {{ asc: " ▲", desc: " ▼" }[header.column.getIsSorted() as string] ?? ""}
-                  </th>
-                ))}
+                {headerGroup.headers.map((header) => {
+                  const sorted = header.column.getIsSorted();
+                  return (
+                    <th
+                      key={header.id}
+                      className="whitespace-nowrap px-3 py-2 font-medium"
+                      aria-sort={sorted === "asc" ? "ascending" : sorted === "desc" ? "descending" : "none"}
+                    >
+                      <button
+                        type="button"
+                        className="select-none"
+                        onClick={header.column.getToggleSortingHandler()}
+                      >
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                        {{ asc: " ▲", desc: " ▼" }[sorted as string] ?? ""}
+                      </button>
+                    </th>
+                  );
+                })}
               </tr>
             ))}
           </thead>
@@ -66,7 +77,10 @@ export function DataTable({ headers, rows }: { headers: string[]; rows: Record<s
       </div>
       <div className="flex items-center justify-between text-sm">
         <span>
-          Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount() || 1}
+          {t("tablePageLabel", {
+            page: table.getState().pagination.pageIndex + 1,
+            total: table.getPageCount() || 1,
+          })}
         </span>
         <div className="flex gap-2">
           <button
@@ -74,14 +88,14 @@ export function DataTable({ headers, rows }: { headers: string[]; rows: Record<s
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            Prev
+            {t("tablePrev")}
           </button>
           <button
             className="rounded border border-gray-300 px-2 py-1 disabled:opacity-40 dark:border-gray-700"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
-            Next
+            {t("tableNext")}
           </button>
         </div>
       </div>

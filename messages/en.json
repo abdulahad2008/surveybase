@@ -3,9 +3,11 @@
     "home": "Home",
     "browse": "Browse",
     "deposit": "Deposit data",
+    "moderate": "Moderate",
     "login": "Log in",
     "signup": "Sign up",
-    "logout": "Log out"
+    "logout": "Log out",
+    "selectLanguage": "Select language"
   },
   "Home": {
     "title": "SurveyBank.uz",
@@ -29,7 +31,11 @@
     "noAccount": "Don't have an account?",
     "haveAccount": "Already have an account?",
     "signupLink": "Sign up",
-    "loginLink": "Log in"
+    "loginLink": "Log in",
+    "errorInvalidCredentials": "Incorrect email or password.",
+    "errorUserExists": "An account with this email already exists.",
+    "errorWeakPassword": "Please choose a stronger password.",
+    "errorGeneric": "Something went wrong. Please try again."
   },
   "Deposit": {
     "title": "Deposit a dataset",
@@ -46,6 +52,7 @@
     "fieldFieldworkEnd": "Fieldwork end",
     "fieldLanguages": "Languages (comma-separated)",
     "fieldLicense": "License",
+    "licenseOther": "Other",
     "fieldQuestionnaireText": "Questionnaire text (optional)",
     "publicationSectionTitle": "Linked publication (optional)",
     "fieldPublicationTitle": "Publication title",
@@ -83,10 +90,18 @@
     "publicationsHeading": "Related publications",
     "questionsHeading": "Questions",
     "dataHeading": "Data",
+    "tablePageLabel": "Page {page} of {total}",
+    "tablePrev": "Prev",
+    "tableNext": "Next",
     "downloadsHeading": "Downloads",
     "downloadCount": "{count} downloads",
     "responses": "{count} responses",
+    "statMin": "min {value}",
+    "statMax": "max {value}",
+    "statMean": "mean {value}",
+    "statMedian": "median {value}",
     "reviewsHeading": "Reviews",
+    "anonymousReviewer": "Anonymous",
     "averageRating": "{rating} out of 5 ({count} reviews)",
     "noReviews": "No reviews yet.",
     "reviewFormHeading": "Leave a review",
@@ -99,6 +114,17 @@
     "reviewErrorAuth": "Log in to leave a review.",
     "reviewErrorGeneric": "Something went wrong. Please try again.",
     "reviewLoginPrompt": "Log in to leave a review."
+  },
+  "Moderate": {
+    "title": "Moderate pending datasets",
+    "empty": "No datasets are awaiting moderation.",
+    "colDepositor": "Depositor",
+    "colCountry": "Country",
+    "colSampleSize": "Sample size",
+    "colSubmitted": "Submitted",
+    "unknownDepositor": "Unknown",
+    "approve": "Approve",
+    "reject": "Reject"
   },
   "Browse": {
     "heading": "Browse datasets",
@@ -124,5 +150,18 @@
     "nextPage": "Next",
     "cardSampleSize": "{count} respondents",
     "cardDownloads": "{count} downloads"
+  },
+  "Common": {
+    "loading": "Loading…"
+  },
+  "Error": {
+    "heading": "Something went wrong",
+    "message": "An unexpected error occurred. Please try again.",
+    "retry": "Try again"
+  },
+  "NotFound": {
+    "heading": "Page not found",
+    "message": "The page you're looking for doesn't exist or has been moved.",
+    "backHome": "Back to home"
   }
 }

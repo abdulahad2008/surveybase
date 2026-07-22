@@ -6,7 +6,26 @@ import { redirect as redirectExternal } from "next/navigation";
 import { routing, type Locale } from "@/i18n/routing";
 import { headers } from "next/headers";
 
-type ActionState = { error: string | null };
+export type AuthErrorKey =
+  | "errorInvalidCredentials"
+  | "errorUserExists"
+  | "errorWeakPassword"
+  | "errorGeneric";
+
+type ActionState = { error: AuthErrorKey | null };
+
+function authErrorKey(code: string | undefined): AuthErrorKey {
+  switch (code) {
+    case "invalid_credentials":
+      return "errorInvalidCredentials";
+    case "user_already_exists":
+      return "errorUserExists";
+    case "weak_password":
+      return "errorWeakPassword";
+    default:
+      return "errorGeneric";
+  }
+}
 
 export async function login(
   locale: Locale,
@@ -21,7 +40,7 @@ export async function login(
   });
 
   if (error) {
-    return { error: error.message };
+    return { error: authErrorKey(error.code) };
   }
 
   redirect({ href: "/", locale });
@@ -47,7 +66,7 @@ export async function signup(
   });
 
   if (error) {
-    return { error: error.message };
+    return { error: authErrorKey(error.code) };
   }
 
   redirect({ href: "/", locale });

@@ -35,7 +35,11 @@ export default function LoginPage() {
             className="rounded border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-black"
           />
         </label>
-        {state.error && <p className="text-sm text-red-600">{state.error}</p>}
+        {state.error && (
+          <p role="alert" className="text-sm text-red-600">
+            {t(state.error)}
+          </p>
+        )}
         <button
           type="submit"
           disabled={pending}

@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useTranslations } from "next-intl";
 import type { ColumnSummary } from "@/lib/csv-analysis";
 
 interface Column {
@@ -31,11 +32,13 @@ export function ColumnCharts({ columns }: { columns: Column[] }) {
 }
 
 function ColumnChart({ summary }: { summary: ColumnSummary }) {
+  const t = useTranslations("Dataset");
+
   if (summary.type === "categorical") {
     const data = summary.counts.slice(0, 15);
     return (
       <>
-        <div className="h-64 w-full">
+        <div className="h-64 w-full" role="img" aria-label={t("responses", { count: summary.responseCount })}>
           <ResponsiveContainer>
             <BarChart data={data}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -46,7 +49,9 @@ function ColumnChart({ summary }: { summary: ColumnSummary }) {
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{summary.responseCount} responses</p>
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          {t("responses", { count: summary.responseCount })}
+        </p>
       </>
     );
   }
@@ -54,7 +59,7 @@ function ColumnChart({ summary }: { summary: ColumnSummary }) {
   if (summary.type === "numeric") {
     return (
       <>
-        <div className="h-64 w-full">
+        <div className="h-64 w-full" role="img" aria-label={t("responses", { count: summary.responseCount })}>
           <ResponsiveContainer>
             <BarChart data={summary.histogram}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -66,8 +71,9 @@ function ColumnChart({ summary }: { summary: ColumnSummary }) {
           </ResponsiveContainer>
         </div>
         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-          min {summary.min} · max {summary.max} · mean {summary.mean.toFixed(2)} · median {summary.median} ·{" "}
-          {summary.responseCount} responses
+          {t("statMin", { value: summary.min })} · {t("statMax", { value: summary.max })} ·{" "}
+          {t("statMean", { value: summary.mean.toFixed(2) })} ·{" "}
+          {t("statMedian", { value: summary.median })} · {t("responses", { count: summary.responseCount })}
         </p>
       </>
     );
@@ -77,7 +83,8 @@ function ColumnChart({ summary }: { summary: ColumnSummary }) {
     return (
       <p className="text-sm text-gray-600 dark:text-gray-400">
         {summary.min ? new Date(summary.min).toLocaleDateString() : "—"} –{" "}
-        {summary.max ? new Date(summary.max).toLocaleDateString() : "—"} · {summary.responseCount} responses
+        {summary.max ? new Date(summary.max).toLocaleDateString() : "—"} ·{" "}
+        {t("responses", { count: summary.responseCount })}
       </p>
     );
   }
@@ -85,16 +92,18 @@ function ColumnChart({ summary }: { summary: ColumnSummary }) {
   return (
     <>
       <ul className="flex flex-wrap gap-2">
-        {summary.topTerms.map((t) => (
+        {summary.topTerms.map((term) => (
           <li
-            key={t.term}
+            key={term.term}
             className="rounded-full bg-gray-100 px-3 py-1 text-xs dark:bg-gray-800"
           >
-            {t.term} ({t.count})
+            {term.term} ({term.count})
           </li>
         ))}
       </ul>
-      <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">{summary.responseCount} responses</p>
+      <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+        {t("responses", { count: summary.responseCount })}
+      </p>
     </>
   );
 }

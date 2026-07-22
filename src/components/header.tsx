@@ -11,6 +11,16 @@ export async function Header() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  let isModerator = false;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    isModerator = profile?.role === "moderator" || profile?.role === "admin";
+  }
+
   return (
     <header className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-800">
       <Link href="/" className="text-lg font-semibold">
@@ -21,6 +31,7 @@ export async function Header() {
         {user ? (
           <>
             <Link href="/deposit">{t("deposit")}</Link>
+            {isModerator && <Link href="/moderate">{t("moderate")}</Link>}
             <SignOutButton label={t("logout")} />
           </>
         ) : (
