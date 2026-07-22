@@ -11,10 +11,18 @@ export default function SignupPage() {
   const [state, formAction, pending] = useActionState(signup.bind(null, locale), {
     error: null,
   });
+  const [googleState, googleAction] = useActionState(signInWithGoogle.bind(null, locale), {
+    error: null,
+  });
 
   return (
     <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-6 px-4 py-16">
       <h1 className="text-2xl font-semibold">{t("signupTitle")}</h1>
+      {state.needsConfirmation && (
+        <p role="status" className="rounded bg-green-50 px-3 py-2 text-sm text-green-800 dark:bg-green-950 dark:text-green-300">
+          {t("checkEmailToConfirm")}
+        </p>
+      )}
       <form action={formAction} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1 text-sm">
           {t("name")}
@@ -65,13 +73,18 @@ export default function SignupPage() {
           {t("submitSignup")}
         </button>
       </form>
-      <form action={signInWithGoogle.bind(null, locale)}>
+      <form action={googleAction} className="flex flex-col gap-2">
         <button
           type="submit"
           className="w-full rounded border border-gray-300 px-4 py-2 dark:border-gray-700"
         >
           {t("continueWithGoogle")}
         </button>
+        {googleState.error && (
+          <p role="alert" className="text-sm text-red-600">
+            {t(googleState.error)}
+          </p>
+        )}
       </form>
       <p className="text-sm">
         {t("haveAccount")}{" "}

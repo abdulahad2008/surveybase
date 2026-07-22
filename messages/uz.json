@@ -33,9 +33,12 @@
     "signupLink": "Ro‘yxatdan o‘tish",
     "loginLink": "Kirish",
     "errorInvalidCredentials": "Email yoki parol noto‘g‘ri.",
+    "errorEmailNotConfirmed": "Avval emailingizni tasdiqlang — pochtangizdagi tasdiqlash havolasini tekshiring.",
     "errorUserExists": "Bu email bilan hisob allaqachon mavjud.",
     "errorWeakPassword": "Iltimos, kuchliroq parol tanlang.",
-    "errorGeneric": "Xatolik yuz berdi. Qayta urinib ko‘ring."
+    "errorGeneric": "Xatolik yuz berdi. Qayta urinib ko‘ring.",
+  "errorOAuthUnavailable": "Google orqali kirish hozircha mavjud emas. Email va parol orqali kiring.",
+  "checkEmailToConfirm": "Hisob yaratildi! Kirishdan oldin elektron pochtangizga yuborilgan tasdiqlash havolasini bosing."
   },
   "Deposit": {
     "title": "Ma'lumotlar to‘plamini joylash",
@@ -71,6 +74,7 @@
     "errorGeneric": "Xatolik yuz berdi. Formani tekshirib, qayta urinib ko‘ring.",
     "errorAuth": "Ma'lumotlar to‘plamini joylash uchun tizimga kirishingiz kerak.",
     "errorFile": "Iltimos, CSV faylini tanlang.",
+    "errorAllPii": "Barcha ustunlar shaxsiy ma’lumotga o‘xshaydi, shuning uchun chop etish uchun xavfsiz narsa yo‘q. Shaxsni aniqlovchi ustunlarni olib tashlang va umumlashtirilgan yoki anonim natijalarni yuklang.",
     "errorConfirm": "Iltimos, anonimlashtirish bayonotini tasdiqlang."
   },
   "Dataset": {

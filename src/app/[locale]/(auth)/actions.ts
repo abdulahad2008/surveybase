@@ -8,16 +8,26 @@ import { headers } from "next/headers";
 
 export type AuthErrorKey =
   | "errorInvalidCredentials"
+  | "errorEmailNotConfirmed"
   | "errorUserExists"
   | "errorWeakPassword"
+  | "errorOAuthUnavailable"
   | "errorGeneric";
 
-type ActionState = { error: AuthErrorKey | null };
+type ActionState = { error: AuthErrorKey | null; needsConfirmation?: boolean };
 
-function authErrorKey(code: string | undefined): AuthErrorKey {
+function authErrorKey(code: string | undefined, message?: string): AuthErrorKey {
+  if (message && /provider is not enabled/i.test(message)) {
+    return "errorOAuthUnavailable";
+  }
+  if (message && /email not confirmed/i.test(message)) {
+    return "errorEmailNotConfirmed";
+  }
   switch (code) {
     case "invalid_credentials":
       return "errorInvalidCredentials";
+    case "email_not_confirmed":
+      return "errorEmailNotConfirmed";
     case "user_already_exists":
       return "errorUserExists";
     case "weak_password":
@@ -40,7 +50,7 @@ export async function login(
   });
 
   if (error) {
-    return { error: authErrorKey(error.code) };
+    return { error: authErrorKey(error.code, error.message) };
   }
 
   redirect({ href: "/", locale });
@@ -54,7 +64,7 @@ export async function signup(
 ): Promise<ActionState> {
   const supabase = await createClient();
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email: String(formData.get("email")),
     password: String(formData.get("password")),
     options: {
@@ -66,7 +76,12 @@ export async function signup(
   });
 
   if (error) {
-    return { error: authErrorKey(error.code) };
+    return { error: authErrorKey(error.code, error.message) };
+  }
+
+  if (!data.session) {
+    // Project requires email confirmation before a session is issued.
+    return { error: null, needsConfirmation: true };
   }
 
   redirect({ href: "/", locale });
@@ -79,7 +94,13 @@ export async function signOut() {
   redirect({ href: "/", locale: routing.defaultLocale });
 }
 
-export async function signInWithGoogle(locale: Locale) {
+export async function signInWithGoogle(
+  locale: Locale,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- required by useActionState's action signature
+  _prevState: ActionState,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- required by useActionState's action signature
+  _formData: FormData,
+): Promise<ActionState> {
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
 
@@ -91,10 +112,12 @@ export async function signInWithGoogle(locale: Locale) {
   });
 
   if (error) {
-    throw error;
+    return { error: authErrorKey(error.code, error.message) };
   }
 
   if (data.url) {
     redirectExternal(data.url);
   }
+
+  return { error: null };
 }

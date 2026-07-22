@@ -11,6 +11,9 @@ export default function LoginPage() {
   const [state, formAction, pending] = useActionState(login.bind(null, locale), {
     error: null,
   });
+  const [googleState, googleAction] = useActionState(signInWithGoogle.bind(null, locale), {
+    error: null,
+  });
 
   return (
     <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-6 px-4 py-16">
@@ -48,13 +51,18 @@ export default function LoginPage() {
           {t("submitLogin")}
         </button>
       </form>
-      <form action={signInWithGoogle.bind(null, locale)}>
+      <form action={googleAction} className="flex flex-col gap-2">
         <button
           type="submit"
           className="w-full rounded border border-gray-300 px-4 py-2 dark:border-gray-700"
         >
           {t("continueWithGoogle")}
         </button>
+        {googleState.error && (
+          <p role="alert" className="text-sm text-red-600">
+            {t(googleState.error)}
+          </p>
+        )}
       </form>
       <p className="text-sm">
         {t("noAccount")}{" "}

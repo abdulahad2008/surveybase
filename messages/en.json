@@ -33,9 +33,12 @@
     "signupLink": "Sign up",
     "loginLink": "Log in",
     "errorInvalidCredentials": "Incorrect email or password.",
+    "errorEmailNotConfirmed": "Please confirm your email first — check your inbox for the confirmation link.",
     "errorUserExists": "An account with this email already exists.",
     "errorWeakPassword": "Please choose a stronger password.",
-    "errorGeneric": "Something went wrong. Please try again."
+    "errorGeneric": "Something went wrong. Please try again.",
+  "errorOAuthUnavailable": "Google sign-in isn't available right now. Please use email and password.",
+  "checkEmailToConfirm": "Account created! Check your email for a confirmation link before logging in."
   },
   "Deposit": {
     "title": "Deposit a dataset",
@@ -71,6 +74,7 @@
     "errorGeneric": "Something went wrong. Please check the form and try again.",
     "errorAuth": "You must be logged in to deposit a dataset.",
     "errorFile": "Please choose a CSV file.",
+    "errorAllPii": "Every column looks like personal data, so there's nothing safe to publish. Remove identifying columns and upload aggregated or anonymized results.",
     "errorConfirm": "Please confirm the anonymization statement."
   },
   "Dataset": {
