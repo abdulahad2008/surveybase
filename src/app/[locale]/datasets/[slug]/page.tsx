@@ -3,8 +3,10 @@ import Papa from "papaparse";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import type { ColumnSummary } from "@/lib/csv-analysis";
+import type { Locale } from "@/i18n/routing";
 import { ColumnCharts } from "./column-charts";
 import { DataTable } from "./data-table";
+import { Reviews, type ReviewRow } from "./reviews";
 
 interface SurveyColumnRow {
   question_text: string;
@@ -43,6 +45,7 @@ interface DatasetRow {
   survey_columns: SurveyColumnRow[];
   files: { storage_path: string; format: string }[];
   dataset_publications: { publications: PublicationRow | null }[];
+  reviews: ReviewRow[];
 }
 
 export default async function DatasetPage({
@@ -50,7 +53,7 @@ export default async function DatasetPage({
 }: {
   params: Promise<{ locale: string; slug: string }>;
 }) {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const supabase = await createClient();
 
   const { data } = await supabase
@@ -60,7 +63,8 @@ export default async function DatasetPage({
       depositor:profiles!datasets_depositor_id_fkey ( name, affiliation ),
       survey_columns ( question_text, column_type, summary_json ),
       files ( storage_path, format ),
-      dataset_publications ( publications ( title, authors, year, doi_or_url ) )`,
+      dataset_publications ( publications ( title, authors, year, doi_or_url ) ),
+      reviews ( id, user_id, rating, comment, created_at, reviewer:profiles!reviews_user_id_fkey ( name ) )`,
     )
     .eq("slug", slug)
     .maybeSingle();
@@ -69,6 +73,9 @@ export default async function DatasetPage({
   if (!dataset) notFound();
 
   const t = await getTranslations("Dataset");
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const csvFile = dataset.files.find((f) => f.format === "csv");
   let headers: string[] = [];
@@ -216,6 +223,13 @@ export default async function DatasetPage({
           <DataTable headers={headers} rows={rows} />
         </div>
       )}
+
+      <Reviews
+        locale={locale as Locale}
+        slug={dataset.slug}
+        reviews={dataset.reviews}
+        currentUserId={user?.id ?? null}
+      />
     </main>
   );
 }

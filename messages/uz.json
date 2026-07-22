@@ -10,7 +10,11 @@
   "Home": {
     "title": "SurveyBank.uz",
     "subtitle": "An open archive of anonymized survey results about Uzbekistan and Central Asia.",
-    "cta": "Browse the archive"
+    "cta": "Browse the archive",
+    "newestHeading": "Newest datasets",
+    "mostDownloadedHeading": "Most downloaded",
+    "viewAll": "View all",
+    "empty": "No datasets have been published yet."
   },
   "Auth": {
     "loginTitle": "Log in",
@@ -81,6 +85,44 @@
     "dataHeading": "Data",
     "downloadsHeading": "Downloads",
     "downloadCount": "{count} downloads",
-    "responses": "{count} responses"
+    "responses": "{count} responses",
+    "reviewsHeading": "Reviews",
+    "averageRating": "{rating} out of 5 ({count} reviews)",
+    "noReviews": "No reviews yet.",
+    "reviewFormHeading": "Leave a review",
+    "reviewYourReviewHeading": "Your review",
+    "reviewRatingLabel": "Rating",
+    "reviewCommentLabel": "Comment (optional)",
+    "reviewSubmit": "Submit review",
+    "reviewUpdate": "Update review",
+    "reviewSubmitting": "Saving…",
+    "reviewErrorAuth": "Log in to leave a review.",
+    "reviewErrorGeneric": "Something went wrong. Please try again.",
+    "reviewLoginPrompt": "Log in to leave a review."
+  },
+  "Browse": {
+    "heading": "Browse datasets",
+    "searchLabel": "Search",
+    "searchPlaceholder": "Search by title, abstract, or topic",
+    "filterTopic": "Topic",
+    "filterMethod": "Collection method",
+    "filterLanguage": "Language",
+    "filterAll": "All",
+    "filterYearFrom": "Fieldwork year (from)",
+    "filterYearTo": "Fieldwork year (to)",
+    "filterSampleMin": "Min sample size",
+    "filterSampleMax": "Max sample size",
+    "sortLabel": "Sort by",
+    "sortNewest": "Newest",
+    "sortDownloads": "Most downloaded",
+    "applyFilters": "Apply filters",
+    "resetFilters": "Reset",
+    "resultsCount": "{count} datasets found",
+    "noResults": "No datasets match these filters.",
+    "pageLabel": "Page {page} of {total}",
+    "prevPage": "Previous",
+    "nextPage": "Next",
+    "cardSampleSize": "{count} respondents",
+    "cardDownloads": "{count} downloads"
   }
 }
