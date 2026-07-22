@@ -1,0 +1,30 @@
+{
+  "Nav": {
+    "home": "Home",
+    "browse": "Browse",
+    "deposit": "Deposit data",
+    "login": "Log in",
+    "signup": "Sign up",
+    "logout": "Log out"
+  },
+  "Home": {
+    "title": "SurveyBank.uz",
+    "subtitle": "An open archive of anonymized survey results about Uzbekistan and Central Asia.",
+    "cta": "Browse the archive"
+  },
+  "Auth": {
+    "loginTitle": "Log in",
+    "signupTitle": "Create an account",
+    "email": "Email",
+    "password": "Password",
+    "name": "Full name",
+    "affiliation": "Affiliation (optional)",
+    "submitLogin": "Log in",
+    "submitSignup": "Sign up",
+    "continueWithGoogle": "Continue with Google",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "signupLink": "Sign up",
+    "loginLink": "Log in"
+  }
+}
