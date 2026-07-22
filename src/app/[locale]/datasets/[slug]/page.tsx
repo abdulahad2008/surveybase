@@ -37,6 +37,8 @@ interface DatasetRow {
   languages: string[];
   license: string;
   questionnaire_text: string | null;
+  is_hosted: boolean;
+  external_url: string | null;
   status: string;
   depositor_id: string | null;
   download_count: number;
@@ -194,20 +196,36 @@ export default async function DatasetPage({
 
       <div>
         <h2 className="mb-3 text-lg font-medium">{t("downloadsHeading")}</h2>
-        <div className="flex flex-wrap items-center gap-3 text-sm">
-          {(["csv", "xlsx", "json"] as const).map((format) => (
+        {!dataset.is_hosted ? (
+          <div className="flex flex-wrap items-center gap-3 text-sm">
             <a
-              key={format}
-              href={`/api/datasets/${dataset.slug}/download/${format}`}
+              href={dataset.external_url ?? "#"}
+              target="_blank"
+              rel="noreferrer"
               className="rounded border border-gray-300 px-3 py-1.5 font-medium dark:border-gray-700"
             >
-              {format.toUpperCase()}
+              {t("viewAtSourceButton")}
             </a>
-          ))}
-          <span className="text-gray-500 dark:text-gray-400">
-            {t("downloadCount", { count: dataset.download_count })}
-          </span>
-        </div>
+            <span className="text-gray-500 dark:text-gray-400">{t("viewAtSourceNote")}</span>
+          </div>
+        ) : csvFile ? (
+          <div className="flex flex-wrap items-center gap-3 text-sm">
+            {(["csv", "xlsx", "json"] as const).map((format) => (
+              <a
+                key={format}
+                href={`/api/datasets/${dataset.slug}/download/${format}`}
+                className="rounded border border-gray-300 px-3 py-1.5 font-medium dark:border-gray-700"
+              >
+                {format.toUpperCase()}
+              </a>
+            ))}
+            <span className="text-gray-500 dark:text-gray-400">
+              {t("downloadCount", { count: dataset.download_count })}
+            </span>
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t("noFileYet")}</p>
+        )}
       </div>
 
       {orderedColumns.length > 0 && (
