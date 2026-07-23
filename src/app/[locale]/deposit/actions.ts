@@ -8,7 +8,12 @@ import { slugify, randomSuffix } from "@/lib/slug";
 import { redirect } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 
-export type DepositErrorKey = "errorAuth" | "errorConfirm" | "errorFile" | "errorGeneric";
+export type DepositErrorKey =
+  | "errorAuth"
+  | "errorConfirm"
+  | "errorFile"
+  | "errorAllPii"
+  | "errorGeneric";
 
 export interface DepositState {
   error: DepositErrorKey | null;
@@ -69,6 +74,12 @@ export async function submitDataset(
   const piiFlags = detectPiiColumns(headers, columnValues);
   const piiIndexes = new Set(piiFlags.map((f) => f.index));
   const keptHeaders = headers.filter((_, i) => !piiIndexes.has(i));
+
+  // Every column was flagged as personal data — there is nothing safe to
+  // store. Reject rather than create an empty dataset.
+  if (keptHeaders.length === 0) {
+    return { error: "errorAllPii" };
+  }
 
   const slugBase = slugify(title);
   let dataset: { id: string; slug: string } | null = null;
