@@ -1,6 +1,6 @@
 // PII detection for uploaded survey CSVs.
 //
-// SurveyBank.uz must never store personal/identifiable data. This module is
+// SurveyBase.uz must never store personal/identifiable data. This module is
 // the single source of truth for which columns get stripped — it runs
 // server-side as the final word before anything is persisted, and is also
 // reused client-side purely to preview to the depositor what will happen.

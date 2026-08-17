@@ -35,9 +35,9 @@ export function DataTable({ headers, rows }: { headers: string[]; rows: Record<s
 
   return (
     <div className="space-y-3">
-      <div className="overflow-x-auto rounded border border-gray-200 dark:border-gray-800">
+      <div className="card overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="bg-gray-50 dark:bg-gray-900">
+          <thead className="border-b border-line bg-card-soft/70">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -45,16 +45,18 @@ export function DataTable({ headers, rows }: { headers: string[]; rows: Record<s
                   return (
                     <th
                       key={header.id}
-                      className="whitespace-nowrap px-3 py-2 font-medium"
+                      className="px-4 py-3 font-semibold whitespace-nowrap text-ink"
                       aria-sort={sorted === "asc" ? "ascending" : sorted === "desc" ? "descending" : "none"}
                     >
                       <button
                         type="button"
-                        className="select-none"
+                        className="inline-flex select-none items-center gap-1 transition hover:text-brand"
                         onClick={header.column.getToggleSortingHandler()}
                       >
                         {flexRender(header.column.columnDef.header, header.getContext())}
-                        {{ asc: " ▲", desc: " ▼" }[sorted as string] ?? ""}
+                        <span className="text-xs text-brand">
+                          {{ asc: "▲", desc: "▼" }[sorted as string] ?? ""}
+                        </span>
                       </button>
                     </th>
                   );
@@ -63,10 +65,15 @@ export function DataTable({ headers, rows }: { headers: string[]; rows: Record<s
             ))}
           </thead>
           <tbody>
-            {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className="border-t border-gray-100 dark:border-gray-800">
+            {table.getRowModel().rows.map((row, i) => (
+              <tr
+                key={row.id}
+                className={`border-t border-line transition hover:bg-brand-wash ${
+                  i % 2 === 1 ? "bg-card-soft/40" : ""
+                }`}
+              >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="whitespace-nowrap px-3 py-2">
+                  <td key={cell.id} className="max-w-[280px] truncate px-4 py-2.5 whitespace-nowrap text-soft">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
@@ -76,7 +83,7 @@ export function DataTable({ headers, rows }: { headers: string[]; rows: Record<s
         </table>
       </div>
       <div className="flex items-center justify-between text-sm">
-        <span>
+        <span className="tnum font-medium text-faint">
           {t("tablePageLabel", {
             page: table.getState().pagination.pageIndex + 1,
             total: table.getPageCount() || 1,
@@ -84,14 +91,14 @@ export function DataTable({ headers, rows }: { headers: string[]; rows: Record<s
         </span>
         <div className="flex gap-2">
           <button
-            className="rounded border border-gray-300 px-2 py-1 disabled:opacity-40 dark:border-gray-700"
+            className="btn btn-ghost btn-sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
             {t("tablePrev")}
           </button>
           <button
-            className="rounded border border-gray-300 px-2 py-1 disabled:opacity-40 dark:border-gray-700"
+            className="btn btn-ghost btn-sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >

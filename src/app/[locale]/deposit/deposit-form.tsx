@@ -1,27 +1,104 @@
 "use client";
 
-import { useActionState, useState, type ReactNode } from "react";
+import { useActionState, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import Papa from "papaparse";
 import { detectPiiColumns } from "@/lib/pii";
 import { submitDataset, type DepositState } from "./actions";
 import type { Locale } from "@/i18n/routing";
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  CheckIcon,
+  FileTextIcon,
+  ShieldIcon,
+  UploadIcon,
+} from "@/components/icons";
 
 const initialState: DepositState = { error: null };
-const inputClass =
-  "w-full rounded border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900";
 
 interface Preview {
+  fileName: string;
   headerCount: number;
   rowCount: number;
   piiHeaders: string[];
 }
+
+const STEPS = ["data", "describe", "publish"] as const;
+type Step = (typeof STEPS)[number];
 
 export function DepositForm({ locale }: { locale: Locale }) {
   const t = useTranslations("Deposit");
   const boundAction = submitDataset.bind(null, locale);
   const [state, formAction, pending] = useActionState(boundAction, initialState);
   const [preview, setPreview] = useState<Preview | null>(null);
+  const [step, setStep] = useState<Step>("data");
+  const formRef = useRef<HTMLFormElement>(null);
+  const dataRef = useRef<HTMLDivElement>(null);
+  const describeRef = useRef<HTMLDivElement>(null);
+  const publishRef = useRef<HTMLDivElement>(null);
+
+  const stepIndex = STEPS.indexOf(step);
+
+  function stepContainer(s: Step): HTMLDivElement | null {
+    if (s === "data") return dataRef.current;
+    if (s === "describe") return describeRef.current;
+    return publishRef.current;
+  }
+
+  function validateStep(s: Step): boolean {
+    const container = stepContainer(s);
+    if (!container) return true;
+    const fields = container.querySelectorAll<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >("input, select, textarea");
+    for (const field of fields) {
+      if (!field.checkValidity()) {
+        field.reportValidity();
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function goNext() {
+    if (!validateStep(step)) return;
+    const next = STEPS[stepIndex + 1];
+    if (next) {
+      setStep(next);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }
+
+  function goBack() {
+    const prev = STEPS[stepIndex - 1];
+    if (prev) {
+      setStep(prev);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }
+
+  function handleFinalSubmit() {
+    // native validation can't focus fields inside hidden steps, so we
+    // validate every step ourselves and jump to the first invalid one
+    for (const s of STEPS) {
+      const container = stepContainer(s);
+      if (!container) continue;
+      const fields = container.querySelectorAll<HTMLInputElement>("input, select, textarea");
+      for (const field of fields) {
+        if (!field.checkValidity()) {
+          if (s !== step) {
+            setStep(s);
+            setTimeout(() => field.reportValidity(), 50);
+          } else {
+            field.reportValidity();
+          }
+          return;
+        }
+      }
+    }
+    formRef.current?.requestSubmit();
+  }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -39,158 +116,307 @@ export function DepositForm({ locale }: { locale: Locale }) {
     const columnValues = headers.map((h) => rows.map((r) => r[h] ?? ""));
     const flags = detectPiiColumns(headers, columnValues);
     setPreview({
+      fileName: file.name,
       headerCount: headers.length,
       rowCount: rows.length,
       piiHeaders: flags.map((f) => f.header),
     });
   }
 
+  const stepLabels: Record<Step, string> = {
+    data: t("stepData"),
+    describe: t("stepDescribe"),
+    publish: t("stepPublish"),
+  };
+
   return (
-    <form action={formAction} className="space-y-6">
-      <h1 className="text-2xl font-semibold">{t("title")}</h1>
-      <p className="text-sm text-gray-600 dark:text-gray-400">{t("intro")}</p>
+    <div className="space-y-8">
+      <header className="space-y-2 text-center">
+        <h1 className="font-display text-3xl font-extrabold tracking-tight text-ink">
+          {t("title")}
+        </h1>
+        <p className="mx-auto max-w-xl text-sm leading-relaxed text-soft">{t("intro")}</p>
+      </header>
 
-      {state.error && (
-        <p
-          role="alert"
-          className="rounded bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300"
-        >
-          {t(state.error)}
-        </p>
-      )}
+      {/* stepper */}
+      <ol className="flex items-center justify-center gap-1 sm:gap-2">
+        {STEPS.map((s, i) => {
+          const isDone = i < stepIndex;
+          const isActive = s === step;
+          return (
+            <li key={s} className="flex items-center gap-1 sm:gap-2">
+              {i > 0 && (
+                <span
+                  aria-hidden
+                  className={`h-0.5 w-6 rounded-full sm:w-12 ${isDone || isActive ? "bg-brand" : "bg-line-strong"}`}
+                />
+              )}
+              <button
+                type="button"
+                onClick={() => i < stepIndex && setStep(s)}
+                disabled={i > stepIndex}
+                className={`flex items-center gap-2 rounded-full py-1.5 pr-3 pl-1.5 text-xs font-bold transition ${
+                  isActive
+                    ? "bg-brand text-on-brand shadow-lift"
+                    : isDone
+                      ? "bg-brand-soft text-brand-ink"
+                      : "text-faint"
+                }`}
+              >
+                <span
+                  className={`flex h-6 w-6 items-center justify-center rounded-full text-[11px] ${
+                    isActive
+                      ? "bg-white/20"
+                      : isDone
+                        ? "bg-brand text-on-brand"
+                        : "border border-line-strong"
+                  }`}
+                >
+                  {isDone ? <CheckIcon size={12} /> : i + 1}
+                </span>
+                <span className="hidden sm:inline">{stepLabels[s]}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
 
-      <Field label={t("fieldTitle")}>
-        <input name="title" required className={inputClass} />
-      </Field>
-      <Field label={t("fieldAbstract")}>
-        <textarea name="abstract" required rows={3} className={inputClass} />
-      </Field>
-      <Field label={t("fieldTopics")}>
-        <input name="topics" required className={inputClass} />
-      </Field>
-      <div className="grid grid-cols-2 gap-4">
-        <Field label={t("fieldCountry")}>
-          <input name="country" required defaultValue="Uzbekistan" className={inputClass} />
-        </Field>
-        <Field label={t("fieldRegion")}>
-          <input name="region" className={inputClass} />
-        </Field>
-      </div>
-      <Field label={t("fieldCollectionMethod")}>
-        <input name="collection_method" required className={inputClass} />
-      </Field>
-      <div className="grid grid-cols-2 gap-4">
-        <Field label={t("fieldSampleSize")}>
-          <input name="sample_size" type="number" min={0} required className={inputClass} />
-        </Field>
-        <Field label={t("fieldTargetPopulation")}>
-          <input name="target_population" required className={inputClass} />
-        </Field>
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <Field label={t("fieldFieldworkStart")}>
-          <input name="fieldwork_start" type="date" required className={inputClass} />
-        </Field>
-        <Field label={t("fieldFieldworkEnd")}>
-          <input name="fieldwork_end" type="date" required className={inputClass} />
-        </Field>
-      </div>
-      <Field label={t("fieldLanguages")}>
-        <input name="languages" required className={inputClass} />
-      </Field>
-      <Field label={t("fieldLicense")}>
-        <select name="license" defaultValue="CC-BY" className={inputClass}>
-          <option value="CC-BY">CC-BY</option>
-          <option value="CC-BY-SA">CC-BY-SA</option>
-          <option value="CC0">CC0</option>
-          <option value="Other">{t("licenseOther")}</option>
-        </select>
-      </Field>
-      <Field label={t("fieldQuestionnaireText")}>
-        <textarea name="questionnaire_text" rows={4} className={inputClass} />
-      </Field>
-
-      <fieldset className="space-y-4 border-t border-gray-200 pt-4 dark:border-gray-800">
-        <legend className="text-sm font-medium">{t("publicationSectionTitle")}</legend>
-        <Field label={t("fieldPublicationTitle")}>
-          <input name="publication_title" className={inputClass} />
-        </Field>
-        <div className="grid grid-cols-2 gap-4">
-          <Field label={t("fieldPublicationAuthors")}>
-            <input name="publication_authors" className={inputClass} />
-          </Field>
-          <Field label={t("fieldPublicationYear")}>
-            <input name="publication_year" type="number" className={inputClass} />
-          </Field>
-        </div>
-        <Field label={t("fieldPublicationUrl")}>
-          <input name="publication_url" className={inputClass} />
-        </Field>
-      </fieldset>
-
-      <Field label={t("csvLabel")} hint={t("csvHelp")}>
-        <input
-          name="csv"
-          type="file"
-          accept=".csv,text/csv"
-          required
-          onChange={handleFileChange}
-          className={inputClass}
-        />
-      </Field>
-
-      {preview && (
-        <div className="rounded border border-gray-200 p-4 text-sm dark:border-gray-800">
-          <p className="font-medium">{t("previewHeading")}</p>
-          <p className="text-gray-600 dark:text-gray-400">
-            {preview.headerCount} columns, {preview.rowCount} rows detected.
+      <form ref={formRef} action={formAction} className="space-y-6">
+        {state.error && (
+          <p
+            role="alert"
+            className="rounded-2xl bg-danger-soft px-4 py-3 text-sm font-medium text-danger"
+          >
+            {t(state.error)}
           </p>
-          <p className="mt-2 font-medium">{t("piiHeading")}</p>
-          {preview.piiHeaders.length === 0 ? (
-            <p className="text-gray-600 dark:text-gray-400">{t("piiNone")}</p>
-          ) : (
-            <>
-              <p className="text-gray-600 dark:text-gray-400">{t("piiWillRemove")}</p>
-              <ul className="list-inside list-disc">
-                {preview.piiHeaders.map((h) => (
-                  <li key={h}>{h}</li>
-                ))}
-              </ul>
-            </>
-          )}
+        )}
+
+        {/* ---------------- step 1: data ---------------- */}
+        <div ref={dataRef} hidden={step !== "data"} className="space-y-5">
+          <div className="card space-y-5 p-6">
+            <div>
+              <span className="label">{t("csvLabel")}</span>
+              <label
+                htmlFor="csv-upload"
+                className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-line-strong bg-card-soft/50 px-6 py-10 text-center transition hover:border-brand hover:bg-brand-wash"
+              >
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-soft text-brand">
+                  <UploadIcon size={22} />
+                </span>
+                {preview ? (
+                  <>
+                    <span className="text-sm font-bold text-ink">{preview.fileName}</span>
+                    <span className="tnum text-xs text-soft">
+                      {t("previewCounts", {
+                        columns: preview.headerCount,
+                        rows: preview.rowCount,
+                      })}
+                    </span>
+                    <span className="text-xs font-semibold text-brand">{t("csvReplace")}</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-sm font-bold text-ink">{t("csvDropTitle")}</span>
+                    <span className="max-w-sm text-xs leading-relaxed text-faint">{t("csvHelp")}</span>
+                  </>
+                )}
+              </label>
+              <input
+                id="csv-upload"
+                name="csv"
+                type="file"
+                accept=".csv,text/csv"
+                required
+                onChange={handleFileChange}
+                className="sr-only"
+              />
+            </div>
+
+            {preview && (
+              <div
+                className={`rounded-2xl p-4 text-sm ${
+                  preview.piiHeaders.length === 0 ? "bg-mint-soft" : "bg-sun-soft"
+                }`}
+              >
+                <p className="flex items-center gap-2 font-bold text-ink">
+                  <ShieldIcon size={16} className={preview.piiHeaders.length === 0 ? "text-mint" : "text-sun"} />
+                  {t("piiHeading")}
+                </p>
+                {preview.piiHeaders.length === 0 ? (
+                  <p className="mt-1.5 text-soft">{t("piiNone")}</p>
+                ) : (
+                  <>
+                    <p className="mt-1.5 text-soft">{t("piiWillRemove")}</p>
+                    <ul className="mt-2 flex flex-wrap gap-1.5">
+                      {preview.piiHeaders.map((h) => (
+                        <li key={h} className="chip bg-card font-mono text-xs text-ink">
+                          {h}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </div>
+            )}
+
+            <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-line p-4 text-sm transition hover:border-brand">
+              <input
+                type="checkbox"
+                name="confirmAnonymized"
+                required
+                className="mt-0.5 h-4 w-4 accent-[var(--brand)]"
+              />
+              <span className="leading-relaxed text-soft">{t("piiConfirm")}</span>
+            </label>
+          </div>
+
+          <div className="flex justify-end">
+            <button type="button" onClick={goNext} className="btn btn-primary">
+              {t("nextStep")}
+              <ArrowRightIcon size={15} />
+            </button>
+          </div>
         </div>
-      )}
 
-      <label className="flex items-start gap-2 text-sm">
-        <input type="checkbox" name="confirmAnonymized" className="mt-1" />
-        {t("piiConfirm")}
-      </label>
+        {/* ---------------- step 2: describe ---------------- */}
+        <div ref={describeRef} hidden={step !== "describe"} className="space-y-5">
+          <div className="card space-y-5 p-6">
+            <Field label={t("fieldTitle")} name="title">
+              <input id="f-title" name="title" required className="input" placeholder={t("titlePlaceholder")} />
+            </Field>
+            <Field label={t("fieldAbstract")} name="abstract">
+              <textarea id="f-abstract" name="abstract" required rows={3} className="input" placeholder={t("abstractPlaceholder")} />
+            </Field>
+            <Field label={t("fieldTopics")} name="topics" hint={t("topicsHint")}>
+              <input id="f-topics" name="topics" required className="input" placeholder={t("topicsPlaceholder")} />
+            </Field>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Field label={t("fieldCountry")} name="country">
+                <input id="f-country" name="country" required defaultValue="Uzbekistan" className="input" />
+              </Field>
+              <Field label={t("fieldRegion")} name="region">
+                <input id="f-region" name="region" className="input" />
+              </Field>
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Field label={t("fieldCollectionMethod")} name="collection_method">
+                <input
+                  id="f-collection_method"
+                  name="collection_method"
+                  required
+                  className="input"
+                  placeholder={t("methodPlaceholder")}
+                />
+              </Field>
+              <Field label={t("fieldSampleSize")} name="sample_size">
+                <input id="f-sample_size" name="sample_size" type="number" min={0} required className="input tnum" />
+              </Field>
+            </div>
+            <Field label={t("fieldTargetPopulation")} name="target_population">
+              <input id="f-target_population" name="target_population" required className="input" placeholder={t("populationPlaceholder")} />
+            </Field>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Field label={t("fieldFieldworkStart")} name="fieldwork_start">
+                <input id="f-fieldwork_start" name="fieldwork_start" type="date" required className="input" />
+              </Field>
+              <Field label={t("fieldFieldworkEnd")} name="fieldwork_end">
+                <input id="f-fieldwork_end" name="fieldwork_end" type="date" required className="input" />
+              </Field>
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Field label={t("fieldLanguages")} name="languages" hint={t("languagesHint")}>
+                <input id="f-languages" name="languages" required className="input" placeholder="Uzbek, Russian" />
+              </Field>
+              <Field label={t("fieldLicense")} name="license">
+                <select id="f-license" name="license" defaultValue="CC-BY" className="input">
+                  <option value="CC-BY">CC-BY</option>
+                  <option value="CC-BY-SA">CC-BY-SA</option>
+                  <option value="CC0">CC0</option>
+                  <option value="Other">{t("licenseOther")}</option>
+                </select>
+              </Field>
+            </div>
+            <Field label={t("fieldQuestionnaireText")} name="questionnaire_text">
+              <textarea id="f-questionnaire_text" name="questionnaire_text" rows={4} className="input" />
+            </Field>
+          </div>
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-white dark:text-black"
-      >
-        {pending ? t("submitting") : t("submit")}
-      </button>
-    </form>
+          <div className="flex justify-between">
+            <button type="button" onClick={goBack} className="btn btn-ghost">
+              <ArrowLeftIcon size={15} />
+              {t("prevStep")}
+            </button>
+            <button type="button" onClick={goNext} className="btn btn-primary">
+              {t("nextStep")}
+              <ArrowRightIcon size={15} />
+            </button>
+          </div>
+        </div>
+
+        {/* ---------------- step 3: publish ---------------- */}
+        <div ref={publishRef} hidden={step !== "publish"} className="space-y-5">
+          <div className="card space-y-5 p-6">
+            <div>
+              <p className="font-display flex items-center gap-2 font-bold text-ink">
+                <FileTextIcon size={17} className="text-brand" />
+                {t("publicationSectionTitle")}
+              </p>
+              <p className="hint">{t("publicationHint")}</p>
+            </div>
+            <Field label={t("fieldPublicationTitle")} name="publication_title">
+              <input id="f-publication_title" name="publication_title" className="input" />
+            </Field>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Field label={t("fieldPublicationAuthors")} name="publication_authors">
+                <input id="f-publication_authors" name="publication_authors" className="input" />
+              </Field>
+              <Field label={t("fieldPublicationYear")} name="publication_year">
+                <input id="f-publication_year" name="publication_year" type="number" className="input tnum" />
+              </Field>
+            </div>
+            <Field label={t("fieldPublicationUrl")} name="publication_url">
+              <input id="f-publication_url" name="publication_url" className="input" placeholder="https://doi.org/…" />
+            </Field>
+          </div>
+
+          <div className="rounded-2xl bg-brand-wash p-5 text-sm leading-relaxed text-soft">
+            {t("moderationNote")}
+          </div>
+
+          <div className="flex justify-between">
+            <button type="button" onClick={goBack} className="btn btn-ghost">
+              <ArrowLeftIcon size={15} />
+              {t("prevStep")}
+            </button>
+            <button type="button" onClick={handleFinalSubmit} disabled={pending} className="btn btn-coral">
+              {pending ? t("submitting") : t("submit")}
+              {!pending && <ArrowRightIcon size={15} />}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
   );
 }
 
 function Field({
   label,
+  name,
   hint,
   children,
 }: {
   label: string;
+  name: string;
   hint?: string;
   children: ReactNode;
 }) {
   return (
-    <label className="block space-y-1 text-sm">
-      <span className="font-medium">{label}</span>
+    <div>
+      <label className="label" htmlFor={`f-${name}`}>
+        {label}
+      </label>
       {children}
-      {hint && <span className="block text-xs text-gray-500 dark:text-gray-400">{hint}</span>}
-    </label>
+      {hint && <p className="hint">{hint}</p>}
+    </div>
   );
 }

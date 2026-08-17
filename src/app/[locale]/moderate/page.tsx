@@ -3,6 +3,7 @@ import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { routing, type Locale } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/server";
+import { CheckIcon, ExternalLinkIcon, XIcon } from "@/components/icons";
 import { approveDataset, rejectDataset } from "./actions";
 
 interface PendingDataset {
@@ -56,62 +57,64 @@ export default async function ModeratePage({
   const t = await getTranslations("Moderate");
 
   return (
-    <main className="mx-auto max-w-3xl space-y-6 px-6 py-10">
-      <h1 className="text-2xl font-semibold">{t("title")}</h1>
+    <main className="mx-auto w-full max-w-3xl flex-1 space-y-6 px-4 py-10 sm:px-6">
+      <div className="flex flex-wrap items-center gap-3">
+        <h1 className="font-display text-3xl font-extrabold tracking-tight text-ink">
+          {t("title")}
+        </h1>
+        {pending.length > 0 && (
+          <span className="rounded-full bg-sun-soft px-3 py-1 text-sm font-bold text-ink tnum">
+            {pending.length}
+          </span>
+        )}
+      </div>
 
       {pending.length === 0 ? (
-        <p className="text-sm text-gray-600 dark:text-gray-400">{t("empty")}</p>
+        <div className="card flex flex-col items-center gap-3 p-12 text-center">
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-mint-soft text-mint">
+            <CheckIcon size={26} />
+          </span>
+          <p className="font-display text-lg font-bold text-ink">{t("emptyHeading")}</p>
+          <p className="text-sm text-soft">{t("empty")}</p>
+        </div>
       ) : (
         <ul className="space-y-4">
           {pending.map((dataset) => (
-            <li
-              key={dataset.id}
-              className="space-y-3 rounded border border-gray-200 p-4 dark:border-gray-800"
-            >
+            <li key={dataset.id} className="card space-y-4 p-6">
               <div>
                 <a
                   href={`/${locale}/datasets/${dataset.slug}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="font-medium underline"
+                  className="font-display inline-flex items-center gap-2 text-lg font-bold text-ink transition hover:text-brand"
                 >
                   {dataset.title}
+                  <ExternalLinkIcon size={15} className="text-faint" />
                 </a>
                 {dataset.abstract && (
-                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                  <p className="mt-1.5 line-clamp-3 text-sm leading-relaxed text-soft">
                     {dataset.abstract}
                   </p>
                 )}
               </div>
-              <dl className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs text-gray-600 sm:grid-cols-4 dark:text-gray-400">
-                <div>
-                  <dt className="uppercase tracking-wide">{t("colDepositor")}</dt>
-                  <dd>{dataset.depositor?.name ?? t("unknownDepositor")}</dd>
-                </div>
-                <div>
-                  <dt className="uppercase tracking-wide">{t("colCountry")}</dt>
-                  <dd>{dataset.country}</dd>
-                </div>
-                <div>
-                  <dt className="uppercase tracking-wide">{t("colSampleSize")}</dt>
-                  <dd>{dataset.sample_size ?? "—"}</dd>
-                </div>
-                <div>
-                  <dt className="uppercase tracking-wide">{t("colSubmitted")}</dt>
-                  <dd>{new Date(dataset.created_at).toLocaleDateString(locale)}</dd>
-                </div>
+              <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-xs sm:grid-cols-4">
+                <MetaItem label={t("colDepositor")} value={dataset.depositor?.name ?? t("unknownDepositor")} />
+                <MetaItem label={t("colCountry")} value={dataset.country} />
+                <MetaItem label={t("colSampleSize")} value={dataset.sample_size?.toString() ?? "—"} />
+                <MetaItem
+                  label={t("colSubmitted")}
+                  value={new Date(dataset.created_at).toLocaleDateString(locale)}
+                />
               </dl>
-              <div className="flex gap-3">
+              <div className="flex gap-2.5">
                 <form
                   action={async () => {
                     "use server";
                     await approveDataset(locale, dataset.id);
                   }}
                 >
-                  <button
-                    type="submit"
-                    className="rounded bg-black px-3 py-1.5 text-sm font-medium text-white dark:bg-white dark:text-black"
-                  >
+                  <button type="submit" className="btn btn-sm bg-mint text-white hover:brightness-105">
+                    <CheckIcon size={14} />
                     {t("approve")}
                   </button>
                 </form>
@@ -123,8 +126,9 @@ export default async function ModeratePage({
                 >
                   <button
                     type="submit"
-                    className="rounded border border-gray-300 px-3 py-1.5 text-sm font-medium dark:border-gray-700"
+                    className="btn btn-ghost btn-sm text-danger hover:bg-danger-soft"
                   >
+                    <XIcon size={14} />
                     {t("reject")}
                   </button>
                 </form>
@@ -134,5 +138,14 @@ export default async function ModeratePage({
         </ul>
       )}
     </main>
+  );
+}
+
+function MetaItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="text-[10px] font-semibold tracking-wide text-faint uppercase">{label}</dt>
+      <dd className="mt-0.5 font-medium text-ink">{value}</dd>
+    </div>
   );
 }

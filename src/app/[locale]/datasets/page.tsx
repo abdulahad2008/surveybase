@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { queryDatasets, getFilterOptions, type DatasetFilters } from "@/lib/datasets";
 import { DatasetCard } from "./dataset-card";
+import { ArrowLeftIcon, ArrowRightIcon, SearchIcon } from "@/components/icons";
 
 const PAGE_SIZE = 12;
 
@@ -31,10 +32,13 @@ function buildPageHref(sp: RawSearchParams, page: number): string {
 }
 
 export default async function DatasetsPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<RawSearchParams>;
 }) {
+  const { locale } = await params;
   const sp = await searchParams;
   const t = await getTranslations("Browse");
   const supabase = await createClient();
@@ -60,92 +64,145 @@ export default async function DatasetsPage({
   ]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const activeFilterCount = [
+    filters.topic,
+    filters.method,
+    filters.language,
+    filters.yearFrom,
+    filters.yearTo,
+    filters.sampleMin,
+    filters.sampleMax,
+  ].filter((v) => v != null).length;
 
   return (
-    <main className="mx-auto max-w-5xl space-y-6 px-6 py-10">
-      <h1 className="text-2xl font-semibold">{t("heading")}</h1>
+    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="font-display text-3xl font-extrabold tracking-tight text-ink">
+            {t("heading")}
+          </h1>
+          <p className="mt-1 text-sm text-soft">{t("resultsCount", { count: total })}</p>
+        </div>
+      </div>
 
-      <form
-        method="get"
-        className="grid grid-cols-2 gap-4 rounded border border-gray-200 p-4 text-sm dark:border-gray-800 sm:grid-cols-3 lg:grid-cols-4"
-      >
-        <label className="col-span-2 space-y-1 sm:col-span-3 lg:col-span-4">
-          <span className="font-medium">{t("searchLabel")}</span>
-          <input
-            type="search"
-            name="q"
-            defaultValue={filters.q ?? ""}
-            placeholder={t("searchPlaceholder")}
-            className="w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-900"
-          />
-        </label>
+      <form method="get" className="mt-6 lg:grid lg:grid-cols-[280px_1fr] lg:items-start lg:gap-8">
+        {/* keep sort when re-filtering */}
+        <div className="contents">
+          {/* -------- filter rail -------- */}
+          <aside className="card space-y-5 p-5 lg:sticky lg:top-20">
+            <div className="flex items-center justify-between">
+              <p className="font-display text-sm font-bold text-ink">
+                {t("filtersHeading")}
+                {activeFilterCount > 0 && (
+                  <span className="ml-2 rounded-full bg-brand px-2 py-0.5 text-xs font-bold text-on-brand">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </p>
+              <Link href="/datasets" className="text-xs font-semibold text-brand hover:underline">
+                {t("resetFilters")}
+              </Link>
+            </div>
 
-        <SelectField name="topic" label={t("filterTopic")} value={filters.topic} options={options.topics} allLabel={t("filterAll")} />
-        <SelectField name="method" label={t("filterMethod")} value={filters.method} options={options.methods} allLabel={t("filterAll")} />
-        <SelectField name="language" label={t("filterLanguage")} value={filters.language} options={options.languages} allLabel={t("filterAll")} />
+            <div>
+              <label className="label" htmlFor="filter-q">
+                {t("searchLabel")}
+              </label>
+              <div className="relative">
+                <SearchIcon
+                  size={15}
+                  className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-faint"
+                />
+                <input
+                  id="filter-q"
+                  type="search"
+                  name="q"
+                  defaultValue={filters.q ?? ""}
+                  placeholder={t("searchPlaceholder")}
+                  className="input pl-9"
+                />
+              </div>
+            </div>
 
-        <label className="space-y-1">
-          <span className="font-medium">{t("sortLabel")}</span>
-          <select
-            name="sort"
-            defaultValue={filters.sort}
-            className="w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-900"
-          >
-            <option value="newest">{t("sortNewest")}</option>
-            <option value="downloads">{t("sortDownloads")}</option>
-          </select>
-        </label>
+            <SelectField name="topic" label={t("filterTopic")} value={filters.topic} options={options.topics} allLabel={t("filterAll")} />
+            <SelectField name="method" label={t("filterMethod")} value={filters.method} options={options.methods} allLabel={t("filterAll")} />
+            <SelectField name="language" label={t("filterLanguage")} value={filters.language} options={options.languages} allLabel={t("filterAll")} />
 
-        <NumberField name="yearFrom" label={t("filterYearFrom")} value={filters.yearFrom} />
-        <NumberField name="yearTo" label={t("filterYearTo")} value={filters.yearTo} />
-        <NumberField name="sampleMin" label={t("filterSampleMin")} value={filters.sampleMin} />
-        <NumberField name="sampleMax" label={t("filterSampleMax")} value={filters.sampleMax} />
+            <div className="grid grid-cols-2 gap-3">
+              <NumberField name="yearFrom" label={t("filterYearFrom")} value={filters.yearFrom} />
+              <NumberField name="yearTo" label={t("filterYearTo")} value={filters.yearTo} />
+              <NumberField name="sampleMin" label={t("filterSampleMin")} value={filters.sampleMin} />
+              <NumberField name="sampleMax" label={t("filterSampleMax")} value={filters.sampleMax} />
+            </div>
 
-        <div className="col-span-2 flex flex-wrap items-end gap-2 sm:col-span-3 lg:col-span-4">
-          <button
-            type="submit"
-            className="rounded bg-black px-4 py-2 font-medium text-white dark:bg-white dark:text-black"
-          >
-            {t("applyFilters")}
-          </button>
-          <Link
-            href="/datasets"
-            className="rounded border border-gray-300 px-4 py-2 font-medium dark:border-gray-700"
-          >
-            {t("resetFilters")}
-          </Link>
+            <div>
+              <label className="label" htmlFor="filter-sort">
+                {t("sortLabel")}
+              </label>
+              <select id="filter-sort" name="sort" defaultValue={filters.sort} className="input">
+                <option value="newest">{t("sortNewest")}</option>
+                <option value="downloads">{t("sortDownloads")}</option>
+              </select>
+            </div>
+
+            <button type="submit" className="btn btn-primary w-full">
+              {t("applyFilters")}
+            </button>
+          </aside>
+
+          {/* -------- results -------- */}
+          <section className="mt-8 lg:mt-0">
+            {datasets.length === 0 ? (
+              <div className="card flex flex-col items-center gap-3 p-12 text-center">
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-soft text-brand">
+                  <SearchIcon size={24} />
+                </span>
+                <p className="font-display text-lg font-bold text-ink">{t("noResultsHeading")}</p>
+                <p className="max-w-sm text-sm text-soft">{t("noResults")}</p>
+                <Link href="/datasets" className="btn btn-soft btn-sm mt-2">
+                  {t("resetFilters")}
+                </Link>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {datasets.map((d) => (
+                  <DatasetCard key={d.id} dataset={d} locale={locale} />
+                ))}
+              </div>
+            )}
+
+            {totalPages > 1 && (
+              <nav className="mt-8 flex items-center justify-between text-sm" aria-label={t("pageLabel", { page, total: totalPages })}>
+                {page > 1 ? (
+                  <Link href={buildPageHref(sp, page - 1)} className="btn btn-ghost btn-sm">
+                    <ArrowLeftIcon size={14} />
+                    {t("prevPage")}
+                  </Link>
+                ) : (
+                  <span className="btn btn-ghost btn-sm opacity-40" aria-disabled>
+                    <ArrowLeftIcon size={14} />
+                    {t("prevPage")}
+                  </span>
+                )}
+                <span className="tnum font-semibold text-soft">
+                  {t("pageLabel", { page, total: totalPages })}
+                </span>
+                {page < totalPages ? (
+                  <Link href={buildPageHref(sp, page + 1)} className="btn btn-ghost btn-sm">
+                    {t("nextPage")}
+                    <ArrowRightIcon size={14} />
+                  </Link>
+                ) : (
+                  <span className="btn btn-ghost btn-sm opacity-40" aria-disabled>
+                    {t("nextPage")}
+                    <ArrowRightIcon size={14} />
+                  </span>
+                )}
+              </nav>
+            )}
+          </section>
         </div>
       </form>
-
-      <p className="text-sm text-gray-600 dark:text-gray-400">{t("resultsCount", { count: total })}</p>
-
-      {datasets.length === 0 ? (
-        <p className="rounded border border-gray-200 p-6 text-center text-sm text-gray-500 dark:border-gray-800 dark:text-gray-400">
-          {t("noResults")}
-        </p>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {datasets.map((d) => (
-            <DatasetCard key={d.id} dataset={d} />
-          ))}
-        </div>
-      )}
-
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between text-sm">
-          {page > 1 ? (
-            <Link href={buildPageHref(sp, page - 1)}>{t("prevPage")}</Link>
-          ) : (
-            <span className="text-gray-400 dark:text-gray-600">{t("prevPage")}</span>
-          )}
-          <span>{t("pageLabel", { page, total: totalPages })}</span>
-          {page < totalPages ? (
-            <Link href={buildPageHref(sp, page + 1)}>{t("nextPage")}</Link>
-          ) : (
-            <span className="text-gray-400 dark:text-gray-600">{t("nextPage")}</span>
-          )}
-        </div>
-      )}
     </main>
   );
 }
@@ -164,13 +221,11 @@ function SelectField({
   allLabel: string;
 }) {
   return (
-    <label className="space-y-1">
-      <span className="font-medium">{label}</span>
-      <select
-        name={name}
-        defaultValue={value ?? ""}
-        className="w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-900"
-      >
+    <div>
+      <label className="label" htmlFor={`filter-${name}`}>
+        {label}
+      </label>
+      <select id={`filter-${name}`} name={name} defaultValue={value ?? ""} className="input">
         <option value="">{allLabel}</option>
         {options.map((opt) => (
           <option key={opt} value={opt}>
@@ -178,20 +233,23 @@ function SelectField({
           </option>
         ))}
       </select>
-    </label>
+    </div>
   );
 }
 
 function NumberField({ name, label, value }: { name: string; label: string; value?: number }) {
   return (
-    <label className="space-y-1">
-      <span className="font-medium">{label}</span>
+    <div>
+      <label className="label" htmlFor={`filter-${name}`}>
+        {label}
+      </label>
       <input
+        id={`filter-${name}`}
         type="number"
         name={name}
         defaultValue={value ?? ""}
-        className="w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-900"
+        className="input tnum"
       />
-    </label>
+    </div>
   );
 }

@@ -63,11 +63,17 @@ export async function signup(
   formData: FormData,
 ): Promise<ActionState> {
   const supabase = await createClient();
+  const origin = (await headers()).get("origin");
 
   const { data, error } = await supabase.auth.signUp({
     email: String(formData.get("email")),
     password: String(formData.get("password")),
     options: {
+      // Send the email-confirmation link back to the callback route that
+      // exchanges the code for a session — NOT the site root, which drops it.
+      emailRedirectTo: origin
+        ? `${origin}/auth/callback?locale=${locale}`
+        : undefined,
       data: {
         full_name: String(formData.get("name") ?? ""),
         affiliation: String(formData.get("affiliation") ?? ""),
@@ -77,6 +83,14 @@ export async function signup(
 
   if (error) {
     return { error: authErrorKey(error.code, error.message) };
+  }
+
+  // Email-enumeration protection: signing up with an already-registered email
+  // returns success with no error and an empty `identities` array rather than a
+  // user_already_exists error. Detect that and tell them to log in instead of
+  // showing the misleading "check your email" message.
+  if (data.user && data.user.identities && data.user.identities.length === 0) {
+    return { error: "errorUserExists" };
   }
 
   if (!data.session) {

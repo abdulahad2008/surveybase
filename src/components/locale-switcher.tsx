@@ -6,9 +6,9 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 import { useParams } from "next/navigation";
 
 const LABELS: Record<string, string> = {
-  uz: "O'zbek",
-  ru: "Русский",
-  en: "English",
+  uz: "O'z",
+  ru: "Ру",
+  en: "En",
 };
 
 export function LocaleSwitcher() {
@@ -19,23 +19,32 @@ export function LocaleSwitcher() {
   const params = useParams();
 
   return (
-    <select
+    <div
+      role="group"
       aria-label={t("selectLanguage")}
-      value={locale}
-      onChange={(e) => {
-        router.replace(
-          // @ts-expect-error -- params come from the current route
-          { pathname, params },
-          { locale: e.target.value },
-        );
-      }}
-      className="rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-black"
+      className="flex items-center gap-0.5 rounded-full border border-line-strong p-0.5"
     >
       {routing.locales.map((l) => (
-        <option key={l} value={l}>
+        <button
+          key={l}
+          type="button"
+          aria-pressed={l === locale}
+          onClick={() => {
+            router.replace(
+              // @ts-expect-error -- params come from the current route
+              { pathname, params },
+              { locale: l },
+            );
+          }}
+          className={
+            l === locale
+              ? "rounded-full bg-brand px-2.5 py-1 text-xs font-bold text-on-brand"
+              : "rounded-full px-2.5 py-1 text-xs font-semibold text-soft transition hover:bg-card-soft hover:text-ink"
+          }
+        >
           {LABELS[l]}
-        </option>
+        </button>
       ))}
-    </select>
+    </div>
   );
 }

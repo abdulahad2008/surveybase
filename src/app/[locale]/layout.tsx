@@ -1,25 +1,20 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+import "@fontsource-variable/inter";
+import "@fontsource-variable/bricolage-grotesque";
 import "../globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "SurveyBank.uz",
+  title: {
+    default: "SurveyBase.uz — the open survey archive of Uzbekistan",
+    template: "%s · SurveyBase.uz",
+  },
   description:
-    "An open archive of anonymized survey results about Uzbekistan and Central Asia.",
+    "An open archive of anonymized survey results about Uzbekistan and Central Asia. Browse, explore charts, download, and cite — or give your own survey a second life.",
 };
 
 export default async function LocaleLayout({
@@ -36,14 +31,12 @@ export default async function LocaleLayout({
   }
 
   return (
-    <html
-      lang={locale}
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">
+    <html lang={locale} className="h-full antialiased">
+      <body className="flex min-h-full flex-col">
         <NextIntlClientProvider>
           <Header />
           {children}
+          <Footer />
         </NextIntlClientProvider>
       </body>
     </html>

@@ -75,6 +75,38 @@ export async function queryDatasets(
   return { datasets: (data as unknown as DatasetSummary[]) ?? [], total: count ?? 0 };
 }
 
+export interface ArchiveStats {
+  datasetCount: number;
+  totalRespondents: number;
+  totalDownloads: number;
+  topicCount: number;
+}
+
+export async function getArchiveStats(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: SupabaseClient<any, any, any>,
+): Promise<ArchiveStats> {
+  const { data, count } = await supabase
+    .from("datasets")
+    .select("sample_size, download_count, topics", { count: "exact" })
+    .eq("status", "published");
+
+  let totalRespondents = 0;
+  let totalDownloads = 0;
+  const topics = new Set<string>();
+  for (const row of (data as { sample_size: number | null; download_count: number; topics: string[] }[]) ?? []) {
+    totalRespondents += row.sample_size ?? 0;
+    totalDownloads += row.download_count ?? 0;
+    for (const t of row.topics ?? []) topics.add(t);
+  }
+  return {
+    datasetCount: count ?? 0,
+    totalRespondents,
+    totalDownloads,
+    topicCount: topics.size,
+  };
+}
+
 export async function getFilterOptions(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: SupabaseClient<any, any, any>,

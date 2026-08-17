@@ -1,14 +1,10 @@
-import { Geist } from "next/font/google";
 import type { Metadata } from "next";
+import "@fontsource-variable/inter";
+import "@fontsource-variable/bricolage-grotesque";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "Not Found · SurveyBank.uz",
+  title: "Not Found · SurveyBase.uz",
   description: "The page you are looking for does not exist.",
 };
 
@@ -24,17 +20,20 @@ const messages = [
 
 export default function GlobalNotFound() {
   return (
-    <html lang="uz" className={`${geistSans.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
-        <main className="mx-auto flex w-full max-w-sm flex-1 flex-col items-center justify-center gap-8 px-4 py-16 text-center">
+    <html lang="uz" className="h-full antialiased">
+      <body className="flex min-h-full flex-col">
+        <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-10 px-4 py-16 text-center">
+          <div aria-hidden className="flex items-end gap-2">
+            <span className="h-10 w-4 rounded-full bg-brand-soft" />
+            <span className="h-16 w-4 rounded-full bg-brand" />
+            <span className="h-7 w-4 rounded-full bg-coral" />
+            <span className="h-12 w-4 rounded-full bg-sun" />
+          </div>
           {messages.map((m) => (
-            <div key={m.href} className="flex flex-col items-center gap-3">
-              <h1 className="text-xl font-semibold">{m.heading}</h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{m.message}</p>
-              <a
-                href={m.href}
-                className="rounded bg-black px-4 py-2 text-sm font-medium text-white dark:bg-white dark:text-black"
-              >
+            <div key={m.href} className="flex flex-col items-center gap-2">
+              <h1 className="font-display text-xl font-bold text-ink">{m.heading}</h1>
+              <p className="text-sm text-soft">{m.message}</p>
+              <a href={m.href} className="btn btn-soft btn-sm mt-1">
                 {m.backHome}
               </a>
             </div>

@@ -22,7 +22,7 @@ export default async function DepositPage({
   }
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-10">
+    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-12 sm:px-6">
       <DepositForm locale={locale} />
     </main>
   );

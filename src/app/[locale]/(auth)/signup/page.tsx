@@ -3,6 +3,8 @@
 import { useActionState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { LogoGlyph } from "@/components/logo";
+import { GoogleIcon } from "@/components/icons";
 import { signup, signInWithGoogle } from "../actions";
 
 export default function SignupPage() {
@@ -16,82 +18,104 @@ export default function SignupPage() {
   });
 
   return (
-    <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-6 px-4 py-16">
-      <h1 className="text-2xl font-semibold">{t("signupTitle")}</h1>
-      {state.needsConfirmation && (
-        <p role="status" className="rounded bg-green-50 px-3 py-2 text-sm text-green-800 dark:bg-green-950 dark:text-green-300">
-          {t("checkEmailToConfirm")}
+    <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-16">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-10 left-0 h-64 w-64 rounded-full bg-coral-soft blur-3xl"
+      />
+      <div className="card relative space-y-6 p-8">
+        <div className="space-y-3 text-center">
+          <div className="flex justify-center">
+            <LogoGlyph size={44} />
+          </div>
+          <h1 className="font-display text-2xl font-extrabold tracking-tight text-ink">
+            {t("signupTitle")}
+          </h1>
+          <p className="text-sm text-soft">{t("signupSubtitle")}</p>
+        </div>
+
+        {state.needsConfirmation && (
+          <p
+            role="status"
+            className="rounded-xl bg-mint-soft px-3 py-2.5 text-sm font-medium text-ink"
+          >
+            {t("checkEmailToConfirm")}
+          </p>
+        )}
+
+        <form action={googleAction}>
+          <button type="submit" className="btn btn-ghost w-full">
+            <GoogleIcon size={17} />
+            {t("continueWithGoogle")}
+          </button>
+          {googleState.error && (
+            <p role="alert" className="mt-2 rounded-xl bg-danger-soft px-3 py-2 text-sm font-medium text-danger">
+              {t(googleState.error)}
+            </p>
+          )}
+        </form>
+
+        <div className="flex items-center gap-3 text-xs font-semibold text-faint">
+          <span className="h-px flex-1 bg-line" />
+          {t("orDivider")}
+          <span className="h-px flex-1 bg-line" />
+        </div>
+
+        <form action={formAction} className="space-y-4">
+          <div>
+            <label className="label" htmlFor="signup-name">
+              {t("name")}
+            </label>
+            <input id="signup-name" name="name" type="text" required className="input" />
+          </div>
+          <div>
+            <label className="label" htmlFor="signup-affiliation">
+              {t("affiliation")}
+            </label>
+            <input
+              id="signup-affiliation"
+              name="affiliation"
+              type="text"
+              className="input"
+              placeholder={t("affiliationPlaceholder")}
+            />
+          </div>
+          <div>
+            <label className="label" htmlFor="signup-email">
+              {t("email")}
+            </label>
+            <input id="signup-email" name="email" type="email" required className="input" />
+          </div>
+          <div>
+            <label className="label" htmlFor="signup-password">
+              {t("password")}
+            </label>
+            <input
+              id="signup-password"
+              name="password"
+              type="password"
+              required
+              minLength={6}
+              className="input"
+            />
+          </div>
+          {state.error && (
+            <p role="alert" className="rounded-xl bg-danger-soft px-3 py-2 text-sm font-medium text-danger">
+              {t(state.error)}
+            </p>
+          )}
+          <button type="submit" disabled={pending} className="btn btn-primary w-full">
+            {t("submitSignup")}
+          </button>
+        </form>
+
+        <p className="text-center text-sm text-soft">
+          {t("haveAccount")}{" "}
+          <Link href="/login" className="font-semibold text-brand hover:underline">
+            {t("loginLink")}
+          </Link>
         </p>
-      )}
-      <form action={formAction} className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1 text-sm">
-          {t("name")}
-          <input
-            name="name"
-            type="text"
-            required
-            className="rounded border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-black"
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          {t("affiliation")}
-          <input
-            name="affiliation"
-            type="text"
-            className="rounded border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-black"
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          {t("email")}
-          <input
-            name="email"
-            type="email"
-            required
-            className="rounded border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-black"
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          {t("password")}
-          <input
-            name="password"
-            type="password"
-            required
-            minLength={6}
-            className="rounded border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-black"
-          />
-        </label>
-        {state.error && (
-          <p role="alert" className="text-sm text-red-600">
-            {t(state.error)}
-          </p>
-        )}
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded bg-black px-4 py-2 text-white disabled:opacity-50 dark:bg-white dark:text-black"
-        >
-          {t("submitSignup")}
-        </button>
-      </form>
-      <form action={googleAction} className="flex flex-col gap-2">
-        <button
-          type="submit"
-          className="w-full rounded border border-gray-300 px-4 py-2 dark:border-gray-700"
-        >
-          {t("continueWithGoogle")}
-        </button>
-        {googleState.error && (
-          <p role="alert" className="text-sm text-red-600">
-            {t(googleState.error)}
-          </p>
-        )}
-      </form>
-      <p className="text-sm">
-        {t("haveAccount")}{" "}
-        <Link href="/login" className="underline">
-          {t("loginLink")}
-        </Link>
-      </p>
+      </div>
     </main>
   );
 }

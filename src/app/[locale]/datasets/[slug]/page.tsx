@@ -4,6 +4,19 @@ import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import type { ColumnSummary } from "@/lib/csv-analysis";
 import type { Locale } from "@/i18n/routing";
+import { Link } from "@/i18n/navigation";
+import { topicColor } from "@/lib/topic-colors";
+import { CopyButton } from "@/components/copy-button";
+import {
+  ArrowLeftIcon,
+  CalendarIcon,
+  DownloadIcon,
+  ExternalLinkIcon,
+  FileTextIcon,
+  GlobeIcon,
+  QuoteIcon,
+  UsersIcon,
+} from "@/components/icons";
 import { ColumnCharts } from "./column-charts";
 import { DataTable } from "./data-table";
 import { Reviews, type ReviewRow } from "./reviews";
@@ -106,149 +119,293 @@ export default async function DatasetPage({
   const citationYear = dataset.fieldwork_start
     ? new Date(dataset.fieldwork_start).getFullYear()
     : new Date(dataset.created_at).getFullYear();
-  const citationAuthor = dataset.depositor?.name ?? "SurveyBank.uz contributor";
-  const citationUrl = `https://surveybank.uz/datasets/${dataset.slug}`;
-  const citation = `${citationAuthor} (${citationYear}). ${dataset.title} [Data set]. SurveyBank.uz. ${citationUrl}`;
+  const citationAuthor = dataset.depositor?.name ?? "SurveyBase.uz contributor";
+  const citationUrl = `https://surveybase.uz/datasets/${dataset.slug}`;
+  const citation = `${citationAuthor} (${citationYear}). ${dataset.title} [Data set]. SurveyBase.uz. ${citationUrl}`;
 
   const publications = dataset.dataset_publications
     .map((dp) => dp.publications)
     .filter((p): p is PublicationRow => Boolean(p));
 
+  const nf = new Intl.NumberFormat(locale);
+  const fieldworkYearRange =
+    dataset.fieldwork_start || dataset.fieldwork_end
+      ? [
+          dataset.fieldwork_start ? new Date(dataset.fieldwork_start).getFullYear() : "?",
+          dataset.fieldwork_end ? new Date(dataset.fieldwork_end).getFullYear() : "?",
+        ]
+          .filter((v, i, arr) => i === 0 || v !== arr[0])
+          .join("–")
+      : null;
+
   return (
-    <main className="mx-auto max-w-4xl space-y-8 px-6 py-10">
+    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
+      <Link
+        href="/datasets"
+        className="inline-flex items-center gap-1.5 text-sm font-semibold text-soft transition hover:text-brand"
+      >
+        <ArrowLeftIcon size={15} />
+        {t("backToBrowse")}
+      </Link>
+
       {dataset.status !== "published" && (
-        <p className="rounded bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+        <p className="mt-4 rounded-2xl border border-sun/40 bg-sun-soft px-4 py-3 text-sm font-medium text-ink">
           {t(dataset.status === "rejected" ? "rejectedBanner" : "pendingBanner")}
         </p>
       )}
 
-      <div>
-        <h1 className="text-3xl font-semibold">{dataset.title}</h1>
+      {/* header */}
+      <header className="mt-6 max-w-3xl">
+        {dataset.topics.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {dataset.topics.map((topic) => {
+              const c = topicColor(topic);
+              return (
+                <Link
+                  key={topic}
+                  href={`/datasets?topic=${encodeURIComponent(topic)}`}
+                  className="chip transition hover:scale-105"
+                  style={{ background: c.bg, color: c.text }}
+                >
+                  {topic}
+                </Link>
+              );
+            })}
+          </div>
+        )}
+        <h1 className="font-display mt-4 text-3xl leading-tight font-extrabold tracking-tight text-ink sm:text-4xl">
+          {dataset.title}
+        </h1>
         {dataset.abstract && (
-          <p className="mt-2 text-gray-600 dark:text-gray-400">{dataset.abstract}</p>
+          <p className="mt-3 text-base leading-relaxed text-soft">{dataset.abstract}</p>
         )}
-      </div>
-
-      <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-3">
-        <Meta label={t("metadataCountry")} value={[dataset.country, dataset.region].filter(Boolean).join(" · ")} />
-        <Meta label={t("metadataSampleSize")} value={dataset.sample_size?.toString()} />
-        <Meta label={t("metadataTargetPopulation")} value={dataset.target_population} />
-        <Meta label={t("metadataCollectionMethod")} value={dataset.collection_method} />
-        <Meta
-          label={t("metadataFieldwork")}
-          value={
-            dataset.fieldwork_start || dataset.fieldwork_end
-              ? `${dataset.fieldwork_start ?? "?"} – ${dataset.fieldwork_end ?? "?"}`
-              : undefined
-          }
-        />
-        <Meta label={t("metadataLanguages")} value={dataset.languages.join(", ")} />
-        <Meta label={t("metadataLicense")} value={dataset.license} />
-      </dl>
-
-      {dataset.topics.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {dataset.topics.map((topic) => (
-            <span key={topic} className="rounded-full bg-gray-100 px-3 py-1 text-xs dark:bg-gray-800">
-              {topic}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {dataset.questionnaire_text && (
-        <div>
-          <h2 className="text-lg font-medium">{t("metadataQuestionnaire")}</h2>
-          <p className="mt-1 whitespace-pre-wrap text-sm text-gray-600 dark:text-gray-400">
-            {dataset.questionnaire_text}
+        {dataset.depositor?.name && (
+          <p className="mt-3 text-sm text-faint">
+            {t("depositedBy")}{" "}
+            <span className="font-semibold text-soft">{dataset.depositor.name}</span>
+            {dataset.depositor.affiliation ? ` · ${dataset.depositor.affiliation}` : ""}
           </p>
-        </div>
-      )}
-
-      {publications.length > 0 && (
-        <div>
-          <h2 className="text-lg font-medium">{t("publicationsHeading")}</h2>
-          <ul className="mt-1 space-y-1 text-sm">
-            {publications.map((p, i) => (
-              <li key={i}>
-                {p.title}
-                {p.authors ? ` — ${p.authors}` : ""}
-                {p.year ? ` (${p.year})` : ""}
-                {p.doi_or_url ? (
-                  <>
-                    {" "}
-                    ·{" "}
-                    <a href={p.doi_or_url} className="underline" target="_blank" rel="noreferrer">
-                      {p.doi_or_url}
-                    </a>
-                  </>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <div>
-        <h2 className="text-lg font-medium">{t("howToCiteHeading")}</h2>
-        <p className="mt-1 rounded bg-gray-50 p-3 text-sm dark:bg-gray-900">{citation}</p>
-      </div>
-
-      <div>
-        <h2 className="mb-3 text-lg font-medium">{t("downloadsHeading")}</h2>
-        {!dataset.is_hosted ? (
-          <div className="flex flex-wrap items-center gap-3 text-sm">
-            <a
-              href={dataset.external_url ?? "#"}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded border border-gray-300 px-3 py-1.5 font-medium dark:border-gray-700"
-            >
-              {t("viewAtSourceButton")}
-            </a>
-            <span className="text-gray-500 dark:text-gray-400">{t("viewAtSourceNote")}</span>
-          </div>
-        ) : csvFile ? (
-          <div className="flex flex-wrap items-center gap-3 text-sm">
-            {(["csv", "xlsx", "json"] as const).map((format) => (
-              <a
-                key={format}
-                href={`/api/datasets/${dataset.slug}/download/${format}`}
-                className="rounded border border-gray-300 px-3 py-1.5 font-medium dark:border-gray-700"
-              >
-                {format.toUpperCase()}
-              </a>
-            ))}
-            <span className="text-gray-500 dark:text-gray-400">
-              {t("downloadCount", { count: dataset.download_count })}
-            </span>
-          </div>
-        ) : (
-          <p className="text-sm text-gray-500 dark:text-gray-400">{t("noFileYet")}</p>
         )}
+      </header>
+
+      {/* stat tiles */}
+      <div className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {dataset.sample_size != null && (
+          <StatTile
+            icon={<UsersIcon size={17} />}
+            bg="var(--brand-soft)"
+            color="var(--brand)"
+            value={nf.format(dataset.sample_size)}
+            label={t("metadataSampleSize")}
+          />
+        )}
+        <StatTile
+          icon={<DownloadIcon size={17} />}
+          bg="var(--mint-soft)"
+          color="var(--mint)"
+          value={nf.format(dataset.download_count)}
+          label={t("statDownloads")}
+        />
+        {fieldworkYearRange && (
+          <StatTile
+            icon={<CalendarIcon size={17} />}
+            bg="var(--sun-soft)"
+            color="var(--sun)"
+            value={fieldworkYearRange}
+            label={t("metadataFieldwork")}
+          />
+        )}
+        <StatTile
+          icon={<GlobeIcon size={17} />}
+          bg="var(--sky-soft)"
+          color="var(--sky)"
+          value={dataset.country}
+          label={t("metadataCountry")}
+        />
       </div>
 
-      {orderedColumns.length > 0 && (
-        <div>
-          <h2 className="mb-3 text-lg font-medium">{t("questionsHeading")}</h2>
-          <ColumnCharts columns={orderedColumns} />
-        </div>
-      )}
+      <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_320px] lg:items-start">
+        {/* ------------------- main column ------------------- */}
+        <div className="min-w-0 space-y-10">
+          {/* metadata */}
+          <section className="card p-6">
+            <h2 className="font-display text-lg font-bold text-ink">{t("aboutHeading")}</h2>
+            <dl className="mt-4 grid grid-cols-1 gap-x-6 gap-y-4 text-sm sm:grid-cols-2">
+              <Meta label={t("metadataCountry")} value={[dataset.country, dataset.region].filter(Boolean).join(" · ")} />
+              <Meta label={t("metadataTargetPopulation")} value={dataset.target_population} />
+              <Meta label={t("metadataCollectionMethod")} value={dataset.collection_method} />
+              <Meta
+                label={t("metadataFieldwork")}
+                value={
+                  dataset.fieldwork_start || dataset.fieldwork_end
+                    ? `${dataset.fieldwork_start ?? "?"} – ${dataset.fieldwork_end ?? "?"}`
+                    : undefined
+                }
+              />
+              <Meta label={t("metadataLanguages")} value={dataset.languages.join(", ")} />
+              <Meta label={t("metadataLicense")} value={dataset.license} />
+            </dl>
+          </section>
 
-      {headers.length > 0 && (
-        <div>
-          <h2 className="mb-3 text-lg font-medium">{t("dataHeading")}</h2>
-          <DataTable headers={headers} rows={rows} />
-        </div>
-      )}
+          {/* questionnaire */}
+          {dataset.questionnaire_text && (
+            <section className="card p-6">
+              <h2 className="font-display flex items-center gap-2 text-lg font-bold text-ink">
+                <FileTextIcon size={18} className="text-brand" />
+                {t("metadataQuestionnaire")}
+              </h2>
+              <p className="mt-3 text-sm leading-relaxed whitespace-pre-wrap text-soft">
+                {dataset.questionnaire_text}
+              </p>
+            </section>
+          )}
 
-      <Reviews
-        locale={locale as Locale}
-        slug={dataset.slug}
-        reviews={dataset.reviews}
-        currentUserId={user?.id ?? null}
-      />
+          {/* publications */}
+          {publications.length > 0 && (
+            <section className="card p-6">
+              <h2 className="font-display text-lg font-bold text-ink">{t("publicationsHeading")}</h2>
+              <ul className="mt-3 space-y-3 text-sm">
+                {publications.map((p, i) => (
+                  <li key={i} className="rounded-xl bg-card-soft p-3.5 leading-relaxed">
+                    <span className="font-semibold text-ink">{p.title}</span>
+                    <span className="text-soft">
+                      {p.authors ? ` — ${p.authors}` : ""}
+                      {p.year ? ` (${p.year})` : ""}
+                    </span>
+                    {p.doi_or_url && (
+                      <a
+                        href={p.doi_or_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-1 flex items-center gap-1 text-brand hover:underline"
+                      >
+                        <ExternalLinkIcon size={13} />
+                        <span className="truncate">{p.doi_or_url}</span>
+                      </a>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* charts */}
+          {orderedColumns.length > 0 && (
+            <section>
+              <h2 className="font-display text-2xl font-extrabold tracking-tight text-ink">
+                {t("questionsHeading")}
+              </h2>
+              <p className="mt-1 mb-5 text-sm text-soft">{t("questionsSubtitle")}</p>
+              <ColumnCharts columns={orderedColumns} />
+            </section>
+          )}
+
+          {/* data table */}
+          {headers.length > 0 && (
+            <section>
+              <h2 className="font-display mb-5 text-2xl font-extrabold tracking-tight text-ink">
+                {t("dataHeading")}
+              </h2>
+              <DataTable headers={headers} rows={rows} />
+            </section>
+          )}
+
+          <Reviews
+            locale={locale as Locale}
+            slug={dataset.slug}
+            reviews={dataset.reviews}
+            currentUserId={user?.id ?? null}
+          />
+        </div>
+
+        {/* ------------------- side rail ------------------- */}
+        <aside className="space-y-5 lg:sticky lg:top-20">
+          {/* download panel */}
+          <div className="card p-6">
+            <h2 className="font-display flex items-center gap-2 text-base font-bold text-ink">
+              <DownloadIcon size={17} className="text-brand" />
+              {t("downloadsHeading")}
+            </h2>
+            {!dataset.is_hosted ? (
+              <div className="mt-4 space-y-3">
+                <a
+                  href={dataset.external_url ?? "#"}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn btn-primary w-full"
+                >
+                  <ExternalLinkIcon size={15} />
+                  {t("viewAtSourceButton")}
+                </a>
+                <p className="text-xs leading-relaxed text-faint">{t("viewAtSourceNote")}</p>
+              </div>
+            ) : csvFile ? (
+              <div className="mt-4 space-y-3">
+                <div className="grid grid-cols-3 gap-2">
+                  {(["csv", "xlsx", "json"] as const).map((format) => (
+                    <a
+                      key={format}
+                      href={`/api/datasets/${dataset.slug}/download/${format}`}
+                      className="btn btn-soft btn-sm justify-center"
+                    >
+                      {format.toUpperCase()}
+                    </a>
+                  ))}
+                </div>
+                <p className="tnum text-center text-xs font-medium text-faint">
+                  {t("downloadCount", { count: nf.format(dataset.download_count) })}
+                </p>
+              </div>
+            ) : (
+              <p className="mt-3 text-sm text-faint">{t("noFileYet")}</p>
+            )}
+          </div>
+
+          {/* citation */}
+          <div className="card border-brand/20 bg-brand-wash p-6">
+            <h2 className="font-display flex items-center gap-2 text-base font-bold text-ink">
+              <QuoteIcon size={17} className="text-brand" />
+              {t("howToCiteHeading")}
+            </h2>
+            <p className="mt-3 rounded-xl bg-card p-3.5 font-mono text-xs leading-relaxed break-words text-soft">
+              {citation}
+            </p>
+            <div className="mt-3">
+              <CopyButton text={citation} label={t("copyCitation")} copiedLabel={t("citationCopied")} />
+            </div>
+          </div>
+        </aside>
+      </div>
     </main>
+  );
+}
+
+function StatTile({
+  icon,
+  bg,
+  color,
+  value,
+  label,
+}: {
+  icon: React.ReactNode;
+  bg: string;
+  color: string;
+  value: string;
+  label: string;
+}) {
+  return (
+    <div className="card flex items-center gap-3.5 p-4">
+      <span
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+        style={{ background: bg, color }}
+      >
+        {icon}
+      </span>
+      <div className="min-w-0">
+        <p className="font-display tnum truncate text-lg font-extrabold text-ink">{value}</p>
+        <p className="truncate text-[11px] font-semibold tracking-wide text-faint uppercase">{label}</p>
+      </div>
+    </div>
   );
 }
 
@@ -256,8 +413,8 @@ function Meta({ label, value }: { label: string; value?: string | null }) {
   if (!value) return null;
   return (
     <div>
-      <dt className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{label}</dt>
-      <dd>{value}</dd>
+      <dt className="text-[11px] font-semibold tracking-wide text-faint uppercase">{label}</dt>
+      <dd className="mt-0.5 font-medium text-ink">{value}</dd>
     </div>
   );
 }

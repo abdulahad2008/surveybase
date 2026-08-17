@@ -1,8 +1,16 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { Logo } from "./logo";
 import { LocaleSwitcher } from "./locale-switcher";
 import { SignOutButton } from "./sign-out-button";
+import { MobileNav } from "./mobile-nav";
+import { UploadIcon } from "./icons";
+
+const navLink =
+  "rounded-full px-3 py-2 text-sm font-semibold text-soft transition hover:bg-card-soft hover:text-ink";
+const sheetLink =
+  "rounded-xl px-4 py-3 text-sm font-semibold text-ink transition hover:bg-card-soft";
 
 export async function Header() {
   const t = await getTranslations("Nav");
@@ -22,26 +30,68 @@ export async function Header() {
   }
 
   return (
-    <header className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-800">
-      <Link href="/" className="text-lg font-semibold">
-        SurveyBank.uz
-      </Link>
-      <nav className="flex items-center gap-4 text-sm">
-        <Link href="/">{t("browse")}</Link>
-        {user ? (
-          <>
-            <Link href="/deposit">{t("deposit")}</Link>
-            {isModerator && <Link href="/moderate">{t("moderate")}</Link>}
+    <header className="sticky top-0 z-40 border-b border-line bg-canvas/85 backdrop-blur-md">
+      <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        <Logo />
+
+        {/* desktop nav */}
+        <nav className="hidden items-center gap-1 md:flex">
+          <Link href="/datasets" className={navLink}>
+            {t("browse")}
+          </Link>
+          {isModerator && (
+            <Link href="/moderate" className={navLink}>
+              {t("moderate")}
+            </Link>
+          )}
+          {user ? (
             <SignOutButton label={t("logout")} />
-          </>
-        ) : (
-          <>
-            <Link href="/login">{t("login")}</Link>
-            <Link href="/signup">{t("signup")}</Link>
-          </>
-        )}
-        <LocaleSwitcher />
-      </nav>
+          ) : (
+            <Link href="/login" className={navLink}>
+              {t("login")}
+            </Link>
+          )}
+          <div className="mx-2">
+            <LocaleSwitcher />
+          </div>
+          <Link href="/deposit" className="btn btn-primary btn-sm">
+            <UploadIcon size={15} />
+            {t("deposit")}
+          </Link>
+        </nav>
+
+        {/* mobile nav */}
+        <div className="flex items-center gap-2 md:hidden">
+          <LocaleSwitcher />
+          <MobileNav label={t("menu")}>
+            <Link href="/datasets" className={sheetLink}>
+              {t("browse")}
+            </Link>
+            <Link href="/deposit" className={sheetLink}>
+              {t("deposit")}
+            </Link>
+            {isModerator && (
+              <Link href="/moderate" className={sheetLink}>
+                {t("moderate")}
+              </Link>
+            )}
+            {user ? (
+              <div className="px-2">
+                <SignOutButton label={t("logout")} />
+              </div>
+            ) : (
+              <>
+                <Link href="/login" className={sheetLink}>
+                  {t("login")}
+                </Link>
+                <Link href="/signup" className={sheetLink}>
+                  {t("signup")}
+                </Link>
+              </>
+            )}
+          </MobileNav>
+        </div>
+      </div>
     </header>
   );
 }

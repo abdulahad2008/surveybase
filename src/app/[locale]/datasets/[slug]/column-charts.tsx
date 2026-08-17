@@ -18,12 +18,32 @@ interface Column {
   summary_json: ColumnSummary;
 }
 
+const AXIS_TICK = { fontSize: 11, fill: "var(--chart-axis)" };
+
+function ChartTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: { value: number }[];
+  label?: string;
+}) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="rounded-xl border border-line bg-card px-3 py-2 text-xs shadow-lift">
+      <p className="max-w-[220px] font-semibold text-ink">{label}</p>
+      <p className="tnum mt-0.5 text-soft">{payload[0].value}</p>
+    </div>
+  );
+}
+
 export function ColumnCharts({ columns }: { columns: Column[] }) {
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       {columns.map((col) => (
-        <div key={col.question_text} className="rounded border border-gray-200 p-4 dark:border-gray-800">
-          <h3 className="mb-3 text-sm font-medium">{col.question_text}</h3>
+        <div key={col.question_text} className="card p-5">
+          <h3 className="mb-4 text-sm leading-snug font-bold text-ink">{col.question_text}</h3>
           <ColumnChart summary={col.summary_json} />
         </div>
       ))}
@@ -40,16 +60,30 @@ function ColumnChart({ summary }: { summary: ColumnSummary }) {
       <>
         <div className="h-64 w-full" role="img" aria-label={t("responses", { count: summary.responseCount })}>
           <ResponsiveContainer>
-            <BarChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="value" tick={{ fontSize: 11 }} interval={0} angle={-20} textAnchor="end" height={60} />
-              <YAxis allowDecimals={false} />
-              <Tooltip />
-              <Bar dataKey="count" fill="#4f46e5" />
+            <BarChart data={data} margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
+              <CartesianGrid vertical={false} stroke="var(--chart-grid)" />
+              <XAxis
+                dataKey="value"
+                tick={AXIS_TICK}
+                interval={0}
+                angle={-20}
+                textAnchor="end"
+                height={60}
+                tickLine={false}
+                axisLine={{ stroke: "var(--chart-grid)" }}
+              />
+              <YAxis
+                allowDecimals={false}
+                tick={AXIS_TICK}
+                tickLine={false}
+                axisLine={false}
+              />
+              <Tooltip content={<ChartTooltip />} cursor={{ fill: "var(--brand-soft)", opacity: 0.5 }} />
+              <Bar dataKey="count" fill="var(--chart-cat)" radius={[4, 4, 0, 0]} maxBarSize={44} />
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+        <p className="tnum mt-2 text-xs font-medium text-faint">
           {t("responses", { count: summary.responseCount })}
         </p>
       </>
@@ -61,27 +95,44 @@ function ColumnChart({ summary }: { summary: ColumnSummary }) {
       <>
         <div className="h-64 w-full" role="img" aria-label={t("responses", { count: summary.responseCount })}>
           <ResponsiveContainer>
-            <BarChart data={summary.histogram}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="bin" tick={{ fontSize: 10 }} interval={0} angle={-30} textAnchor="end" height={60} />
-              <YAxis allowDecimals={false} />
-              <Tooltip />
-              <Bar dataKey="count" fill="#0891b2" />
+            <BarChart data={summary.histogram} margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
+              <CartesianGrid vertical={false} stroke="var(--chart-grid)" />
+              <XAxis
+                dataKey="bin"
+                tick={{ ...AXIS_TICK, fontSize: 10 }}
+                interval={0}
+                angle={-30}
+                textAnchor="end"
+                height={60}
+                tickLine={false}
+                axisLine={{ stroke: "var(--chart-grid)" }}
+              />
+              <YAxis allowDecimals={false} tick={AXIS_TICK} tickLine={false} axisLine={false} />
+              <Tooltip content={<ChartTooltip />} cursor={{ fill: "var(--mint-soft)", opacity: 0.5 }} />
+              <Bar dataKey="count" fill="var(--chart-num)" radius={[4, 4, 0, 0]} maxBarSize={44} />
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-          {t("statMin", { value: summary.min })} · {t("statMax", { value: summary.max })} ·{" "}
-          {t("statMean", { value: summary.mean.toFixed(2) })} ·{" "}
-          {t("statMedian", { value: summary.median })} · {t("responses", { count: summary.responseCount })}
-        </p>
+        <div className="mt-2 flex flex-wrap gap-x-2 gap-y-1">
+          {[
+            t("statMin", { value: summary.min }),
+            t("statMax", { value: summary.max }),
+            t("statMean", { value: summary.mean.toFixed(2) }),
+            t("statMedian", { value: summary.median }),
+            t("responses", { count: summary.responseCount }),
+          ].map((s) => (
+            <span key={s} className="chip tnum bg-card-soft text-soft">
+              {s}
+            </span>
+          ))}
+        </div>
       </>
     );
   }
 
   if (summary.type === "date") {
     return (
-      <p className="text-sm text-gray-600 dark:text-gray-400">
+      <p className="tnum text-sm text-soft">
         {summary.min ? new Date(summary.min).toLocaleDateString() : "—"} –{" "}
         {summary.max ? new Date(summary.max).toLocaleDateString() : "—"} ·{" "}
         {t("responses", { count: summary.responseCount })}
@@ -93,15 +144,13 @@ function ColumnChart({ summary }: { summary: ColumnSummary }) {
     <>
       <ul className="flex flex-wrap gap-2">
         {summary.topTerms.map((term) => (
-          <li
-            key={term.term}
-            className="rounded-full bg-gray-100 px-3 py-1 text-xs dark:bg-gray-800"
-          >
-            {term.term} ({term.count})
+          <li key={term.term} className="chip bg-brand-soft text-brand-ink">
+            {term.term}
+            <span className="tnum opacity-70">{term.count}</span>
           </li>
         ))}
       </ul>
-      <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+      <p className="tnum mt-3 text-xs font-medium text-faint">
         {t("responses", { count: summary.responseCount })}
       </p>
     </>
