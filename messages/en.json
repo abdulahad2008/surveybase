@@ -8,7 +8,8 @@
     "signup": "Sign up",
     "logout": "Log out",
     "selectLanguage": "Select language",
-    "menu": "Menu"
+    "menu": "Menu",
+    "toggleTheme": "Switch theme"
   },
   "Home": {
     "title": "SurveyBase.uz",

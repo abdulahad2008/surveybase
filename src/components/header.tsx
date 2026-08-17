@@ -5,6 +5,7 @@ import { Logo } from "./logo";
 import { LocaleSwitcher } from "./locale-switcher";
 import { SignOutButton } from "./sign-out-button";
 import { MobileNav } from "./mobile-nav";
+import { ThemeToggle } from "./theme-toggle";
 import { UploadIcon } from "./icons";
 
 const navLink =
@@ -51,7 +52,8 @@ export async function Header() {
               {t("login")}
             </Link>
           )}
-          <div className="mx-2">
+          <div className="mx-2 flex items-center gap-2">
+            <ThemeToggle label={t("toggleTheme")} />
             <LocaleSwitcher />
           </div>
           <Link href="/deposit" className="btn btn-primary btn-sm">
@@ -62,6 +64,7 @@ export async function Header() {
 
         {/* mobile nav */}
         <div className="flex items-center gap-2 md:hidden">
+          <ThemeToggle label={t("toggleTheme")} />
           <LocaleSwitcher />
           <MobileNav label={t("menu")}>
             <Link href="/datasets" className={sheetLink}>

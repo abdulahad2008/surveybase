@@ -8,7 +8,8 @@
     "signup": "Ro‘yxatdan o‘tish",
     "logout": "Chiqish",
     "selectLanguage": "Tilni tanlash",
-    "menu": "Menyu"
+    "menu": "Menyu",
+    "toggleTheme": "Mavzuni almashtirish"
   },
   "Home": {
     "title": "SurveyBase.uz",

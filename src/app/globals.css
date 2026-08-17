@@ -58,8 +58,14 @@
   --shadow-pop: 0 24px 48px -16px rgba(25, 23, 36, 0.25);
 }
 
+/* Dark palette.
+   Applied in two places that must stay in sync:
+     1. the OS prefers dark and the visitor has not explicitly chosen light
+     2. the visitor explicitly chose dark (data-theme is set by the inline
+        script in the layout before first paint, so there is no flash)
+   Editing one block without the other will desync the two paths. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     color-scheme: dark;
 
     --canvas: #0f0e16;
@@ -105,6 +111,53 @@
     --shadow-pop: 0 24px 48px -16px rgba(0, 0, 0, 0.7);
   }
 }
+
+:root[data-theme="dark"] {
+    color-scheme: dark;
+
+    --canvas: #0f0e16;
+    --card: #17161f;
+    --card-soft: #1d1c28;
+    --ink: #f2f1f8;
+    --soft: #a5a2b3;
+    --faint: #77748a;
+    --line: rgba(242, 241, 248, 0.09);
+    --line-strong: rgba(242, 241, 248, 0.18);
+
+    --brand: #8b7ff2;
+    --brand-deep: #a094f6;
+    --brand-ink: #c9c2fa;
+    --brand-soft: rgba(139, 127, 242, 0.16);
+    --brand-wash: rgba(139, 127, 242, 0.09);
+    --on-brand: #171233;
+
+    --coral: #fa7c6e;
+    --coral-soft: rgba(250, 124, 110, 0.14);
+    --mint: #34c78f;
+    --mint-soft: rgba(52, 199, 143, 0.14);
+    --sun: #f0b429;
+    --sun-soft: rgba(240, 180, 41, 0.13);
+    --rose: #e57ab0;
+    --rose-soft: rgba(229, 122, 176, 0.14);
+    --sky: #3987e5;
+    --sky-soft: rgba(57, 135, 229, 0.15);
+
+    --good: #0ca30c;
+    --good-text: #4ade4a;
+    --warning: #f0b429;
+    --danger: #e66767;
+    --danger-soft: rgba(230, 103, 103, 0.14);
+
+    --chart-cat: #3987e5;
+    --chart-num: #199e70;
+    --chart-grid: #2c2c34;
+    --chart-axis: #898781;
+
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+    --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.4), 0 16px 32px -12px rgba(0, 0, 0, 0.6);
+    --shadow-pop: 0 24px 48px -16px rgba(0, 0, 0, 0.7);
+  }
+
 
 @theme inline {
   --color-canvas: var(--canvas);
@@ -152,6 +205,7 @@
 
 body {
   background: var(--canvas);
+  transition: background-color 200ms ease, color 200ms ease;
   color: var(--ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -232,9 +286,12 @@ body {
   filter: brightness(1.05);
 }
 @media (prefers-color-scheme: dark) {
-  .btn-coral {
+  :root:not([data-theme="light"]) .btn-coral {
     color: #2b0f0b;
   }
+}
+:root[data-theme="dark"] .btn-coral {
+  color: #2b0f0b;
 }
 
 .btn-ghost {
@@ -410,4 +467,41 @@ select.input {
 /* tabular numbers for stats/tables */
 .tnum {
   font-variant-numeric: tabular-nums;
+}
+
+/* Respect the OS "reduce motion" setting for the whole UI. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Theme toggle icon swap                                              */
+/* Driven by CSS rather than React state so the button's markup is     */
+/* identical on server and client (no hydration mismatch, no flicker). */
+/* Mirrors the palette selectors above — keep the three in sync.       */
+/* ------------------------------------------------------------------ */
+
+.theme-icon-dark {
+  display: none;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-icon-light {
+    display: none;
+  }
+  :root:not([data-theme="light"]) .theme-icon-dark {
+    display: block;
+  }
+}
+:root[data-theme="dark"] .theme-icon-light {
+  display: none;
+}
+:root[data-theme="dark"] .theme-icon-dark {
+  display: block;
 }

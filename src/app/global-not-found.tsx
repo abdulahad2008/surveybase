@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "@fontsource-variable/inter";
 import "@fontsource-variable/bricolage-grotesque";
 import "./globals.css";
+import { ThemeScript } from "@/components/theme-script";
 
 export const metadata: Metadata = {
   title: "Not Found · SurveyBase.uz",
@@ -20,7 +21,10 @@ const messages = [
 
 export default function GlobalNotFound() {
   return (
-    <html lang="uz" className="h-full antialiased">
+    <html lang="uz" className="h-full antialiased" suppressHydrationWarning>
+      <head>
+        <ThemeScript />
+      </head>
       <body className="flex min-h-full flex-col">
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-10 px-4 py-16 text-center">
           <div aria-hidden className="flex items-end gap-2">
