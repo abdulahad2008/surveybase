@@ -6,7 +6,7 @@ import { LocaleSwitcher } from "./locale-switcher";
 import { SignOutButton } from "./sign-out-button";
 import { MobileNav } from "./mobile-nav";
 import { ThemeToggle } from "./theme-toggle";
-import { UploadIcon } from "./icons";
+import { UploadIcon, UserIcon } from "./icons";
 
 const navLink =
   "rounded-full px-3 py-2 text-sm font-semibold text-soft transition hover:bg-card-soft hover:text-ink";
@@ -46,7 +46,13 @@ export async function Header() {
             </Link>
           )}
           {user ? (
-            <SignOutButton label={t("logout")} />
+            <>
+              <Link href="/profile" className={`${navLink} inline-flex items-center gap-1.5`}>
+                <UserIcon size={15} />
+                {t("profile")}
+              </Link>
+              <SignOutButton label={t("logout")} />
+            </>
           ) : (
             <Link href="/login" className={navLink}>
               {t("login")}
@@ -79,9 +85,14 @@ export async function Header() {
               </Link>
             )}
             {user ? (
-              <div className="px-2">
-                <SignOutButton label={t("logout")} />
-              </div>
+              <>
+                <Link href="/profile" className={sheetLink}>
+                  {t("profile")}
+                </Link>
+                <div className="px-2">
+                  <SignOutButton label={t("logout")} />
+                </div>
+              </>
             ) : (
               <>
                 <Link href="/login" className={sheetLink}>

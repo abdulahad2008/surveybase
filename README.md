@@ -26,10 +26,10 @@ Grotesque via `@fontsource-variable` · deployed on Vercel, DNS on Cloudflare.
    - `SUPABASE_SERVICE_ROLE_KEY` (server-only — used by the seed script and
      `src/lib/supabase/admin.ts`; keep it out of the browser bundle)
 4. Apply the schema: open the Supabase SQL editor and run the files in
-   `supabase/migrations/` **in order**, `0001` through `0004`. Together they
+   `supabase/migrations/` **in order**, `0001` through `0005`. Together they
    create the tables, the profile-on-signup trigger, Row-Level Security
-   policies, the `dataset-files` storage bucket, full-text search, and
-   link-only dataset support.
+   policies, the `dataset-files` and `avatars` storage buckets, full-text
+   search, link-only dataset support, and researcher profile fields.
 5. Enable auth providers in **Authentication → Providers**:
    - **Email** is on by default.
    - **Google**: create an OAuth client in Google Cloud Console, add
@@ -86,7 +86,9 @@ up three weeks ahead of `main` between 2026-07-23 and 2026-08-17.
 - `src/app/auth/callback/` — OAuth callback route (outside the locale
   segment; the redirect URI must be a fixed URL).
 - `src/components/` — shared UI: header, footer, logo, icons, mobile nav,
-  locale switcher, copy button.
+  locale switcher, copy button, avatar, theme toggle.
+- `src/lib/profiles.ts` — profile queries, stats, and URL sanitizing shared by
+  the private settings page and the public researcher page.
 - `src/lib/pii.ts` — the single source of truth for which columns get
   stripped. Runs server-side as the final word before anything is persisted.
 - `src/lib/csv-analysis.ts` — column type inference and summary statistics.

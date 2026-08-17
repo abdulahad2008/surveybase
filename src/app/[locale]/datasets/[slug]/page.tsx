@@ -56,7 +56,7 @@ interface DatasetRow {
   depositor_id: string | null;
   download_count: number;
   created_at: string;
-  depositor: { name: string | null; affiliation: string | null } | null;
+  depositor: { id: string; name: string | null; affiliation: string | null } | null;
   survey_columns: SurveyColumnRow[];
   files: { storage_path: string; format: string }[];
   dataset_publications: { publications: PublicationRow | null }[];
@@ -75,7 +75,7 @@ export default async function DatasetPage({
     .from("datasets")
     .select(
       `*,
-      depositor:profiles!datasets_depositor_id_fkey ( name, affiliation ),
+      depositor:profiles!datasets_depositor_id_fkey ( id, name, affiliation ),
       survey_columns ( question_text, column_type, summary_json ),
       files ( storage_path, format ),
       dataset_publications ( publications ( title, authors, year, doi_or_url ) ),
@@ -182,7 +182,12 @@ export default async function DatasetPage({
         {dataset.depositor?.name && (
           <p className="mt-3 text-sm text-faint">
             {t("depositedBy")}{" "}
-            <span className="font-semibold text-soft">{dataset.depositor.name}</span>
+            <Link
+              href={`/users/${dataset.depositor.id}`}
+              className="font-semibold text-soft underline-offset-2 transition hover:text-brand hover:underline"
+            >
+              {dataset.depositor.name}
+            </Link>
             {dataset.depositor.affiliation ? ` · ${dataset.depositor.affiliation}` : ""}
           </p>
         )}
