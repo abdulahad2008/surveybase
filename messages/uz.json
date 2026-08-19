@@ -187,7 +187,8 @@
     "reviewSubmitting": "Saqlanmoqda…",
     "reviewErrorAuth": "Sharh qoldirish uchun tizimga kiring.",
     "reviewErrorGeneric": "Xatolik yuz berdi. Qayta urinib ko‘ring.",
-    "reviewLoginPrompt": "Sharh qoldirish uchun tizimga kiring."
+    "reviewLoginPrompt": "Sharh qoldirish uchun tizimga kiring.",
+    "visitCount": "{count} marta manbaga o‘tildi"
   },
   "Moderate": {
     "title": "Moderatsiya navbati",

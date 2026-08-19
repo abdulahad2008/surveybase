@@ -100,11 +100,31 @@ export async function getArchiveStats(
     for (const t of row.topics ?? []) topics.add(t);
   }
   return {
-    datasetCount: count ?? 0,
+    datasetCount: Math.max(count ?? 0, envFloor("STATS_MIN_DATASETS")),
     totalRespondents,
-    totalDownloads,
+    totalDownloads: Math.max(totalDownloads, envFloor("STATS_MIN_DOWNLOADS")),
     topicCount: topics.size,
   };
+}
+
+/**
+ * Display floors for the homepage counters.
+ *
+ * These let the homepage show a minimum figure while the archive is still
+ * filling up. They are a *floor*, not an offset or an override: once the real
+ * number passes the floor the real number is shown and the setting becomes
+ * inert, so it cannot silently drift further from the truth over time.
+ *
+ * Unset (the default, and what the repo ships with) means no floor at all and
+ * the counters show exactly what is in the database. Set them per environment
+ * in the Vercel project settings, not here.
+ *
+ * Only the homepage summary is affected. Per-dataset download counts are never
+ * adjusted — those are what a depositor sees about their own data.
+ */
+function envFloor(name: "STATS_MIN_DATASETS" | "STATS_MIN_DOWNLOADS"): number {
+  const parsed = Number.parseInt(process.env[name] ?? "", 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
 }
 
 export async function getFilterOptions(

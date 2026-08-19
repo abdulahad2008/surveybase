@@ -334,7 +334,7 @@ export default async function DatasetPage({
             {!dataset.is_hosted ? (
               <div className="mt-4 space-y-3">
                 <a
-                  href={dataset.external_url ?? "#"}
+                  href={`/api/datasets/${dataset.slug}/visit`}
                   target="_blank"
                   rel="noreferrer"
                   className="btn btn-primary w-full"
@@ -342,6 +342,9 @@ export default async function DatasetPage({
                   <ExternalLinkIcon size={15} />
                   {t("viewAtSourceButton")}
                 </a>
+                <p className="tnum text-center text-xs font-medium text-faint">
+                  {t("visitCount", { count: nf.format(dataset.download_count) })}
+                </p>
                 <p className="text-xs leading-relaxed text-faint">{t("viewAtSourceNote")}</p>
               </div>
             ) : csvFile ? (

@@ -187,7 +187,8 @@
     "reviewSubmitting": "Сохранение…",
     "reviewErrorAuth": "Войдите, чтобы оставить отзыв.",
     "reviewErrorGeneric": "Что-то пошло не так. Попробуйте снова.",
-    "reviewLoginPrompt": "Войдите, чтобы оставить отзыв."
+    "reviewLoginPrompt": "Войдите, чтобы оставить отзыв.",
+    "visitCount": "{count} переходов к источнику"
   },
   "Moderate": {
     "title": "Очередь модерации",

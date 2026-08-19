@@ -187,7 +187,8 @@
     "reviewSubmitting": "Saving…",
     "reviewErrorAuth": "Log in to leave a review.",
     "reviewErrorGeneric": "Something went wrong. Please try again.",
-    "reviewLoginPrompt": "Log in to leave a review."
+    "reviewLoginPrompt": "Log in to leave a review.",
+    "visitCount": "{count} visits to source"
   },
   "Moderate": {
     "title": "Moderation queue",
