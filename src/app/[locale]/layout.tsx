@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     template: "%s · SurveyBase.uz",
   },
   description:
-    "An open archive of anonymized survey results about Uzbekistan and Central Asia. Browse, explore charts, download, and cite — or give your own survey a second life.",
+    "An open archive of survey results about Uzbekistan and Central Asia. Browse, explore charts, download, and cite — or give your own survey a second life.",
 };
 
 export default async function LocaleLayout({
