@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import { createClient } from "@/lib/supabase/server";
+import { recordDownload } from "@/lib/download-count";
 
 const CONTENT_TYPES: Record<string, string> = {
   csv: "text/csv",
@@ -55,12 +56,7 @@ export async function GET(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  await supabase.from("download_log").insert({
-    dataset_id: dataset.id,
-    user_id: user?.id ?? null,
-    format,
-  });
-  await supabase.rpc("increment_download_count", { p_dataset_id: dataset.id });
+  await recordDownload(supabase, dataset.id, user?.id ?? null, format);
 
   let body: BodyInit;
   if (format === "csv") {

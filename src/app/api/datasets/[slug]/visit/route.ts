@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { recordDownload } from "@/lib/download-count";
 
 /**
  * Outbound click tracking for link-only datasets.
@@ -49,14 +50,7 @@ export async function GET(
 
   // 'link' rather than a file format, so referrals stay distinguishable from
   // real file downloads when reading download_log later.
-  await supabase.from("download_log").insert({
-    dataset_id: dataset.id,
-    user_id: user?.id ?? null,
-    format: "link",
-  });
-
-  // Security-definer RPC; it only touches rows with status = 'published'.
-  await supabase.rpc("increment_download_count", { p_dataset_id: dataset.id });
+  await recordDownload(supabase, dataset.id, user?.id ?? null, "link");
 
   // 302, not 307/308: this is a tracking hop, and it must never be cached.
   return NextResponse.redirect(destination.toString(), {
