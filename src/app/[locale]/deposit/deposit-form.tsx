@@ -233,13 +233,20 @@ export function DepositForm({ locale }: { locale: Locale }) {
             </div>
 
             {preview && (
+              // Finding nothing is not a pass, so the empty case is styled
+              // neutral rather than mint-green. A success colour here told the
+              // depositor their file was clean at exactly the moment the check
+              // had learned nothing about it.
               <div
                 className={`rounded-2xl p-4 text-sm ${
-                  preview.piiHeaders.length === 0 ? "bg-mint-soft" : "bg-sun-soft"
+                  preview.piiHeaders.length === 0 ? "bg-card-soft" : "bg-sun-soft"
                 }`}
               >
                 <p className="flex items-center gap-2 font-bold text-ink">
-                  <ShieldIcon size={16} className={preview.piiHeaders.length === 0 ? "text-mint" : "text-sun"} />
+                  <ShieldIcon
+                    size={16}
+                    className={preview.piiHeaders.length === 0 ? "text-soft" : "text-sun"}
+                  />
                   {t("piiHeading")}
                 </p>
                 {preview.piiHeaders.length === 0 ? (
@@ -256,6 +263,11 @@ export function DepositForm({ locale }: { locale: Locale }) {
                     </ul>
                   </>
                 )}
+                {/* Shown in both branches: the limits apply whether or not
+                    anything was flagged. */}
+                <p className="mt-3 border-t border-line pt-3 text-xs leading-relaxed text-faint">
+                  {t("piiLimits")}
+                </p>
               </div>
             )}
 
