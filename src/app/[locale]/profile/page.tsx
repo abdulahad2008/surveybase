@@ -117,6 +117,15 @@ export default async function ProfilePage({
                     {d.sample_size ? ` · ${d.sample_size.toLocaleString(locale)}` : ""}
                   </p>
                 </div>
+                {/* Only on published rows: a pending dataset cannot have been
+                    downloaded, so a zero there reads as failure rather than as
+                    "not yet available". */}
+                {d.status === "published" && (
+                  <span className="inline-flex items-center gap-1.5 text-sm text-soft">
+                    <DownloadIcon size={15} />
+                    <span className="tnum">{t("statDownloads", { count: d.download_count ?? 0 })}</span>
+                  </span>
+                )}
                 <span className={`chip ${statusChip[d.status] ?? "bg-card-soft text-soft"}`}>
                   {t(`status_${d.status}` as "status_published")}
                 </span>

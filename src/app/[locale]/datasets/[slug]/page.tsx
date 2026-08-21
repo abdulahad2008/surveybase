@@ -7,7 +7,8 @@ import { createClient } from "@/lib/supabase/server";
 import type { ColumnSummary } from "@/lib/csv-analysis";
 import { routing, type Locale } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
-import { SITE_NAME, datasetId, localeAlternates, localeUrl } from "@/lib/site";
+import { SITE_NAME, localeAlternates, localeUrl } from "@/lib/site";
+import { citationYear, fullCitation } from "@/lib/citation";
 import {
   datasetDescription,
   datasetJsonLd,
@@ -169,12 +170,14 @@ export default async function DatasetPage({
     .map((h) => dataset.survey_columns.find((c) => c.question_text === h))
     .filter((c): c is SurveyColumnRow => Boolean(c));
 
-  const citationYear = dataset.fieldwork_start
-    ? new Date(dataset.fieldwork_start).getFullYear()
-    : new Date(dataset.created_at).getFullYear();
-  const citationAuthor = dataset.depositor?.name ?? "SurveyBase.uz contributor";
-  const citationUrl = datasetId(dataset.slug);
-  const citation = `${citationAuthor} (${citationYear}). ${dataset.title} [Data set]. SurveyBase.uz. ${citationUrl}`;
+  const citation = fullCitation(
+    {
+      title: dataset.title,
+      author: dataset.depositor?.name ?? null,
+      year: citationYear(dataset.fieldwork_start, new Date(dataset.created_at)),
+    },
+    dataset.slug,
+  );
 
   const publications = dataset.dataset_publications
     .map((dp) => dp.publications)

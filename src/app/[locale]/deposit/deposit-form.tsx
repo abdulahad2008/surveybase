@@ -5,6 +5,9 @@ import { useTranslations } from "next-intl";
 import { detectPiiColumns } from "@/lib/pii";
 import { inferFieldworkRange } from "@/lib/fieldwork";
 import { ACCEPTED_UPLOAD_EXTENSIONS, parseSpreadsheet } from "@/lib/spreadsheet";
+import { citationWithoutUrl, citationYear } from "@/lib/citation";
+import { splitList } from "@/lib/form-values";
+import { CopyButton } from "@/components/copy-button";
 import { submitDataset, type DepositState } from "./actions";
 import type { Locale } from "@/i18n/routing";
 import {
@@ -12,11 +15,24 @@ import {
   ArrowRightIcon,
   CheckIcon,
   FileTextIcon,
+  QuoteIcon,
   ShieldIcon,
   UploadIcon,
 } from "@/components/icons";
 
 const initialState: DepositState = { error: null };
+
+/** A read-only snapshot of what is about to be submitted, taken when the
+ *  depositor reaches the review step. */
+interface Summary {
+  title: string;
+  topics: string[];
+  license: string;
+  sampleSize: string;
+  fieldworkStart: string;
+  fieldworkEnd: string;
+  citation: string;
+}
 
 interface Preview {
   fileName: string;
@@ -34,12 +50,19 @@ interface Preview {
 const STEPS = ["data", "describe", "publish"] as const;
 type Step = (typeof STEPS)[number];
 
-export function DepositForm({ locale }: { locale: Locale }) {
+export function DepositForm({
+  locale,
+  depositorName,
+}: {
+  locale: Locale;
+  depositorName: string | null;
+}) {
   const t = useTranslations("Deposit");
   const boundAction = submitDataset.bind(null, locale);
   const [state, formAction, pending] = useActionState(boundAction, initialState);
   const [preview, setPreview] = useState<Preview | null>(null);
   const [step, setStep] = useState<Step>("data");
+  const [summary, setSummary] = useState<Summary | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const dataRef = useRef<HTMLDivElement>(null);
   const describeRef = useRef<HTMLDivElement>(null);
@@ -68,6 +91,34 @@ export function DepositForm({ locale }: { locale: Locale }) {
     return true;
   }
 
+  /**
+   * The three steps are all mounted at once behind `hidden`, so the values a
+   * depositor typed in step 2 are sitting in the DOM by the time they reach
+   * step 3. Reading them on the transition is far less invasive than making
+   * nine inputs controlled purely to render a summary of them.
+   */
+  function readSummary(): Summary | null {
+    const form = formRef.current;
+    if (!form) return null;
+    const data = new FormData(form);
+    const str = (name: string) => data.get(name)?.toString().trim() ?? "";
+    const title = str("title");
+    const fieldworkStart = str("fieldwork_start");
+    return {
+      title,
+      topics: splitList(str("topics")),
+      license: str("license"),
+      sampleSize: str("sample_size"),
+      fieldworkStart,
+      fieldworkEnd: str("fieldwork_end"),
+      citation: citationWithoutUrl({
+        title,
+        author: depositorName,
+        year: citationYear(fieldworkStart || null, new Date()),
+      }),
+    };
+  }
+
   function goNext() {
     if (!validateStep(step)) return;
     // SheetJS does not throw on a file that is not really a workbook — it
@@ -77,6 +128,7 @@ export function DepositForm({ locale }: { locale: Locale }) {
     if (step === "data" && preview && preview.rowCount === 0) return;
     const next = STEPS[stepIndex + 1];
     if (next) {
+      if (next === "publish") setSummary(readSummary());
       setStep(next);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -445,6 +497,80 @@ export function DepositForm({ locale }: { locale: Locale }) {
             </Field>
           </div>
 
+          {summary && (
+            <div className="card space-y-5 p-6">
+              <div>
+                <p className="font-display flex items-center gap-2 font-bold text-ink">
+                  <QuoteIcon size={17} className="text-brand" />
+                  {t("reviewCitationTitle")}
+                </p>
+                <p className="hint">{t("reviewCitationHint")}</p>
+              </div>
+
+              <p className="rounded-xl bg-brand-wash p-3.5 font-mono text-xs leading-relaxed break-words text-soft">
+                {summary.citation}
+              </p>
+              {/* The slug carries a random suffix assigned at insert time, so
+                  the permanent link does not exist yet. Saying so beats
+                  printing a guess that would 404. */}
+              <p className="text-xs leading-relaxed text-faint">{t("reviewLinkPending")}</p>
+              <CopyButton
+                text={summary.citation}
+                label={t("copyCitation")}
+                copiedLabel={t("citationCopied")}
+              />
+
+              <dl className="grid gap-x-6 gap-y-3 border-t border-line pt-5 text-sm sm:grid-cols-2">
+                <ReviewRow label={t("reviewTitle")} value={summary.title} />
+                <ReviewRow
+                  label={t("fieldSampleSize")}
+                  value={
+                    summary.sampleSize
+                      ? Number(summary.sampleSize).toLocaleString(locale)
+                      : null
+                  }
+                />
+                <ReviewRow
+                  label={t("reviewFieldwork")}
+                  value={
+                    summary.fieldworkStart && summary.fieldworkEnd
+                      ? `${summary.fieldworkStart} → ${summary.fieldworkEnd}`
+                      : null
+                  }
+                />
+                <ReviewRow label={t("fieldLicense")} value={summary.license} />
+                <ReviewRow
+                  label={t("fieldTopics")}
+                  value={summary.topics.length > 0 ? summary.topics.join(", ") : null}
+                />
+                <ReviewRow
+                  label={t("reviewColumnsKept")}
+                  value={
+                    preview
+                      ? String(preview.headerCount - preview.piiHeaders.length)
+                      : null
+                  }
+                />
+              </dl>
+
+              {preview && preview.piiHeaders.length > 0 && (
+                <div className="border-t border-line pt-5">
+                  <p className="flex items-center gap-2 text-sm font-bold text-ink">
+                    <ShieldIcon size={16} className="text-sun" />
+                    {t("reviewStripped")}
+                  </p>
+                  <ul className="mt-2 flex flex-wrap gap-1.5">
+                    {preview.piiHeaders.map((h) => (
+                      <li key={h} className="chip bg-card-soft font-mono text-xs text-soft">
+                        {h}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="rounded-2xl bg-brand-wash p-5 text-sm leading-relaxed text-soft">
             {t("moderationNote")}
           </div>
@@ -461,6 +587,18 @@ export function DepositForm({ locale }: { locale: Locale }) {
           </div>
         </div>
       </form>
+    </div>
+  );
+}
+
+/** One row of the review summary. An unanswered optional field is shown as a
+ *  dash rather than hidden — a depositor scanning for what they forgot needs
+ *  the gap to be visible. */
+function ReviewRow({ label, value }: { label: string; value: string | null }) {
+  return (
+    <div>
+      <dt className="text-xs font-semibold tracking-wide text-faint uppercase">{label}</dt>
+      <dd className={value ? "mt-0.5 text-ink" : "mt-0.5 text-faint"}>{value || "—"}</dd>
     </div>
   );
 }

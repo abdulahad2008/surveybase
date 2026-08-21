@@ -21,9 +21,18 @@ export default async function DepositPage({
     redirect({ href: "/login", locale });
   }
 
+  // Needed so the review step can show the depositor the citation they will be
+  // credited with. Read here rather than in the form: the name belongs to the
+  // signed-in user, and the client has no business querying profiles for it.
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("name")
+    .eq("id", user!.id)
+    .maybeSingle();
+
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-12 sm:px-6">
-      <DepositForm locale={locale} />
+      <DepositForm locale={locale} depositorName={profile?.name ?? null} />
     </main>
   );
 }
