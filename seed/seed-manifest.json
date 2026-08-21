@@ -1,5 +1,5 @@
 {
-  "_readme": "Seed manifest for SurveyBank.uz Phase 4 — UZBEKISTAN ONLY scope. record_type: 'hosted' = download + run through pipeline + store; 'link_only' = catalog metadata + external_url, no file stored. Verify each license on the source page before importing. CAB fieldwork dates are approximate (biannual 2017-2021) — confirm from each wave's method report.",
+  "_readme": "Seed manifest for SurveyBank.uz Phase 4 — UZBEKISTAN ONLY scope. record_type: 'hosted' = download + run through pipeline + store; 'link_only' = catalog metadata + external_url, no file stored. Verify each license on the source page before importing. CAB fieldwork dates are approximate (biannual 2017-2021) — confirm from each wave's method report. Sources that were evaluated and rejected are recorded in seed/seed-sources.md — read it before adding a source, so dead ends are not re-investigated.",
   "schema": {
     "record_type": "hosted | link_only",
     "title": "string",
@@ -86,40 +86,6 @@
       "formats_available": ["xlsx", "sav", "dta", "pdf"],
       "fieldwork_year": 2021,
       "notes": "Waves 8-9 = 2000 respondents/country (Uzbekistan files). Two dataset entries."
-    },
-    {
-      "record_type": "hosted",
-      "title": "[Harvard Dataverse] Uzbekistan survey datasets (CC0)",
-      "source_name": "Harvard Dataverse",
-      "source_url": "https://dataverse.harvard.edu/dataverse/harvard?q=Uzbekistan",
-      "license": "CC0 (verify per dataset)",
-      "attribution_required": false,
-      "citation": null,
-      "country": "Uzbekistan",
-      "topics": [],
-      "collection_method": "varies",
-      "sample_size": null,
-      "languages": ["en"],
-      "formats_available": ["csv", "tab", "dta"],
-      "fieldwork_year": null,
-      "notes": "Placeholder: query https://dataverse.harvard.edu/api/search?q=Uzbekistan&type=dataset&per_page=50 , filter to CC0 survey datasets about Uzbekistan, expand into individual hosted records. CC0 = fully reusable."
-    },
-    {
-      "record_type": "hosted",
-      "title": "[data.egov.uz] Uzbekistan open survey/poll datasets (verify license)",
-      "source_name": "Open Data Portal of the Republic of Uzbekistan",
-      "source_url": "https://data.egov.uz/eng",
-      "license": "Government open data (verify per dataset)",
-      "attribution_required": true,
-      "citation": null,
-      "country": "Uzbekistan",
-      "topics": [],
-      "collection_method": "varies",
-      "sample_size": null,
-      "languages": ["uz", "ru", "en"],
-      "formats_available": ["csv", "xlsx", "json", "xml"],
-      "fieldwork_year": null,
-      "notes": "Placeholder: pick 2-4 genuine survey/poll datasets (most egov datasets are administrative statistics). Confirm the portal license permits re-hosting."
     },
     {
       "record_type": "link_only",
