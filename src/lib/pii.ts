@@ -27,11 +27,19 @@ const lat = (...stems: string[]) => `\\b(?:${stems.join("|")})`;
 // Safari only shipped it in 16.4, and this module also runs in the browser.
 const cyr = (...stems: string[]) => `(?:^|[^\\u0400-\\u04FF])(?:${stems.join("|")})`;
 
+/**
+ * Google Forms names its automatic first column after the form's interface
+ * language. Kept fully anchored so it cannot swallow a genuine question about
+ * time ("Ish vaqtingiz", "Во сколько вы встаёте").
+ *
+ * Exported because the deposit flow reads the fieldwork date range out of this
+ * column before stripping it. Both uses must agree on which column that is, so
+ * there is exactly one pattern.
+ */
+export const TIMESTAMP_HEADER = /^(?:timestamp|vaqt\s*belgisi|отметка\s*времени)$/i;
+
 const HEADER_PATTERNS: [PiiReason, RegExp][] = [
-  // Google Forms names its automatic first column after the form's interface
-  // language. Kept fully anchored so it cannot swallow a genuine question
-  // about time ("Ish vaqtingiz", "Во сколько вы встаёте").
-  ["timestamp", /^(?:timestamp|vaqt\s*belgisi|отметка\s*времени)$/i],
+  ["timestamp", TIMESTAMP_HEADER],
   ["email", new RegExp(`e[\\s-]?mail|${lat("pochta(?!\\s*indeks)")}|${cyr("почт(?!ов)")}`, "i")],
   [
     "phone",
