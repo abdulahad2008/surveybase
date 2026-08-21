@@ -2,6 +2,7 @@
 
 import Papa from "papaparse";
 import { createClient } from "@/lib/supabase/server";
+import { parseSpreadsheet } from "@/lib/spreadsheet";
 import { detectPiiColumns } from "@/lib/pii";
 import { inferColumnType, computeSummary } from "@/lib/csv-analysis";
 import { slugify, randomSuffix } from "@/lib/slug";
@@ -59,13 +60,18 @@ export async function submitDataset(
 
   const publicationTitle = formData.get("publication_title")?.toString().trim() ?? "";
 
-  const csvText = await file.text();
-  const parsed = Papa.parse<Record<string, string>>(csvText, {
-    header: true,
-    skipEmptyLines: true,
-  });
-  const headers = parsed.meta.fields ?? [];
-  const rows = parsed.data;
+  // Accepts CSV and Excel alike; everything downstream still works in CSV, so
+  // the format a depositor happened to export is not the archive's problem.
+  // Parsed again server-side rather than trusting the browser's preview: this
+  // is the copy that decides what gets stored and what gets stripped.
+  let headers: string[];
+  let rows: Record<string, string>[];
+  try {
+    ({ headers, rows } = await parseSpreadsheet(file));
+  } catch {
+    // A corrupt workbook, or something renamed to .xlsx that never was one.
+    return { error: "errorFile" };
+  }
   if (headers.length === 0 || rows.length === 0) {
     return { error: "errorFile" };
   }

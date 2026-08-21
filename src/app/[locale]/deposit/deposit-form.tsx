@@ -2,8 +2,9 @@
 
 import { useActionState, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
-import Papa from "papaparse";
 import { detectPiiColumns } from "@/lib/pii";
+import { inferFieldworkRange } from "@/lib/fieldwork";
+import { ACCEPTED_UPLOAD_EXTENSIONS, parseSpreadsheet } from "@/lib/spreadsheet";
 import { submitDataset, type DepositState } from "./actions";
 import type { Locale } from "@/i18n/routing";
 import {
@@ -22,6 +23,12 @@ interface Preview {
   headerCount: number;
   rowCount: number;
   piiHeaders: string[];
+  fieldworkStart: string | null;
+  fieldworkEnd: string | null;
+  // Bumped on every parse so the prefilled fields remount and pick up the new
+  // values. Without it, re-uploading a corrected file would leave the previous
+  // file's numbers sitting in the form.
+  parseId: number;
 }
 
 const STEPS = ["data", "describe", "publish"] as const;
@@ -63,6 +70,11 @@ export function DepositForm({ locale }: { locale: Locale }) {
 
   function goNext() {
     if (!validateStep(step)) return;
+    // SheetJS does not throw on a file that is not really a workbook — it
+    // falls back to delimited text and yields headers with no rows. The server
+    // rejects that anyway; catching it here means the depositor hears about it
+    // now rather than after filling in nine more fields.
+    if (step === "data" && preview && preview.rowCount === 0) return;
     const next = STEPS[stepIndex + 1];
     if (next) {
       setStep(next);
@@ -106,21 +118,20 @@ export function DepositForm({ locale }: { locale: Locale }) {
       setPreview(null);
       return;
     }
-    const text = await file.text();
-    const parsed = Papa.parse<Record<string, string>>(text, {
-      header: true,
-      skipEmptyLines: true,
-    });
-    const headers = parsed.meta.fields ?? [];
-    const rows = parsed.data;
+    const { headers, rows } = await parseSpreadsheet(file);
     const columnValues = headers.map((h) => rows.map((r) => r[h] ?? ""));
     const flags = detectPiiColumns(headers, columnValues);
-    setPreview({
+    // Read before the PII layer takes the timestamp column away.
+    const fieldwork = inferFieldworkRange(headers, columnValues);
+    setPreview((prev) => ({
       fileName: file.name,
       headerCount: headers.length,
       rowCount: rows.length,
       piiHeaders: flags.map((f) => f.header),
-    });
+      fieldworkStart: fieldwork?.start ?? null,
+      fieldworkEnd: fieldwork?.end ?? null,
+      parseId: (prev?.parseId ?? 0) + 1,
+    }));
   }
 
   const stepLabels: Record<Step, string> = {
@@ -225,14 +236,20 @@ export function DepositForm({ locale }: { locale: Locale }) {
                 id="csv-upload"
                 name="csv"
                 type="file"
-                accept=".csv,text/csv"
+                accept={ACCEPTED_UPLOAD_EXTENSIONS}
                 required
                 onChange={handleFileChange}
                 className="sr-only"
               />
             </div>
 
-            {preview && (
+            {preview && preview.rowCount === 0 && (
+              <p role="alert" className="rounded-2xl bg-danger-soft px-4 py-3 text-sm font-medium text-danger">
+                {t("errorUnreadable")}
+              </p>
+            )}
+
+            {preview && preview.rowCount > 0 && (
               // Finding nothing is not a pass, so the empty case is styled
               // neutral rather than mint-green. A success colour here told the
               // depositor their file was clean at exactly the moment the check
@@ -320,19 +337,56 @@ export function DepositForm({ locale }: { locale: Locale }) {
                   placeholder={t("methodPlaceholder")}
                 />
               </Field>
-              <Field label={t("fieldSampleSize")} name="sample_size">
-                <input id="f-sample_size" name="sample_size" type="number" min={0} required className="input tnum" />
+              <Field
+                label={t("fieldSampleSize")}
+                name="sample_size"
+                hint={preview ? t("prefilledFromFile") : undefined}
+              >
+                <input
+                  key={`sample_size-${preview?.parseId ?? 0}`}
+                  id="f-sample_size"
+                  name="sample_size"
+                  type="number"
+                  min={0}
+                  required
+                  defaultValue={preview?.rowCount ?? ""}
+                  className="input tnum"
+                />
               </Field>
             </div>
             <Field label={t("fieldTargetPopulation")} name="target_population">
               <input id="f-target_population" name="target_population" required className="input" placeholder={t("populationPlaceholder")} />
             </Field>
             <div className="grid gap-5 sm:grid-cols-2">
-              <Field label={t("fieldFieldworkStart")} name="fieldwork_start">
-                <input id="f-fieldwork_start" name="fieldwork_start" type="date" required className="input" />
+              <Field
+                label={t("fieldFieldworkStart")}
+                name="fieldwork_start"
+                hint={preview?.fieldworkStart ? t("prefilledFromTimestamps") : undefined}
+              >
+                <input
+                  key={`fieldwork_start-${preview?.parseId ?? 0}`}
+                  id="f-fieldwork_start"
+                  name="fieldwork_start"
+                  type="date"
+                  required
+                  defaultValue={preview?.fieldworkStart ?? ""}
+                  className="input"
+                />
               </Field>
-              <Field label={t("fieldFieldworkEnd")} name="fieldwork_end">
-                <input id="f-fieldwork_end" name="fieldwork_end" type="date" required className="input" />
+              <Field
+                label={t("fieldFieldworkEnd")}
+                name="fieldwork_end"
+                hint={preview?.fieldworkEnd ? t("prefilledFromTimestamps") : undefined}
+              >
+                <input
+                  key={`fieldwork_end-${preview?.parseId ?? 0}`}
+                  id="f-fieldwork_end"
+                  name="fieldwork_end"
+                  type="date"
+                  required
+                  defaultValue={preview?.fieldworkEnd ?? ""}
+                  className="input"
+                />
               </Field>
             </div>
             <div className="grid gap-5 sm:grid-cols-2">
