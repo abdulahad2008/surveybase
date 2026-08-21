@@ -1,8 +1,10 @@
 # Google OAuth: the two dashboards, and which URL goes where
 
-Almost every failure of "Continue with Google" is one of two URLs typed into the
-wrong dashboard. They are different URLs, they live in different places, and
-neither is interchangeable with the other.
+Almost every failure of "Continue with Google" is either the Google provider
+left switched off in Supabase, or one of two URLs typed into the wrong
+dashboard. The two URLs are different, they live in different places, and
+neither is interchangeable with the other. All three look similar from the
+browser, so diagnose before you edit — see "Start here" below.
 
 ## The flow, so the URLs make sense
 
@@ -20,6 +22,27 @@ our app  ──4──▶  https://surveybase.uz/uz
 
 Google never learns that surveybase.uz exists. Supabase is the OAuth client;
 our site is downstream of it. That is the whole source of the confusion.
+
+## Start here: ask Supabase what is wrong
+
+Before opening either dashboard, run the first hop yourself. It takes one
+command and it names the failure, which beats reasoning from what the browser
+showed you — the two dashboards produce errors that look alike from the outside.
+
+```
+curl -si "https://<project-ref>.supabase.co/auth/v1/authorize?provider=google\
+&redirect_to=https%3A%2F%2Fsurveybase.uz%2Fauth%2Fcallback%3Flocale%3Duz" | head -20
+```
+
+| Response | Meaning |
+| --- | --- |
+| `400 … "provider is not enabled"` | Google is **off in Supabase**. Nothing in Google Cloud Console can fix this — see "The other dashboard" below. Provider config does **not** survive a project migration, so this is the first thing to check after one. |
+| `302` with a `Location` on `accounts.google.com` | Supabase is configured. Read `redirect_uri` out of that URL — that exact string is what must be registered in Google Cloud Console. |
+| `302` whose `redirect_to` came back as bare `https://surveybase.uz` | Our callback URL failed the Redirect URLs allow-list; GoTrue silently substituted the Site URL. |
+
+Fetching the `Location` URL shows Google's own verdict (`redirect_uri_mismatch`,
+`invalid_client`, "Access blocked", or its ordinary sign-in page) without
+needing a browser session.
 
 ## Fixing `Error 400: redirect_uri_mismatch`
 
@@ -58,8 +81,14 @@ Supabase Dashboard → **Authentication → URL Configuration**:
 
 - **Site URL**: `https://surveybase.uz`
 - **Redirect URLs** must include:
-  - `https://surveybase.uz/auth/callback`
-  - `http://localhost:3000/auth/callback` — local development
+  - `https://surveybase.uz/auth/callback**`
+  - `http://localhost:3000/auth/callback**` — local development
+
+  The `**` matters: `authCallbackUrl()` appends `?locale=uz`, so the entry has
+  to cover a query string. Do not write the query out literally — in Supabase's
+  matching syntax `?` is itself a wildcard for a single character, not a literal
+  question mark, so `…/auth/callback?locale=uz` does not mean what it looks
+  like. `**` matches any trailing sequence and is the honest way to say it.
 
 Supabase Dashboard → **Authentication → Providers → Google**: enabled, with the
 client ID and secret from the same Google credential above.
