@@ -1,10 +1,18 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Papa from "papaparse";
+import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import type { ColumnSummary } from "@/lib/csv-analysis";
-import type { Locale } from "@/i18n/routing";
+import { routing, type Locale } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
+import { SITE_NAME, datasetId, localeAlternates, localeUrl } from "@/lib/site";
+import {
+  datasetDescription,
+  datasetJsonLd,
+  type DescribableDataset,
+} from "@/lib/dataset-jsonld";
 import { topicColor } from "@/lib/topic-colors";
 import { CopyButton } from "@/components/copy-button";
 import {
@@ -61,6 +69,51 @@ interface DatasetRow {
   files: { storage_path: string; format: string }[];
   dataset_publications: { publications: PublicationRow | null }[];
   reviews: ReviewRow[];
+}
+
+// Metadata columns only — this runs as a second query alongside the page's own,
+// so it stays as narrow as possible.
+interface DatasetMetaRow extends DescribableDataset {
+  title: string;
+  status: string;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}): Promise<Metadata> {
+  const { locale: rawLocale, slug } = await params;
+  const locale: Locale = hasLocale(routing.locales, rawLocale) ? rawLocale : routing.defaultLocale;
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("datasets")
+    .select("title, abstract, country, region, topics, sample_size, status")
+    .eq("slug", slug)
+    .maybeSingle();
+
+  const dataset = data as DatasetMetaRow | null;
+  if (!dataset) return {};
+
+  const path = `/datasets/${slug}`;
+  const description = datasetDescription(dataset);
+
+  return {
+    title: dataset.title,
+    description,
+    alternates: { canonical: localeUrl(locale, path), languages: localeAlternates(path) },
+    openGraph: {
+      type: "website",
+      siteName: SITE_NAME,
+      title: dataset.title,
+      description,
+      url: localeUrl(locale, path),
+    },
+    // Drafts, pending deposits and rejections still render — for their depositor
+    // and for moderators — so they have to be kept out of the index explicitly.
+    ...(dataset.status === "published" ? {} : { robots: { index: false, follow: false } }),
+  };
 }
 
 export default async function DatasetPage({
@@ -120,7 +173,7 @@ export default async function DatasetPage({
     ? new Date(dataset.fieldwork_start).getFullYear()
     : new Date(dataset.created_at).getFullYear();
   const citationAuthor = dataset.depositor?.name ?? "SurveyBase.uz contributor";
-  const citationUrl = `https://surveybase.uz/datasets/${dataset.slug}`;
+  const citationUrl = datasetId(dataset.slug);
   const citation = `${citationAuthor} (${citationYear}). ${dataset.title} [Data set]. SurveyBase.uz. ${citationUrl}`;
 
   const publications = dataset.dataset_publications
@@ -138,8 +191,28 @@ export default async function DatasetPage({
           .join("–")
       : null;
 
+  // Only published datasets are advertised as structured data — a draft is not a
+  // dataset anyone can get. Escaping "<" is what keeps a depositor-supplied
+  // title or abstract from closing this script tag: everything in here is
+  // user-submitted text.
+  const jsonLd =
+    dataset.status === "published"
+      ? JSON.stringify(
+          datasetJsonLd(
+            dataset,
+            localeUrl(
+              hasLocale(routing.locales, locale) ? locale : routing.defaultLocale,
+              `/datasets/${dataset.slug}`,
+            ),
+          ),
+        ).replace(/</g, "\\u003c")
+      : null;
+
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
+      {jsonLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
+      )}
       <Link
         href="/datasets"
         className="inline-flex items-center gap-1.5 text-sm font-semibold text-soft transition hover:text-brand"

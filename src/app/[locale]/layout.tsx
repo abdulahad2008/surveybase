@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import { SITE_URL } from "@/lib/site";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { ThemeScript } from "@/components/theme-script";
@@ -10,6 +11,9 @@ import "@fontsource-variable/bricolage-grotesque";
 import "../globals.css";
 
 export const metadata: Metadata = {
+  // Without this, any relative `alternates`/`openGraph` URL a page declares is
+  // dropped from the rendered head rather than resolved.
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "SurveyBase.uz — the open survey archive of Uzbekistan",
     template: "%s · SurveyBase.uz",
