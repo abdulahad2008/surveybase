@@ -1,11 +1,35 @@
 "use client";
 
-import { useActionState } from "react";
+import { Suspense, useActionState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { isAuthErrorKey } from "@/lib/auth-errors";
 import { LogoGlyph } from "@/components/logo";
 import { GoogleIcon } from "@/components/icons";
 import { login, signInWithGoogle } from "../actions";
+
+const ALERT_CLASS =
+  "mt-2 rounded-xl bg-danger-soft px-3 py-2 text-sm font-medium text-danger";
+
+/**
+ * Failures that happen during the OAuth round-trip land back here as a query
+ * param, because the redirect from /auth/callback cannot carry action state.
+ *
+ * Isolated behind its own Suspense boundary: useSearchParams opts the client
+ * tree up to the nearest boundary out of prerendering, and keeping that boundary
+ * tight leaves the rest of the login page in the static shell.
+ */
+function CallbackError() {
+  const t = useTranslations("Auth");
+  const key = useSearchParams().get("authError");
+  if (!isAuthErrorKey(key)) return null;
+  return (
+    <p role="alert" className={ALERT_CLASS}>
+      {t(key)}
+    </p>
+  );
+}
 
 export default function LoginPage() {
   const t = useTranslations("Auth");
@@ -40,10 +64,13 @@ export default function LoginPage() {
             {t("continueWithGoogle")}
           </button>
           {googleState.error && (
-            <p role="alert" className="mt-2 rounded-xl bg-danger-soft px-3 py-2 text-sm font-medium text-danger">
+            <p role="alert" className={ALERT_CLASS}>
               {t(googleState.error)}
             </p>
           )}
+          <Suspense fallback={null}>
+            <CallbackError />
+          </Suspense>
         </form>
 
         <div className="flex items-center gap-3 text-xs font-semibold text-faint">

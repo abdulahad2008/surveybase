@@ -5,14 +5,8 @@ import { redirect } from "@/i18n/navigation";
 import { redirect as redirectExternal } from "next/navigation";
 import { routing, type Locale } from "@/i18n/routing";
 import { headers } from "next/headers";
-
-export type AuthErrorKey =
-  | "errorInvalidCredentials"
-  | "errorEmailNotConfirmed"
-  | "errorUserExists"
-  | "errorWeakPassword"
-  | "errorOAuthUnavailable"
-  | "errorGeneric";
+import { authCallbackUrl } from "@/lib/auth-redirect";
+import type { AuthErrorKey } from "@/lib/auth-errors";
 
 type ActionState = { error: AuthErrorKey | null; needsConfirmation?: boolean };
 
@@ -71,9 +65,7 @@ export async function signup(
     options: {
       // Send the email-confirmation link back to the callback route that
       // exchanges the code for a session — NOT the site root, which drops it.
-      emailRedirectTo: origin
-        ? `${origin}/auth/callback?locale=${locale}`
-        : undefined,
+      emailRedirectTo: authCallbackUrl(locale, origin),
       data: {
         full_name: String(formData.get("name") ?? ""),
         affiliation: String(formData.get("affiliation") ?? ""),
@@ -121,7 +113,7 @@ export async function signInWithGoogle(
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${origin}/auth/callback?locale=${locale}`,
+      redirectTo: authCallbackUrl(locale, origin),
     },
   });
 
