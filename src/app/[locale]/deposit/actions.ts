@@ -3,6 +3,7 @@
 import Papa from "papaparse";
 import { createClient } from "@/lib/supabase/server";
 import { parseSpreadsheet } from "@/lib/spreadsheet";
+import { splitList as splitListValue } from "@/lib/form-values";
 import { detectPiiColumns } from "@/lib/pii";
 import { inferColumnType, computeSummary } from "@/lib/csv-analysis";
 import { slugify, randomSuffix } from "@/lib/slug";
@@ -21,10 +22,7 @@ export interface DepositState {
 }
 
 function splitList(value: FormDataEntryValue | null): string[] {
-  return (value?.toString() ?? "")
-    .split(",")
-    .map((v) => v.trim())
-    .filter((v) => v !== "");
+  return splitListValue(value?.toString() ?? "");
 }
 
 function nullableText(value: FormDataEntryValue | null): string | null {
