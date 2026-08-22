@@ -17,6 +17,8 @@ type Checks = {
   datasetFilesBucket: boolean;
   incrementDownloadCountFn: boolean;
   linkOnlyColumns: boolean;
+  profileColumns: boolean;
+  avatarsBucket: boolean;
 };
 
 export async function GET() {
@@ -29,6 +31,8 @@ export async function GET() {
     datasetFilesBucket: false,
     incrementDownloadCountFn: false,
     linkOnlyColumns: false,
+    profileColumns: false,
+    avatarsBucket: false,
   };
 
   let supabase: ReturnType<typeof createAdminClient>;
@@ -69,10 +73,24 @@ export async function GET() {
     checks.surveyColumnsTable = !error;
   }
 
+  // 0005's profile fields. The profiles table itself predates them, so a
+  // missing column here reads as an ordinary empty result to every caller that
+  // only destructures `data` — which is precisely how this went unnoticed until
+  // a user tried to open their own profile.
+  {
+    const { error } = await supabase.from("profiles").select("bio, avatar_url").limit(1);
+    checks.profileColumns = !error;
+  }
+
   // Storage bucket existence (requires service role — anon can't list buckets).
   {
     const { data, error } = await supabase.storage.getBucket("dataset-files");
     checks.datasetFilesBucket = !error && Boolean(data);
+  }
+
+  {
+    const { data, error } = await supabase.storage.getBucket("avatars");
+    checks.avatarsBucket = !error && Boolean(data);
   }
 
   // increment_download_count callable. A random uuid updates zero rows (the

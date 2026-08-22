@@ -44,11 +44,17 @@ export default async function PublicProfilePage({
   if (!UUID.test(id)) notFound();
 
   const supabase = await createClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("profiles")
     .select(PUBLIC_PROFILE_COLUMNS)
     .eq("id", id)
     .maybeSingle();
+
+  // Same trap as the private page: a query error is indistinguishable from an
+  // unknown id once it reaches notFound(). Worse here, because generateMetadata
+  // selects only `name` and keeps succeeding, so the page serves a correct
+  // <title> around a 404 body and looks half-alive rather than broken.
+  if (error) console.error(`[users/${id}] loading public profile failed: ${error.message}`);
 
   const profile = data as unknown as Profile | null;
   if (!profile) notFound();

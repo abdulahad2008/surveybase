@@ -40,11 +40,18 @@ export default async function ProfilePage({
     redirect({ href: "/login", locale });
   }
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("profiles")
     .select(OWN_PROFILE_COLUMNS)
     .eq("id", user!.id)
     .single();
+
+  // A schema that predates a migration fails here as a query error, not a
+  // missing row, and the redirect below then looks exactly like "no profile".
+  // That cost a fortnight of "the profile page doesn't work" with an empty log,
+  // so the reason goes to the server even though the user still just gets sent
+  // home — there is nothing actionable to show them either way.
+  if (error) console.error(`[profile] loading own profile failed: ${error.message}`);
 
   const profile = data as unknown as Profile | null;
   if (!profile) {
