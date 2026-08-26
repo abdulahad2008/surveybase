@@ -183,6 +183,7 @@
     "noFileYet": "Ushbu ma'lumotlar to‘plami uchun hali fayl yuklanmagan.",
     "downloadCount": "{count} marta yuklab olingan",
     "responses": "{count} ta javob",
+    "moreOptions": "yana {count} ta variant",
     "statMin": "min {value}",
     "statMax": "maks {value}",
     "statMean": "o‘rtacha {value}",

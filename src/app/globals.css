@@ -51,6 +51,21 @@
   --chart-num: #1baf7a;
   --chart-grid: #e1e0d9;
   --chart-axis: #898781;
+  --chart-track: #f0eee8;
+
+  /* Slice palette. Categorical charts colour by option, so these must stay
+     distinguishable from each other, not merely pretty: hues are spread around
+     the wheel rather than run along a ramp, because a ramp reads as an ordering
+     that a set of survey options does not have. Eight is deliberate — past that
+     the donut gives way to bars, which need only one colour. */
+  --slice-1: #5747e0;
+  --slice-2: #2a78d6;
+  --slice-3: #0e97a8;
+  --slice-4: #0f9d6c;
+  --slice-5: #c79000;
+  --slice-6: #e0662e;
+  --slice-7: #d63c6a;
+  --slice-8: #9b51c9;
 
   --radius-card: 1.25rem;
   --shadow-card: 0 1px 2px rgba(25, 23, 36, 0.04), 0 8px 24px -12px rgba(25, 23, 36, 0.1);
@@ -105,6 +120,16 @@
     --chart-num: #199e70;
     --chart-grid: #2c2c34;
     --chart-axis: #898781;
+    --chart-track: rgba(255, 255, 255, 0.05);
+
+    --slice-1: #8b7ff2;
+    --slice-2: #5ba3ee;
+    --slice-3: #35b8c9;
+    --slice-4: #34c78f;
+    --slice-5: #e5b53d;
+    --slice-6: #f0885a;
+    --slice-7: #ec6f95;
+    --slice-8: #bd85e0;
 
     --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
     --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.4), 0 16px 32px -12px rgba(0, 0, 0, 0.6);
@@ -152,6 +177,16 @@
     --chart-num: #199e70;
     --chart-grid: #2c2c34;
     --chart-axis: #898781;
+    --chart-track: rgba(255, 255, 255, 0.05);
+
+    --slice-1: #8b7ff2;
+    --slice-2: #5ba3ee;
+    --slice-3: #35b8c9;
+    --slice-4: #34c78f;
+    --slice-5: #e5b53d;
+    --slice-6: #f0885a;
+    --slice-7: #ec6f95;
+    --slice-8: #bd85e0;
 
     --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
     --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.4), 0 16px 32px -12px rgba(0, 0, 0, 0.6);

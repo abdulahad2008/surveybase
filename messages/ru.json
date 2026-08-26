@@ -183,6 +183,7 @@
     "noFileYet": "Файл для этого набора данных ещё не загружен.",
     "downloadCount": "{count} скачиваний",
     "responses": "{count} ответов",
+    "moreOptions": "ещё {count, plural, one {# вариант} few {# варианта} other {# вариантов}}",
     "statMin": "мин. {value}",
     "statMax": "макс. {value}",
     "statMean": "среднее {value}",
