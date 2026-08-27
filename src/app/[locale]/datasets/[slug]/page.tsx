@@ -15,6 +15,7 @@ import {
   type DescribableDataset,
 } from "@/lib/dataset-jsonld";
 import { topicColor } from "@/lib/topic-colors";
+import { methodLabel, topicLabel } from "@/lib/survey-vocab";
 import { CopyButton } from "@/components/copy-button";
 import {
   ArrowLeftIcon,
@@ -52,6 +53,7 @@ interface DatasetRow {
   region: string | null;
   topics: string[];
   collection_method: string | null;
+  collection_platform: string | null;
   sample_size: number | null;
   target_population: string | null;
   fieldwork_start: string | null;
@@ -142,6 +144,7 @@ export default async function DatasetPage({
   if (!dataset) notFound();
 
   const t = await getTranslations("Dataset");
+  const v = await getTranslations("Vocab");
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -243,7 +246,7 @@ export default async function DatasetPage({
                   className="chip transition hover:scale-105"
                   style={{ background: c.bg, color: c.text }}
                 >
-                  {topic}
+                  {topicLabel(topic, v)}
                 </Link>
               );
             })}
@@ -314,7 +317,15 @@ export default async function DatasetPage({
             <dl className="mt-4 grid grid-cols-1 gap-x-6 gap-y-4 text-sm sm:grid-cols-2">
               <Meta label={t("metadataCountry")} value={[dataset.country, dataset.region].filter(Boolean).join(" · ")} />
               <Meta label={t("metadataTargetPopulation")} value={dataset.target_population} />
-              <Meta label={t("metadataCollectionMethod")} value={dataset.collection_method} />
+              <Meta
+                label={t("metadataCollectionMethod")}
+                value={
+                  dataset.collection_method
+                    ? methodLabel(dataset.collection_method, v)
+                    : null
+                }
+              />
+              <Meta label={t("metadataPlatform")} value={dataset.collection_platform ?? null} />
               <Meta
                 label={t("metadataFieldwork")}
                 value={

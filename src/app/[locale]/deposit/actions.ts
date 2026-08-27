@@ -4,6 +4,7 @@ import Papa from "papaparse";
 import { createClient } from "@/lib/supabase/server";
 import { parseSpreadsheet } from "@/lib/spreadsheet";
 import { splitList as splitListValue } from "@/lib/form-values";
+import { OTHER } from "@/lib/survey-vocab";
 import { detectPiiColumns } from "@/lib/pii";
 import { inferColumnType, computeSummary } from "@/lib/csv-analysis";
 import { slugify, randomSuffix } from "@/lib/slug";
@@ -15,6 +16,7 @@ export type DepositErrorKey =
   | "errorConfirm"
   | "errorFile"
   | "errorAllPii"
+  | "errorMissingFields"
   | "errorGeneric";
 
 export interface DepositState {
@@ -28,6 +30,23 @@ function splitList(value: FormDataEntryValue | null): string[] {
 function nullableText(value: FormDataEntryValue | null): string | null {
   const v = value?.toString().trim() ?? "";
   return v === "" ? null : v;
+}
+
+/**
+ * Reads a field backed by a preset list plus an "Other" escape hatch, and
+ * returns what should actually be stored.
+ *
+ * "Other" is a control for the form, not a value for the archive: storing the
+ * literal string would give the browse page a facet named "Other" collecting
+ * unrelated surveys, which is worse than no answer at all. So the free-text
+ * box replaces the choice rather than annotating it, and an "Other" with an
+ * empty box comes back null.
+ */
+function resolveChoice(formData: FormData, name: string): string | null {
+  const chosen = formData.get(name)?.toString().trim() ?? "";
+  if (chosen === "") return null;
+  if (chosen !== OTHER) return chosen;
+  return nullableText(formData.get(`${name}_other`));
 }
 
 export async function submitDataset(
@@ -51,12 +70,51 @@ export async function submitDataset(
   }
 
   const title = formData.get("title")?.toString().trim() ?? "";
-  if (!title) return { error: "errorGeneric" };
+  const abstract = nullableText(formData.get("abstract"));
+  const country = formData.get("country")?.toString().trim() || "Uzbekistan";
+  const targetPopulation = nullableText(formData.get("target_population"));
+  const fieldworkStart = nullableText(formData.get("fieldwork_start"));
+  const fieldworkEnd = nullableText(formData.get("fieldwork_end"));
+  const collectionMethod = resolveChoice(formData, "collection_method");
+  const collectionPlatform = resolveChoice(formData, "collection_platform");
+  const license = resolveChoice(formData, "license") ?? "CC-BY";
+  const languages = splitList(formData.get("languages"));
+
+  // Every chip and the free-text "Other" box submit under the same name, so
+  // the answer arrives as repeated entries rather than one delimited string.
+  // Each is still split on commas: only the free-text one can contain any, and
+  // a depositor typing "sport, leisure" there means two topics.
+  const topics = [
+    ...new Set(
+      formData.getAll("topics").flatMap((v) => splitListValue(v.toString())),
+    ),
+  ];
 
   const sampleSizeRaw = formData.get("sample_size")?.toString().trim() ?? "";
   const sampleSize = sampleSizeRaw === "" ? null : Number(sampleSizeRaw);
 
-  const publicationTitle = formData.get("publication_title")?.toString().trim() ?? "";
+  // The form marks all of these required, but `required` is a request to a
+  // cooperating browser, not a rule — and this action is a public endpoint
+  // that anything can POST to. Checking here is what actually keeps the
+  // archive's records complete; the attribute only makes the ask visible.
+  const incomplete =
+    !title ||
+    !abstract ||
+    !country ||
+    !collectionMethod ||
+    !targetPopulation ||
+    !fieldworkStart ||
+    !fieldworkEnd ||
+    topics.length === 0 ||
+    languages.length === 0 ||
+    sampleSize === null ||
+    !Number.isFinite(sampleSize) ||
+    sampleSize <= 0;
+
+  if (incomplete) return { error: "errorMissingFields" };
+
+  const publicationTitle =
+    formData.get("publication_title")?.toString().trim() ?? "";
 
   // Accepts CSV and Excel alike; everything downstream still works in CSV, so
   // the format a depositor happened to export is not the archive's problem.
@@ -97,17 +155,18 @@ export async function submitDataset(
       .insert({
         title,
         slug,
-        abstract: nullableText(formData.get("abstract")),
-        country: formData.get("country")?.toString().trim() || "Uzbekistan",
+        abstract,
+        country,
         region: nullableText(formData.get("region")),
-        topics: splitList(formData.get("topics")),
-        collection_method: nullableText(formData.get("collection_method")),
-        sample_size: Number.isFinite(sampleSize) ? sampleSize : null,
-        target_population: nullableText(formData.get("target_population")),
-        fieldwork_start: nullableText(formData.get("fieldwork_start")),
-        fieldwork_end: nullableText(formData.get("fieldwork_end")),
-        languages: splitList(formData.get("languages")),
-        license: formData.get("license")?.toString().trim() || "CC-BY",
+        topics,
+        collection_method: collectionMethod,
+        collection_platform: collectionPlatform,
+        sample_size: sampleSize,
+        target_population: targetPopulation,
+        fieldwork_start: fieldworkStart,
+        fieldwork_end: fieldworkEnd,
+        languages,
+        license,
         questionnaire_text: nullableText(formData.get("questionnaire_text")),
         depositor_id: user.id,
         status: "pending",

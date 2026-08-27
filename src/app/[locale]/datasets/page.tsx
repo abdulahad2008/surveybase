@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { queryDatasets, getFilterOptions, type DatasetFilters } from "@/lib/datasets";
+import { methodLabel, topicLabel } from "@/lib/survey-vocab";
 import { DatasetCard } from "./dataset-card";
 import { ArrowLeftIcon, ArrowRightIcon, SearchIcon } from "@/components/icons";
 
@@ -41,6 +42,7 @@ export default async function DatasetsPage({
   const { locale } = await params;
   const sp = await searchParams;
   const t = await getTranslations("Browse");
+  const v = await getTranslations("Vocab");
   const supabase = await createClient();
 
   const filters: DatasetFilters = {
@@ -124,9 +126,27 @@ export default async function DatasetsPage({
               </div>
             </div>
 
-            <SelectField name="topic" label={t("filterTopic")} value={filters.topic} options={options.topics} allLabel={t("filterAll")} />
-            <SelectField name="method" label={t("filterMethod")} value={filters.method} options={options.methods} allLabel={t("filterAll")} />
-            <SelectField name="language" label={t("filterLanguage")} value={filters.language} options={options.languages} allLabel={t("filterAll")} />
+            <SelectField
+              name="topic"
+              label={t("filterTopic")}
+              value={filters.topic}
+              options={options.topics.map((o) => ({ value: o, label: topicLabel(o, v) }))}
+              allLabel={t("filterAll")}
+            />
+            <SelectField
+              name="method"
+              label={t("filterMethod")}
+              value={filters.method}
+              options={options.methods.map((o) => ({ value: o, label: methodLabel(o, v) }))}
+              allLabel={t("filterAll")}
+            />
+            <SelectField
+              name="language"
+              label={t("filterLanguage")}
+              value={filters.language}
+              options={options.languages.map((o) => ({ value: o, label: o }))}
+              allLabel={t("filterAll")}
+            />
 
             <div className="grid grid-cols-2 gap-3">
               <NumberField name="yearFrom" label={t("filterYearFrom")} value={filters.yearFrom} />
@@ -217,7 +237,10 @@ function SelectField({
   name: string;
   label: string;
   value?: string;
-  options: string[];
+  // Value and label are separate because the stored facet is canonical
+  // English: translating it in place would send a Russian label to a filter
+  // that matches on the English one and return nothing.
+  options: { value: string; label: string }[];
   allLabel: string;
 }) {
   return (
@@ -228,8 +251,8 @@ function SelectField({
       <select id={`filter-${name}`} name={name} defaultValue={value ?? ""} className="input">
         <option value="">{allLabel}</option>
         {options.map((opt) => (
-          <option key={opt} value={opt}>
-            {opt}
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
           </option>
         ))}
       </select>

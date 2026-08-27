@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import type { DatasetSummary } from "@/lib/datasets";
 import { topicColor } from "@/lib/topic-colors";
+import { topicLabel } from "@/lib/survey-vocab";
 import { CalendarIcon, DownloadIcon, GlobeIcon, UsersIcon } from "@/components/icons";
 
 export async function DatasetCard({
@@ -12,6 +13,7 @@ export async function DatasetCard({
   locale?: string;
 }) {
   const t = await getTranslations("Browse");
+  const v = await getTranslations("Vocab");
   const fieldworkYear = dataset.fieldwork_start
     ? new Date(dataset.fieldwork_start).getFullYear()
     : null;
@@ -44,7 +46,7 @@ export async function DatasetCard({
             const c = topicColor(topic);
             return (
               <span key={topic} className="chip" style={{ background: c.bg, color: c.text }}>
-                {topic}
+                {topicLabel(topic, v)}
               </span>
             );
           })}

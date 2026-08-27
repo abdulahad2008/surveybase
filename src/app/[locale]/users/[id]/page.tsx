@@ -13,6 +13,7 @@ import {
   summarizeDatasets,
   type Profile,
 } from "@/lib/profiles";
+import { topicLabel } from "@/lib/survey-vocab";
 import { Avatar } from "@/components/avatar";
 import { DatabaseIcon, DownloadIcon, LinkIcon, MailIcon, UsersIcon } from "@/components/icons";
 
@@ -60,6 +61,7 @@ export default async function PublicProfilePage({
   if (!profile) notFound();
 
   const t = await getTranslations("Profile");
+  const v = await getTranslations("Vocab");
   const datasets = await getProfileDatasets(supabase, id, { publishedOnly: true });
   const stats = summarizeDatasets(datasets);
 
@@ -152,7 +154,7 @@ export default async function PublicProfilePage({
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {d.topics.slice(0, 4).map((topic) => (
                       <span key={topic} className="chip bg-card-soft text-soft">
-                        {topic}
+                        {topicLabel(topic, v)}
                       </span>
                     ))}
                   </div>
