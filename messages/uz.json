@@ -109,12 +109,11 @@
     "languagesHint": "So‘rovnoma tillari, vergul bilan ajratilgan",
     "fieldLicense": "Litsenziya",
     "fieldQuestionnaireText": "So'rovnoma",
-    "publicationSectionTitle": "Bog‘liq nashr (ixtiyoriy)",
-    "publicationHint": "Agar maqola yoki dissertatsiya bu ma'lumotlardan foydalangan bo‘lsa, o‘quvchilar tadqiqotni kuzatishi uchun havola qiling.",
+    "publicationSectionTitle": "Bu ma'lumotlar asosidagi tadqiqotlar",
     "fieldPublicationTitle": "Nashr sarlavhasi",
     "fieldPublicationAuthors": "Mualliflar",
     "fieldPublicationYear": "Yil",
-    "fieldPublicationUrl": "DOI yoki URL",
+    "fieldPublicationUrl": "Nashrga havola",
     "csvLabel": "So‘rovnoma ma'lumotlari (CSV yoki Excel)",
     "csvDropTitle": "CSV yoki Excel faylingizni tanlang",
     "csvHelp": "Faylni to‘g‘ridan-to‘g‘ri Google Forms’dan yuklang — Javoblar → Google Sheets’da ochish → Fayl → Yuklab olish → Microsoft Excel (.xlsx) yoki CSV. Ikkalasi ham ishlaydi.",
@@ -163,7 +162,12 @@
     "licenseOtherPlaceholder": "Shartlaringizni tavsiflang",
     "questionnaireHint": "Savollarni qanday so'ragan bo'lsangiz, xuddi shu tarzda, javob variantlari bilan birga joylashtiring. \"q7_trust\" kabi ustun nomlari o'z-o'zidan hech narsa anglatmaydi — aynan shu boshqa odamga ma'lumotlaringizni o'qish imkonini beradi. Savol qaysi tilda berilganini ham faqat shu yerdan bilish mumkin.",
     "questionnairePlaceholder": "1. Yoshingiz nechada? ___\n2. Mahalliy hokimiyatga ishonasizmi?\n   1 To'liq ishonaman   2 Qisman   3 Unchalik emas   4 Umuman yo'q",
-    "errorMissingFields": "Ba'zi majburiy javoblar to'ldirilmagan. Orqaga qaytib, * bilan belgilangan har bir maydonni to'ldiring."
+    "errorMissingFields": "Ba'zi majburiy javoblar to'ldirilmagan. Orqaga qaytib, * bilan belgilangan har bir maydonni to'ldiring.",
+    "publicationQuestion": "Agar maqola, dissertatsiya yoki hisobot bu ma'lumotlardan foydalangan bo‘lsa, o‘quvchilar tadqiqotni kuzatishi uchun havola qiling.",
+    "publicationYes": "Ha, nashr etilgan tadqiqotda foydalanilgan",
+    "publicationNo": "Hali yo‘q",
+    "publicationUrlHint": "DOI, jurnal sahifasi, dissertatsiya yozuvi, preprint yoki repozitoriy yozuvi — eng uzoq saqlanadigan havolani tanlang.",
+    "errorPublicationIncomplete": "Siz bu ma'lumotlar nashr etilgan tadqiqotda ishlatilganini bildirdingiz, shuning uchun nashr nomi ham, havola ham kerak. Orqaga qaytib ularni kiriting yoki javobni «Hali yo‘q»ga o‘zgartiring."
   },
   "Dataset": {
     "backToBrowse": "Barcha to‘plamlar",

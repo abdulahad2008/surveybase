@@ -17,6 +17,7 @@ export type DepositErrorKey =
   | "errorFile"
   | "errorAllPii"
   | "errorMissingFields"
+  | "errorPublicationIncomplete"
   | "errorGeneric";
 
 export interface DepositState {
@@ -113,8 +114,22 @@ export async function submitDataset(
 
   if (incomplete) return { error: "errorMissingFields" };
 
+  // The link is the whole reason for asking, and `publications.title` is NOT
+  // NULL, so an answer of "yes" missing either one cannot be stored at all.
+  // Checked here beside the other required fields rather than down at the
+  // insert, so a missing link cannot leave a dataset already created and its
+  // publication quietly discarded — which is what the old `if (publicationTitle)`
+  // gate did to anyone who pasted a DOI and skipped the title.
+  const hasPublication =
+    formData.get("has_publication")?.toString() === "yes";
   const publicationTitle =
     formData.get("publication_title")?.toString().trim() ?? "";
+  const publicationUrl =
+    formData.get("publication_url")?.toString().trim() ?? "";
+
+  if (hasPublication && (!publicationTitle || !publicationUrl)) {
+    return { error: "errorPublicationIncomplete" };
+  }
 
   // Accepts CSV and Excel alike; everything downstream still works in CSV, so
   // the format a depositor happened to export is not the archive's problem.
@@ -182,7 +197,7 @@ export async function submitDataset(
     return { error: "errorGeneric" };
   }
 
-  if (publicationTitle) {
+  if (hasPublication) {
     const { data: publication } = await supabase
       .from("publications")
       .insert({
@@ -192,7 +207,7 @@ export async function submitDataset(
           const y = formData.get("publication_year")?.toString().trim();
           return y ? Number(y) : null;
         })(),
-        doi_or_url: nullableText(formData.get("publication_url")),
+        doi_or_url: publicationUrl,
       })
       .select("id")
       .single();

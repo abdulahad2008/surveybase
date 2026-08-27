@@ -13,7 +13,12 @@ import { splitList } from "@/lib/form-values";
 import { OTHER } from "@/lib/survey-vocab";
 import { CopyButton } from "@/components/copy-button";
 import { submitDataset, type DepositState } from "./actions";
-import { LicensePicker, MethodPicker, TopicPicker } from "./option-fields";
+import {
+  LicensePicker,
+  MethodPicker,
+  PublicationPicker,
+  TopicPicker,
+} from "./option-fields";
 import type { Locale } from "@/i18n/routing";
 import {
   ArrowLeftIcon,
@@ -574,56 +579,57 @@ export function DepositForm({
                 <FileTextIcon size={17} className="text-brand" />
                 {t("publicationSectionTitle")}
               </p>
-              <p className="hint">{t("publicationHint")}</p>
+              <p className="hint">{t("publicationQuestion")}</p>
             </div>
-            <Field
-              label={t("fieldPublicationTitle")}
-              name="publication_title"
-              optional
-            >
-              <input
-                id="f-publication_title"
-                name="publication_title"
-                className="input"
-              />
-            </Field>
-            <div className="grid gap-5 sm:grid-cols-2">
-              <Field
-                label={t("fieldPublicationAuthors")}
-                name="publication_authors"
-                optional
-              >
+            <PublicationPicker>
+              <Field label={t("fieldPublicationTitle")} name="publication_title">
                 <input
-                  id="f-publication_authors"
-                  name="publication_authors"
+                  id="f-publication_title"
+                  name="publication_title"
+                  required
+                  autoFocus
                   className="input"
                 />
               </Field>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <Field
+                  label={t("fieldPublicationAuthors")}
+                  name="publication_authors"
+                  optional
+                >
+                  <input
+                    id="f-publication_authors"
+                    name="publication_authors"
+                    className="input"
+                  />
+                </Field>
+                <Field
+                  label={t("fieldPublicationYear")}
+                  name="publication_year"
+                  optional
+                >
+                  <input
+                    id="f-publication_year"
+                    name="publication_year"
+                    type="number"
+                    className="input tnum"
+                  />
+                </Field>
+              </div>
               <Field
-                label={t("fieldPublicationYear")}
-                name="publication_year"
-                optional
+                label={t("fieldPublicationUrl")}
+                name="publication_url"
+                hint={t("publicationUrlHint")}
               >
                 <input
-                  id="f-publication_year"
-                  name="publication_year"
-                  type="number"
-                  className="input tnum"
+                  id="f-publication_url"
+                  name="publication_url"
+                  required
+                  className="input"
+                  placeholder="https://doi.org/…"
                 />
               </Field>
-            </div>
-            <Field
-              label={t("fieldPublicationUrl")}
-              name="publication_url"
-              optional
-            >
-              <input
-                id="f-publication_url"
-                name="publication_url"
-                className="input"
-                placeholder="https://doi.org/…"
-              />
-            </Field>
+            </PublicationPicker>
           </div>
 
           {summary && (

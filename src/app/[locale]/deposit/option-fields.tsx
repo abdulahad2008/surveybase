@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import {
   COLLECTION_METHODS,
@@ -237,6 +237,64 @@ export function LicensePicker() {
           className="input"
           placeholder={t("licenseOtherPlaceholder")}
         />
+      )}
+    </div>
+  );
+}
+
+
+/**
+ * Wraps the publication fields in the question they answer.
+ *
+ * They used to sit open on the page as four optional boxes, which asks nothing
+ * of a depositor who did publish and explains nothing to one who did not.
+ *
+ * Neither option is preselected on purpose. Defaulting to "Not yet" would
+ * recreate the very thing this replaces — a section that already looks
+ * answered is a section you scroll past — and it is the depositor who
+ * published, the case worth catching, who would be scrolling.
+ *
+ * The fields are unmounted rather than hidden while the answer is "Not yet",
+ * so their `required` attributes leave with them and nothing they hold reaches
+ * the submitted FormData.
+ */
+export function PublicationPicker({ children }: { children: ReactNode }) {
+  const t = useTranslations("Deposit");
+  const [published, setPublished] = useState<boolean | null>(null);
+
+  const options = [
+    { value: "yes", published: true, label: t("publicationYes") },
+    { value: "no", published: false, label: t("publicationNo") },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        {options.map((o) => (
+          <label
+            key={o.value}
+            className={`flex cursor-pointer items-center gap-3 rounded-2xl border p-3.5 transition ${
+              published === o.published
+                ? "border-brand bg-brand-wash"
+                : "border-line hover:border-brand"
+            }`}
+          >
+            <input
+              type="radio"
+              name="has_publication"
+              value={o.value}
+              required
+              checked={published === o.published}
+              onChange={() => setPublished(o.published)}
+              className="h-4 w-4 shrink-0 accent-[var(--brand)]"
+            />
+            <span className="text-sm font-semibold text-ink">{o.label}</span>
+          </label>
+        ))}
+      </div>
+
+      {published && (
+        <div className="space-y-5 rounded-2xl bg-card-soft p-4">{children}</div>
       )}
     </div>
   );
