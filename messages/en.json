@@ -183,6 +183,7 @@
     "noFileYet": "No file has been uploaded for this dataset yet.",
     "downloadCount": "{count} downloads",
     "responses": "{count} responses",
+    "moreOptions": "{count, plural, one {+# more option} other {+# more options}}",
     "statMin": "min {value}",
     "statMax": "max {value}",
     "statMean": "mean {value}",
