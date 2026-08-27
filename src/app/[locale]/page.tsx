@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { queryDatasets, getArchiveStats, getFilterOptions } from "@/lib/datasets";
 import { DatasetCard } from "./datasets/dataset-card";
 import { topicColor } from "@/lib/topic-colors";
+import { topicLabel } from "@/lib/survey-vocab";
 import {
   ArrowRightIcon,
   ChartIcon,
@@ -20,6 +21,7 @@ import {
 export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const t = await getTranslations("Home");
+  const v = await getTranslations("Vocab");
   const supabase = await createClient();
 
   const [{ datasets: newest }, { datasets: mostDownloaded }, stats, options] = await Promise.all([
@@ -91,7 +93,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
                       className="chip transition hover:scale-105"
                       style={{ background: c.bg, color: c.text }}
                     >
-                      {topic}
+                      {topicLabel(topic, v)}
                     </Link>
                   );
                 })}

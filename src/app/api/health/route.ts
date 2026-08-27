@@ -19,6 +19,7 @@ type Checks = {
   linkOnlyColumns: boolean;
   profileColumns: boolean;
   avatarsBucket: boolean;
+  collectionPlatformColumn: boolean;
 };
 
 export async function GET() {
@@ -33,6 +34,7 @@ export async function GET() {
     linkOnlyColumns: false,
     profileColumns: false,
     avatarsBucket: false,
+    collectionPlatformColumn: false,
   };
 
   let supabase: ReturnType<typeof createAdminClient>;
@@ -41,14 +43,21 @@ export async function GET() {
     checks.envPresent = true;
   } catch (error) {
     return NextResponse.json(
-      { ok: false, checks, error: error instanceof Error ? error.message : "env error" },
+      {
+        ok: false,
+        checks,
+        error: error instanceof Error ? error.message : "env error",
+      },
       { status: 503 },
     );
   }
 
   // datasets table + reachability (also exercises the 0004 link-only columns).
   {
-    const { error } = await supabase.from("datasets").select("id, is_hosted, external_url").limit(1);
+    const { error } = await supabase
+      .from("datasets")
+      .select("id, is_hosted, external_url")
+      .limit(1);
     if (!error) {
       checks.supabaseReachable = true;
       checks.datasetsTable = true;
@@ -63,13 +72,28 @@ export async function GET() {
     }
   }
 
+  // 0006. The deposit action writes this column on every submission, so a
+  // database without it does not degrade — it rejects the deposit outright,
+  // and the depositor is told only that something went wrong. Worth a check of
+  // its own rather than hiding inside datasetsTable.
+  {
+    const { error } = await supabase
+      .from("datasets")
+      .select("collection_platform")
+      .limit(1);
+    checks.collectionPlatformColumn = !error;
+  }
+
   {
     const { error } = await supabase.from("files").select("id").limit(1);
     checks.filesTable = !error;
   }
 
   {
-    const { error } = await supabase.from("survey_columns").select("id").limit(1);
+    const { error } = await supabase
+      .from("survey_columns")
+      .select("id")
+      .limit(1);
     checks.surveyColumnsTable = !error;
   }
 
@@ -78,7 +102,10 @@ export async function GET() {
   // only destructures `data` — which is precisely how this went unnoticed until
   // a user tried to open their own profile.
   {
-    const { error } = await supabase.from("profiles").select("bio, avatar_url").limit(1);
+    const { error } = await supabase
+      .from("profiles")
+      .select("bio, avatar_url")
+      .limit(1);
     checks.profileColumns = !error;
   }
 
