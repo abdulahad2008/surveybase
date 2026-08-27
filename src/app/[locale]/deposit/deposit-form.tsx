@@ -4,11 +4,16 @@ import { useActionState, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { detectPiiColumns } from "@/lib/pii";
 import { inferFieldworkRange } from "@/lib/fieldwork";
-import { ACCEPTED_UPLOAD_EXTENSIONS, parseSpreadsheet } from "@/lib/spreadsheet";
+import {
+  ACCEPTED_UPLOAD_EXTENSIONS,
+  parseSpreadsheet,
+} from "@/lib/spreadsheet";
 import { citationWithoutUrl, citationYear } from "@/lib/citation";
 import { splitList } from "@/lib/form-values";
+import { OTHER } from "@/lib/survey-vocab";
 import { CopyButton } from "@/components/copy-button";
 import { submitDataset, type DepositState } from "./actions";
+import { LicensePicker, MethodPicker, TopicPicker } from "./option-fields";
 import type { Locale } from "@/i18n/routing";
 import {
   ArrowLeftIcon,
@@ -59,7 +64,10 @@ export function DepositForm({
 }) {
   const t = useTranslations("Deposit");
   const boundAction = submitDataset.bind(null, locale);
-  const [state, formAction, pending] = useActionState(boundAction, initialState);
+  const [state, formAction, pending] = useActionState(
+    boundAction,
+    initialState,
+  );
   const [preview, setPreview] = useState<Preview | null>(null);
   const [step, setStep] = useState<Step>("data");
   const [summary, setSummary] = useState<Summary | null>(null);
@@ -104,10 +112,15 @@ export function DepositForm({
     const str = (name: string) => data.get(name)?.toString().trim() ?? "";
     const title = str("title");
     const fieldworkStart = str("fieldwork_start");
+    // Mirrors the server exactly: every chip and the free-text box submit
+    // under `topics`, and "Other" replaces the license rather than annotating
+    // it. A review step that split these differently from the code that
+    // stores them would be previewing something that is not going to happen.
+    const license = str("license");
     return {
       title,
-      topics: splitList(str("topics")),
-      license: str("license"),
+      topics: data.getAll("topics").flatMap((v) => splitList(v.toString())),
+      license: license === OTHER ? str("license_other") : license,
       sampleSize: str("sample_size"),
       fieldworkStart,
       fieldworkEnd: str("fieldwork_end"),
@@ -148,7 +161,9 @@ export function DepositForm({
     for (const s of STEPS) {
       const container = stepContainer(s);
       if (!container) continue;
-      const fields = container.querySelectorAll<HTMLInputElement>("input, select, textarea");
+      const fields = container.querySelectorAll<HTMLInputElement>(
+        "input, select, textarea",
+      );
       for (const field of fields) {
         if (!field.checkValidity()) {
           if (s !== step) {
@@ -198,7 +213,9 @@ export function DepositForm({
         <h1 className="font-display text-3xl font-extrabold tracking-tight text-ink">
           {t("title")}
         </h1>
-        <p className="mx-auto max-w-xl text-sm leading-relaxed text-soft">{t("intro")}</p>
+        <p className="mx-auto max-w-xl text-sm leading-relaxed text-soft">
+          {t("intro")}
+        </p>
       </header>
 
       {/* stepper */}
@@ -268,19 +285,27 @@ export function DepositForm({
                 </span>
                 {preview ? (
                   <>
-                    <span className="text-sm font-bold text-ink">{preview.fileName}</span>
+                    <span className="text-sm font-bold text-ink">
+                      {preview.fileName}
+                    </span>
                     <span className="tnum text-xs text-soft">
                       {t("previewCounts", {
                         columns: preview.headerCount,
                         rows: preview.rowCount,
                       })}
                     </span>
-                    <span className="text-xs font-semibold text-brand">{t("csvReplace")}</span>
+                    <span className="text-xs font-semibold text-brand">
+                      {t("csvReplace")}
+                    </span>
                   </>
                 ) : (
                   <>
-                    <span className="text-sm font-bold text-ink">{t("csvDropTitle")}</span>
-                    <span className="max-w-sm text-xs leading-relaxed text-faint">{t("csvHelp")}</span>
+                    <span className="text-sm font-bold text-ink">
+                      {t("csvDropTitle")}
+                    </span>
+                    <span className="max-w-sm text-xs leading-relaxed text-faint">
+                      {t("csvHelp")}
+                    </span>
                   </>
                 )}
               </label>
@@ -296,7 +321,10 @@ export function DepositForm({
             </div>
 
             {preview && preview.rowCount === 0 && (
-              <p role="alert" className="rounded-2xl bg-danger-soft px-4 py-3 text-sm font-medium text-danger">
+              <p
+                role="alert"
+                className="rounded-2xl bg-danger-soft px-4 py-3 text-sm font-medium text-danger"
+              >
                 {t("errorUnreadable")}
               </p>
             )}
@@ -308,13 +336,17 @@ export function DepositForm({
               // had learned nothing about it.
               <div
                 className={`rounded-2xl p-4 text-sm ${
-                  preview.piiHeaders.length === 0 ? "bg-card-soft" : "bg-sun-soft"
+                  preview.piiHeaders.length === 0
+                    ? "bg-card-soft"
+                    : "bg-sun-soft"
                 }`}
               >
                 <p className="flex items-center gap-2 font-bold text-ink">
                   <ShieldIcon
                     size={16}
-                    className={preview.piiHeaders.length === 0 ? "text-soft" : "text-sun"}
+                    className={
+                      preview.piiHeaders.length === 0 ? "text-soft" : "text-sun"
+                    }
                   />
                   {t("piiHeading")}
                 </p>
@@ -325,7 +357,10 @@ export function DepositForm({
                     <p className="mt-1.5 text-soft">{t("piiWillRemove")}</p>
                     <ul className="mt-2 flex flex-wrap gap-1.5">
                       {preview.piiHeaders.map((h) => (
-                        <li key={h} className="chip bg-card font-mono text-xs text-ink">
+                        <li
+                          key={h}
+                          className="chip bg-card font-mono text-xs text-ink"
+                        >
                           {h}
                         </li>
                       ))}
@@ -347,7 +382,9 @@ export function DepositForm({
                 required
                 className="mt-0.5 h-4 w-4 accent-[var(--brand)]"
               />
-              <span className="leading-relaxed text-soft">{t("piiConfirm")}</span>
+              <span className="leading-relaxed text-soft">
+                {t("piiConfirm")}
+              </span>
             </label>
           </div>
 
@@ -360,34 +397,59 @@ export function DepositForm({
         </div>
 
         {/* ---------------- step 2: describe ---------------- */}
-        <div ref={describeRef} hidden={step !== "describe"} className="space-y-5">
+        <div
+          ref={describeRef}
+          hidden={step !== "describe"}
+          className="space-y-5"
+        >
           <div className="card space-y-5 p-6">
             <Field label={t("fieldTitle")} name="title">
-              <input id="f-title" name="title" required className="input" placeholder={t("titlePlaceholder")} />
+              <input
+                id="f-title"
+                name="title"
+                required
+                className="input"
+                placeholder={t("titlePlaceholder")}
+              />
             </Field>
             <Field label={t("fieldAbstract")} name="abstract">
-              <textarea id="f-abstract" name="abstract" required rows={3} className="input" placeholder={t("abstractPlaceholder")} />
+              <textarea
+                id="f-abstract"
+                name="abstract"
+                required
+                rows={3}
+                className="input"
+                placeholder={t("abstractPlaceholder")}
+              />
             </Field>
-            <Field label={t("fieldTopics")} name="topics" hint={t("topicsHint")}>
-              <input id="f-topics" name="topics" required className="input" placeholder={t("topicsPlaceholder")} />
+            <Field
+              label={t("fieldTopics")}
+              name="topics"
+              group
+              hint={t("topicsHint")}
+            >
+              <TopicPicker />
             </Field>
             <div className="grid gap-5 sm:grid-cols-2">
               <Field label={t("fieldCountry")} name="country">
-                <input id="f-country" name="country" required defaultValue="Uzbekistan" className="input" />
+                <input
+                  id="f-country"
+                  name="country"
+                  required
+                  defaultValue="Uzbekistan"
+                  className="input"
+                />
               </Field>
-              <Field label={t("fieldRegion")} name="region">
+              <Field label={t("fieldRegion")} name="region" optional>
                 <input id="f-region" name="region" className="input" />
               </Field>
             </div>
             <div className="grid gap-5 sm:grid-cols-2">
-              <Field label={t("fieldCollectionMethod")} name="collection_method">
-                <input
-                  id="f-collection_method"
-                  name="collection_method"
-                  required
-                  className="input"
-                  placeholder={t("methodPlaceholder")}
-                />
+              <Field
+                label={t("fieldCollectionMethod")}
+                name="collection_method"
+              >
+                <MethodPicker />
               </Field>
               <Field
                 label={t("fieldSampleSize")}
@@ -407,13 +469,23 @@ export function DepositForm({
               </Field>
             </div>
             <Field label={t("fieldTargetPopulation")} name="target_population">
-              <input id="f-target_population" name="target_population" required className="input" placeholder={t("populationPlaceholder")} />
+              <input
+                id="f-target_population"
+                name="target_population"
+                required
+                className="input"
+                placeholder={t("populationPlaceholder")}
+              />
             </Field>
             <div className="grid gap-5 sm:grid-cols-2">
               <Field
                 label={t("fieldFieldworkStart")}
                 name="fieldwork_start"
-                hint={preview?.fieldworkStart ? t("prefilledFromTimestamps") : undefined}
+                hint={
+                  preview?.fieldworkStart
+                    ? t("prefilledFromTimestamps")
+                    : undefined
+                }
               >
                 <input
                   key={`fieldwork_start-${preview?.parseId ?? 0}`}
@@ -428,7 +500,11 @@ export function DepositForm({
               <Field
                 label={t("fieldFieldworkEnd")}
                 name="fieldwork_end"
-                hint={preview?.fieldworkEnd ? t("prefilledFromTimestamps") : undefined}
+                hint={
+                  preview?.fieldworkEnd
+                    ? t("prefilledFromTimestamps")
+                    : undefined
+                }
               >
                 <input
                   key={`fieldwork_end-${preview?.parseId ?? 0}`}
@@ -441,21 +517,40 @@ export function DepositForm({
                 />
               </Field>
             </div>
-            <div className="grid gap-5 sm:grid-cols-2">
-              <Field label={t("fieldLanguages")} name="languages" hint={t("languagesHint")}>
-                <input id="f-languages" name="languages" required className="input" placeholder="Uzbek, Russian" />
-              </Field>
-              <Field label={t("fieldLicense")} name="license">
-                <select id="f-license" name="license" defaultValue="CC-BY" className="input">
-                  <option value="CC-BY">CC-BY</option>
-                  <option value="CC-BY-SA">CC-BY-SA</option>
-                  <option value="CC0">CC0</option>
-                  <option value="Other">{t("licenseOther")}</option>
-                </select>
-              </Field>
-            </div>
-            <Field label={t("fieldQuestionnaireText")} name="questionnaire_text">
-              <textarea id="f-questionnaire_text" name="questionnaire_text" rows={4} className="input" />
+            <Field
+              label={t("fieldLanguages")}
+              name="languages"
+              hint={t("languagesHint")}
+            >
+              <input
+                id="f-languages"
+                name="languages"
+                required
+                className="input"
+                placeholder="Uzbek, Russian"
+              />
+            </Field>
+            <Field
+              label={t("fieldLicense")}
+              name="license"
+              group
+              hint={t("licenseHint")}
+            >
+              <LicensePicker />
+            </Field>
+            <Field
+              label={t("fieldQuestionnaireText")}
+              name="questionnaire_text"
+              optional
+              hint={t("questionnaireHint")}
+            >
+              <textarea
+                id="f-questionnaire_text"
+                name="questionnaire_text"
+                rows={6}
+                className="input"
+                placeholder={t("questionnairePlaceholder")}
+              />
             </Field>
           </div>
 
@@ -481,19 +576,53 @@ export function DepositForm({
               </p>
               <p className="hint">{t("publicationHint")}</p>
             </div>
-            <Field label={t("fieldPublicationTitle")} name="publication_title">
-              <input id="f-publication_title" name="publication_title" className="input" />
+            <Field
+              label={t("fieldPublicationTitle")}
+              name="publication_title"
+              optional
+            >
+              <input
+                id="f-publication_title"
+                name="publication_title"
+                className="input"
+              />
             </Field>
             <div className="grid gap-5 sm:grid-cols-2">
-              <Field label={t("fieldPublicationAuthors")} name="publication_authors">
-                <input id="f-publication_authors" name="publication_authors" className="input" />
+              <Field
+                label={t("fieldPublicationAuthors")}
+                name="publication_authors"
+                optional
+              >
+                <input
+                  id="f-publication_authors"
+                  name="publication_authors"
+                  className="input"
+                />
               </Field>
-              <Field label={t("fieldPublicationYear")} name="publication_year">
-                <input id="f-publication_year" name="publication_year" type="number" className="input tnum" />
+              <Field
+                label={t("fieldPublicationYear")}
+                name="publication_year"
+                optional
+              >
+                <input
+                  id="f-publication_year"
+                  name="publication_year"
+                  type="number"
+                  className="input tnum"
+                />
               </Field>
             </div>
-            <Field label={t("fieldPublicationUrl")} name="publication_url">
-              <input id="f-publication_url" name="publication_url" className="input" placeholder="https://doi.org/…" />
+            <Field
+              label={t("fieldPublicationUrl")}
+              name="publication_url"
+              optional
+            >
+              <input
+                id="f-publication_url"
+                name="publication_url"
+                className="input"
+                placeholder="https://doi.org/…"
+              />
             </Field>
           </div>
 
@@ -513,7 +642,9 @@ export function DepositForm({
               {/* The slug carries a random suffix assigned at insert time, so
                   the permanent link does not exist yet. Saying so beats
                   printing a guess that would 404. */}
-              <p className="text-xs leading-relaxed text-faint">{t("reviewLinkPending")}</p>
+              <p className="text-xs leading-relaxed text-faint">
+                {t("reviewLinkPending")}
+              </p>
               <CopyButton
                 text={summary.citation}
                 label={t("copyCitation")}
@@ -541,7 +672,9 @@ export function DepositForm({
                 <ReviewRow label={t("fieldLicense")} value={summary.license} />
                 <ReviewRow
                   label={t("fieldTopics")}
-                  value={summary.topics.length > 0 ? summary.topics.join(", ") : null}
+                  value={
+                    summary.topics.length > 0 ? summary.topics.join(", ") : null
+                  }
                 />
                 <ReviewRow
                   label={t("reviewColumnsKept")}
@@ -561,7 +694,10 @@ export function DepositForm({
                   </p>
                   <ul className="mt-2 flex flex-wrap gap-1.5">
                     {preview.piiHeaders.map((h) => (
-                      <li key={h} className="chip bg-card-soft font-mono text-xs text-soft">
+                      <li
+                        key={h}
+                        className="chip bg-card-soft font-mono text-xs text-soft"
+                      >
                         {h}
                       </li>
                     ))}
@@ -580,7 +716,12 @@ export function DepositForm({
               <ArrowLeftIcon size={15} />
               {t("prevStep")}
             </button>
-            <button type="button" onClick={handleFinalSubmit} disabled={pending} className="btn btn-coral">
+            <button
+              type="button"
+              onClick={handleFinalSubmit}
+              disabled={pending}
+              className="btn btn-coral"
+            >
               {pending ? t("submitting") : t("submit")}
               {!pending && <ArrowRightIcon size={15} />}
             </button>
@@ -597,28 +738,66 @@ export function DepositForm({
 function ReviewRow({ label, value }: { label: string; value: string | null }) {
   return (
     <div>
-      <dt className="text-xs font-semibold tracking-wide text-faint uppercase">{label}</dt>
-      <dd className={value ? "mt-0.5 text-ink" : "mt-0.5 text-faint"}>{value || "—"}</dd>
+      <dt className="text-xs font-semibold tracking-wide text-faint uppercase">
+        {label}
+      </dt>
+      <dd className={value ? "mt-0.5 text-ink" : "mt-0.5 text-faint"}>
+        {value || "—"}
+      </dd>
     </div>
   );
 }
 
+/**
+ * Marks every field as required or optional, rather than only rejecting the
+ * empty ones at submit time. Most of these answers were already mandatory, but
+ * nothing said so until the browser refused to continue — which reads as the
+ * form being broken rather than as an answer being missing.
+ *
+ * `group` is for fields whose control is a set of chips or radios: there is no
+ * single element for `htmlFor` to point at, and a label pointing nowhere is
+ * worse for a screen reader than a plain caption.
+ */
 function Field({
   label,
   name,
   hint,
+  optional,
+  group,
   children,
 }: {
   label: string;
   name: string;
   hint?: string;
+  optional?: boolean;
+  group?: boolean;
   children: ReactNode;
 }) {
+  const t = useTranslations("Deposit");
+  const caption = (
+    <>
+      {label}
+      {optional ? (
+        <span className="ml-1.5 text-xs font-normal text-faint">
+          {t("optionalTag")}
+        </span>
+      ) : (
+        <span aria-hidden className="ml-1 text-danger">
+          *
+        </span>
+      )}
+    </>
+  );
+
   return (
     <div>
-      <label className="label" htmlFor={`f-${name}`}>
-        {label}
-      </label>
+      {group ? (
+        <span className="label">{caption}</span>
+      ) : (
+        <label className="label" htmlFor={`f-${name}`}>
+          {caption}
+        </label>
+      )}
       {children}
       {hint && <p className="hint">{hint}</p>}
     </div>
