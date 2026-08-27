@@ -109,12 +109,11 @@
     "languagesHint": "Comma-separated survey languages",
     "fieldLicense": "License",
     "fieldQuestionnaireText": "Questionnaire",
-    "publicationSectionTitle": "Linked publication (optional)",
-    "publicationHint": "If a paper or thesis used this data, link it so readers can follow the research.",
+    "publicationSectionTitle": "Research using this data",
     "fieldPublicationTitle": "Publication title",
     "fieldPublicationAuthors": "Authors",
     "fieldPublicationYear": "Year",
-    "fieldPublicationUrl": "DOI or URL",
+    "fieldPublicationUrl": "Link to the publication",
     "csvLabel": "Survey data (CSV or Excel)",
     "csvDropTitle": "Choose your CSV or Excel file",
     "csvHelp": "Upload the file straight from Google Forms — Responses → open in Sheets → File → Download → Microsoft Excel (.xlsx) or CSV. Either works.",
@@ -163,7 +162,12 @@
     "licenseOtherPlaceholder": "Describe your terms",
     "questionnaireHint": "Paste the questions exactly as you asked them, with their answer options. Column names like \"q7_trust\" mean nothing on their own — this is what lets someone else read your data. It is also the only place a reader learns which language a question was asked in.",
     "questionnairePlaceholder": "1. How old are you? ___\n2. Do you trust your local government?\n   1 Yes, fully   2 Somewhat   3 Not really   4 Not at all",
-    "errorMissingFields": "Some required answers are missing. Go back and fill in every field marked with *."
+    "errorMissingFields": "Some required answers are missing. Go back and fill in every field marked with *.",
+    "publicationQuestion": "If a paper, thesis, or report used this data, link it so readers can follow the research.",
+    "publicationYes": "Yes, it has been used in published research",
+    "publicationNo": "Not yet",
+    "publicationUrlHint": "A DOI, journal page, thesis record, preprint, or repository entry — whichever link is most permanent.",
+    "errorPublicationIncomplete": "You said this data was used in published research, so the publication title and link are both needed. Go back and add them, or change the answer to “Not yet”."
   },
   "Dataset": {
     "backToBrowse": "All datasets",
