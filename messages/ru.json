@@ -234,7 +234,14 @@
     "colSubmitted": "Отправлено",
     "unknownDepositor": "Неизвестно",
     "approve": "Одобрить",
-    "reject": "Отклонить"
+    "reject": "Отклонить",
+    "vocabHeading": "Предложенные варианты",
+    "vocabHint": "Значения, которые депозиторы ввели в поле «Другое», сначала самые частые. Добавьте вариант в список в src/lib/survey-vocab.ts — и он перестанет появляться здесь.",
+    "vocabTopics": "Темы",
+    "vocabMethods": "Методы сбора",
+    "vocabPlatforms": "Платформы",
+    "vocabLicenses": "Лицензии",
+    "vocabDatasetCount": "{count, plural, one {# набор} few {# набора} many {# наборов} other {# набора}}"
   },
   "Browse": {
     "heading": "Обзор наборов данных",

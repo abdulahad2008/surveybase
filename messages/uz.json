@@ -234,7 +234,14 @@
     "colSubmitted": "Yuborilgan sana",
     "unknownDepositor": "Noma'lum",
     "approve": "Tasdiqlash",
-    "reject": "Rad etish"
+    "reject": "Rad etish",
+    "vocabHeading": "Taklif qilingan variantlar",
+    "vocabHint": "Ma'lumot joylovchilar «Boshqa» maydoniga yozgan qiymatlar, eng ko‘p ishlatilgani birinchi. Variantni src/lib/survey-vocab.ts ro‘yxatiga qo‘shsangiz, u bu yerda ko‘rinmay qoladi.",
+    "vocabTopics": "Mavzular",
+    "vocabMethods": "Ma'lumot yig‘ish usullari",
+    "vocabPlatforms": "Platformalar",
+    "vocabLicenses": "Litsenziyalar",
+    "vocabDatasetCount": "{count, plural, other {# ta to‘plam}}"
   },
   "Browse": {
     "heading": "Ma'lumotlar to‘plamlarini ko‘rish",

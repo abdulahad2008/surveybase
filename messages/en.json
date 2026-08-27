@@ -234,7 +234,14 @@
     "colSubmitted": "Submitted",
     "unknownDepositor": "Unknown",
     "approve": "Approve",
-    "reject": "Reject"
+    "reject": "Reject",
+    "vocabHeading": "Suggested vocabulary",
+    "vocabHint": "Values depositors typed into an “Other” box, most used first. Add one to the list in src/lib/survey-vocab.ts and it stops appearing here.",
+    "vocabTopics": "Topics",
+    "vocabMethods": "Collection methods",
+    "vocabPlatforms": "Platforms",
+    "vocabLicenses": "Licences",
+    "vocabDatasetCount": "{count, plural, one {# dataset} other {# datasets}}"
   },
   "Browse": {
     "heading": "Browse datasets",
