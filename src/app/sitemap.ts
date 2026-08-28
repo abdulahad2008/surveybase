@@ -28,7 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Every entry is listed at the default locale with hreflang alternates for
   // the others, which is how Google reads a multilingual sitemap: one row per
   // page, not one row per translation.
-  const staticPaths = ["", "/datasets"];
+  const staticPaths = ["", "/datasets", "/privacy", "/terms"];
   const entries: MetadataRoute.Sitemap = staticPaths.map((path) => ({
     url: localeUrl(routing.defaultLocale, path),
     alternates: { languages: localeAlternates(path) },
