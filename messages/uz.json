@@ -164,6 +164,7 @@
     "errorGeneric": "Xatolik yuz berdi. Formani tekshirib, qayta urinib ko‘ring.",
     "errorAuth": "Ma'lumotlar to‘plamini joylash uchun tizimga kirishingiz kerak.",
     "errorFile": "CSV yoki Excel faylini tanlang.",
+    "errorFileTooLarge": "Bu fayl ushbu forma qabul qiladigan {max} MB dan katta. Kamroq ustunni eksport qiling yoki uni bir nechta to‘plamga ajrating.",
     "errorUnreadable": "Bu fayldan hech qanday javob o‘qib bo‘lmadi. Google Forms’dan CSV yoki .xlsx sifatida qayta eksport qilib ko‘ring.",
     "errorAllPii": "Barcha ustunlar shaxsiy ma’lumotga o‘xshaydi, shuning uchun chop etish uchun xavfsiz narsa yo‘q. Shaxsni aniqlovchi ustunlarni olib tashlang va umumlashtirilgan yoki anonim natijalarni yuklang.",
     "errorConfirm": "Iltimos, anonimlashtirish bayonotini tasdiqlang.",

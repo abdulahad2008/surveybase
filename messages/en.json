@@ -164,6 +164,7 @@
     "errorGeneric": "Something went wrong. Please check the form and try again.",
     "errorAuth": "You must be logged in to deposit a dataset.",
     "errorFile": "Please choose a CSV or Excel file.",
+    "errorFileTooLarge": "This file is larger than the {max} MB this form can accept. Export fewer columns, or split it into more than one deposit.",
     "errorUnreadable": "No responses could be read from that file. Try exporting it again from Google Forms as CSV or .xlsx.",
     "errorAllPii": "Every column looks like personal data, so there's nothing safe to publish. Remove identifying columns and upload aggregated or anonymized results.",
     "errorConfirm": "Please confirm the anonymization statement.",

@@ -27,6 +27,29 @@ export function isBinaryWorkbook(fileName: string): boolean {
 /** What the file input should advertise, and what the server will accept. */
 export const ACCEPTED_UPLOAD_EXTENSIONS = ".csv,.tsv,.xlsx,.xlsm,.xlsb,.xls,.ods";
 
+/**
+ * The largest upload the deposit form accepts, checked in the browser before
+ * parsing and again on the server before storing.
+ *
+ * The ceiling is not ours to choose freely: a deposit is a Server Action, and
+ * the whole action body — file plus every other field — has to fit inside
+ * `serverActions.bodySizeLimit` in next.config.ts, which is set to 4mb. This
+ * sits below that so the depositor meets our message rather than the
+ * framework's, which arrives as an unexplained failure with the form still
+ * full. Going much higher is a platform question rather than a config one:
+ * request bodies to a serverless function are capped independently of Next.
+ *
+ * A survey wider than this exists, and the answer for it is an upload that
+ * goes straight to storage rather than through an action. That is a different
+ * piece of work; this constant is what makes the current limit legible.
+ */
+export const MAX_UPLOAD_BYTES = 3.5 * 1024 * 1024;
+
+/** For messages: the limit, and a file's size, in whole tenths of a megabyte. */
+export function megabytes(bytes: number): number {
+  return Math.round((bytes / (1024 * 1024)) * 10) / 10;
+}
+
 function fromRowArrays(rowArrays: unknown[][]): Sheet {
   const rawHeaders = (rowArrays[0] ?? []).map((h) => String(h ?? "").trim());
 
