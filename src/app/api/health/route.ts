@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -5,8 +6,31 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // migrated Supabase project, so a broken sign-up / upload / download can be
 // diagnosed as "migrations/config not applied" vs "code bug" in one request.
 //
-// Never returns keys or connection strings — only boolean pass/fail per check.
+// Never returns keys or connection strings. It does return which migrations
+// have landed and which tables, buckets and functions exist, which is a map of
+// the backend and a list of what is currently broken — useful to whoever is
+// fixing it, and equally useful to anyone deciding where to push. So the
+// per-check detail is gated and the public answer is one boolean, which is all
+// an uptime monitor needs.
 export const dynamic = "force-dynamic";
+
+/**
+ * Fails closed: with no HEALTH_CHECK_TOKEN configured there is no way to ask
+ * for detail at all, rather than the detail being open by default.
+ */
+function detailAuthorized(request: Request): boolean {
+  const expected = process.env.HEALTH_CHECK_TOKEN;
+  if (!expected) return false;
+
+  const header = request.headers.get("authorization") ?? "";
+  const presented = header.startsWith("Bearer ") ? header.slice(7) : "";
+
+  const a = Buffer.from(presented);
+  const b = Buffer.from(expected);
+  // timingSafeEqual throws on a length mismatch, so the lengths are compared
+  // first; the length of a token is not the part worth hiding.
+  return a.length === b.length && timingSafeEqual(a, b);
+}
 
 type Checks = {
   envPresent: boolean;
@@ -22,7 +46,9 @@ type Checks = {
   collectionPlatformColumn: boolean;
 };
 
-export async function GET() {
+export async function GET(request: Request) {
+  const detailed = detailAuthorized(request);
+
   const checks: Checks = {
     envPresent: false,
     supabaseReachable: false,
@@ -42,12 +68,10 @@ export async function GET() {
     supabase = createAdminClient();
     checks.envPresent = true;
   } catch (error) {
+    const message = error instanceof Error ? error.message : "env error";
+    console.error(`[api/health] admin client unavailable: ${message}`);
     return NextResponse.json(
-      {
-        ok: false,
-        checks,
-        error: error instanceof Error ? error.message : "env error",
-      },
+      detailed ? { ok: false, checks, error: message } : { ok: false },
       { status: 503 },
     );
   }
@@ -131,5 +155,7 @@ export async function GET() {
   }
 
   const ok = Object.values(checks).every(Boolean);
-  return NextResponse.json({ ok, checks }, { status: ok ? 200 : 503 });
+  return NextResponse.json(detailed ? { ok, checks } : { ok }, {
+    status: ok ? 200 : 503,
+  });
 }
