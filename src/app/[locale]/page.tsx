@@ -259,7 +259,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
 
           {/* share data path */}
           <div className="card space-y-6 p-7">
-            <span className="chip" style={{ background: "var(--coral-soft)", color: "var(--coral)" }}>
+            <span className="chip" style={{ background: "var(--coral-soft)", color: "var(--coral-ink)" }}>
               <UploadIcon size={13} />
               {t("pathShareLabel")}
             </span>
@@ -340,11 +340,11 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
           <h2 className="font-display relative text-3xl font-extrabold tracking-tight text-on-brand">
             {t("finalCtaHeading")}
           </h2>
-          <p className="relative mx-auto mt-3 max-w-xl text-on-brand/80">{t("finalCtaText")}</p>
+          <p className="relative mx-auto mt-3 max-w-xl text-on-brand/90">{t("finalCtaText")}</p>
           <div className="relative mt-7 flex flex-wrap justify-center gap-3">
             <Link
               href="/deposit"
-              className="btn bg-white text-brand-deep shadow-pop hover:-translate-y-0.5"
+              className="btn bg-white text-brand-on-white shadow-pop hover:-translate-y-0.5"
             >
               <UploadIcon size={16} />
               {t("ctaShare")}

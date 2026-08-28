@@ -26,6 +26,11 @@
   --brand-soft: #eceafd;
   --brand-wash: #f4f2fe;
   --on-brand: #ffffff;
+  /* For brand-coloured text on a surface that is white in BOTH themes — the
+     button on the closing call-to-action band. The -ink accents all lighten in
+     dark mode because they sit on dark surfaces there; this one cannot, so it
+     is deliberately defined once and never redefined below. */
+  --brand-on-white: #4536c9;
 
   /* accents */
   --coral: #f25c4d;
@@ -240,6 +245,7 @@
 
   --color-brand: var(--brand);
   --color-brand-deep: var(--brand-deep);
+  --color-brand-on-white: var(--brand-on-white);
   --color-brand-ink: var(--brand-ink);
   --color-brand-soft: var(--brand-soft);
   --color-brand-wash: var(--brand-wash);
@@ -351,22 +357,18 @@ body {
   box-shadow: 0 12px 24px -8px color-mix(in srgb, var(--brand) 60%, transparent);
 }
 
+/* White on --coral measures 3.27:1, which is under AA for a 14px label — and
+   this is the deposit button, the one thing the homepage is asking for. Dark
+   mode already labelled it #2b0f0b; both themes now do, which clears 5.47:1
+   and leaves the coral fill exactly as it was. */
 .btn-coral {
   background: var(--coral);
-  color: #fff;
+  color: #2b0f0b;
   box-shadow: 0 8px 20px -8px color-mix(in srgb, var(--coral) 55%, transparent);
 }
 .btn-coral:hover:not(:disabled) {
   transform: translateY(-1px);
   filter: brightness(1.05);
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .btn-coral {
-    color: #2b0f0b;
-  }
-}
-:root[data-theme="dark"] .btn-coral {
-  color: #2b0f0b;
 }
 
 .btn-ghost {
