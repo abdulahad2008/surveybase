@@ -77,7 +77,7 @@ export default async function DatasetsPage({
   ].filter((v) => v != null).length;
 
   return (
-    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
+    <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl font-extrabold tracking-tight text-ink">
@@ -93,14 +93,14 @@ export default async function DatasetsPage({
           {/* -------- filter rail -------- */}
           <aside className="card space-y-5 p-5 lg:sticky lg:top-20">
             <div className="flex items-center justify-between">
-              <p className="font-display text-sm font-bold text-ink">
+              <h2 className="font-display text-sm font-bold text-ink">
                 {t("filtersHeading")}
                 {activeFilterCount > 0 && (
                   <span className="ml-2 rounded-full bg-brand px-2 py-0.5 text-xs font-bold text-on-brand">
                     {activeFilterCount}
                   </span>
                 )}
-              </p>
+              </h2>
               <Link href="/datasets" className="text-xs font-semibold text-brand hover:underline">
                 {t("resetFilters")}
               </Link>

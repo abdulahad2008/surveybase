@@ -35,7 +35,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   const popularTopics = options.topics.slice(0, 6);
 
   return (
-    <main className="flex-1">
+    <main id="main-content" tabIndex={-1} className="flex-1">
       {/* ---------------------------------------------------------------- */}
       {/* Hero                                                              */}
       {/* ---------------------------------------------------------------- */}
@@ -53,7 +53,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 pt-14 pb-16 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:pt-20">
           <div className="space-y-7">
             <p className="fade-up inline-flex items-center gap-2 rounded-full border border-line bg-card px-4 py-1.5 text-xs font-semibold text-soft shadow-card">
-              <SparkleIcon size={14} className="text-sun" />
+              <SparkleIcon size={14} className="text-sun-ink" />
               {t("eyebrow")}
             </p>
 
@@ -72,6 +72,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
                 <input
                   type="search"
                   name="q"
+                  aria-label={t("searchLabel")}
                   placeholder={t("searchPlaceholder")}
                   className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-faint"
                 />

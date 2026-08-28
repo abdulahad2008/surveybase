@@ -48,7 +48,7 @@ export function Reviews({
         </h2>
         {average != null && (
           <span className="chip bg-sun-soft text-ink">
-            <StarIcon size={13} filled className="text-sun" />
+            <StarIcon size={13} filled className="text-sun-ink" />
             <span className="tnum font-bold">{average.toFixed(1)}</span>
             <span className="tnum text-soft">({sorted.length})</span>
           </span>
@@ -68,7 +68,7 @@ export function Reviews({
                 </span>
                 <Stars rating={r.rating} />
               </div>
-              {r.comment && <p className="mt-2 leading-relaxed text-soft">{r.comment}</p>}
+              {r.comment && <p className="mt-2 leading-relaxed text-soft wrap-anywhere">{r.comment}</p>}
             </li>
           ))}
         </ul>
@@ -135,7 +135,7 @@ function Stars({ rating }: { rating: number }) {
           key={n}
           size={14}
           filled={n <= rating}
-          className={n <= rating ? "text-sun" : "text-line-strong"}
+          className={n <= rating ? "text-sun-ink" : "text-line-strong"}
         />
       ))}
     </span>
@@ -160,7 +160,7 @@ function RatingPicker({ initial }: { initial: number }) {
           onMouseLeave={() => setHover(null)}
           className="rounded p-0.5 transition hover:scale-125"
         >
-          <StarIcon size={22} filled={n <= shown} className={n <= shown ? "text-sun" : "text-line-strong"} />
+          <StarIcon size={22} filled={n <= shown} className={n <= shown ? "text-sun-ink" : "text-line-strong"} />
         </button>
       ))}
     </div>

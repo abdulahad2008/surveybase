@@ -9,6 +9,7 @@
     "logout": "Log out",
     "selectLanguage": "Select language",
     "menu": "Menu",
+    "skipToContent": "Skip to content",
     "toggleTheme": "Switch theme",
     "profile": "Profile"
   },
@@ -18,6 +19,7 @@
     "headline": "Every survey deserves a <highlight>second life</highlight>",
     "subtitle": "Browse survey results from Uzbekistan and Central Asia — or share your own and get cited. Interactive charts, clean downloads, identifying columns removed.",
     "searchPlaceholder": "Search surveys — e.g. education, employment, health…",
+    "searchLabel": "Search surveys",
     "searchButton": "Search",
     "popularTopics": "Popular:",
     "ctaFind": "Find data",

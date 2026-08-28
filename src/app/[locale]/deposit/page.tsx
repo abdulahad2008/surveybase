@@ -31,7 +31,7 @@ export default async function DepositPage({
     .maybeSingle();
 
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-12 sm:px-6">
+    <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-3xl flex-1 px-4 py-12 sm:px-6">
       <DepositForm locale={locale} depositorName={profile?.name ?? null} />
     </main>
   );

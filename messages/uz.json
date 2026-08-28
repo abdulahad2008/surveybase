@@ -9,6 +9,7 @@
     "logout": "Chiqish",
     "selectLanguage": "Tilni tanlash",
     "menu": "Menyu",
+    "skipToContent": "Asosiy qismga o‘tish",
     "toggleTheme": "Mavzuni almashtirish",
     "profile": "Profil"
   },
@@ -18,6 +19,7 @@
     "headline": "Har bir so‘rovnoma <highlight>ikkinchi hayotga</highlight> loyiq",
     "subtitle": "O‘zbekiston va Markaziy Osiyo bo‘yicha so‘rovnoma natijalarini ko‘ring — yoki o‘zingiznikini ulashing va iqtibos oling. Interaktiv diagrammalar, toza yuklab olishlar, shaxsni aniqlovchi ustunlar olib tashlangan.",
     "searchPlaceholder": "So‘rovnomalarni qidiring — masalan, ta'lim, bandlik, salomatlik…",
+    "searchLabel": "So‘rovnomalarni qidirish",
     "searchButton": "Qidirish",
     "popularTopics": "Ommabop:",
     "ctaFind": "Ma'lumot topish",

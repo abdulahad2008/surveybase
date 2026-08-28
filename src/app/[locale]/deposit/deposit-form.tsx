@@ -350,7 +350,7 @@ export function DepositForm({
                   <ShieldIcon
                     size={16}
                     className={
-                      preview.piiHeaders.length === 0 ? "text-soft" : "text-sun"
+                      preview.piiHeaders.length === 0 ? "text-soft" : "text-sun-ink"
                     }
                   />
                   {t("piiHeading")}
@@ -695,7 +695,7 @@ export function DepositForm({
               {preview && preview.piiHeaders.length > 0 && (
                 <div className="border-t border-line pt-5">
                   <p className="flex items-center gap-2 text-sm font-bold text-ink">
-                    <ShieldIcon size={16} className="text-sun" />
+                    <ShieldIcon size={16} className="text-sun-ink" />
                     {t("reviewStripped")}
                   </p>
                   <ul className="mt-2 flex flex-wrap gap-1.5">

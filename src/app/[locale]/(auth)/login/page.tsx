@@ -42,7 +42,7 @@ export default function LoginPage() {
   });
 
   return (
-    <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-16">
+    <main id="main-content" tabIndex={-1} className="relative mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-16">
       <div
         aria-hidden
         className="pointer-events-none absolute -top-10 right-0 h-64 w-64 rounded-full bg-brand-soft blur-3xl"
