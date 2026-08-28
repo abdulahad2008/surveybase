@@ -261,7 +261,8 @@
     "reviewLoginPrompt": "Войдите, чтобы оставить отзыв.",
     "visitCount": "{count} переходов к источнику",
     "metadataPlatform": "Платформа",
-    "rejectedReasonHeading": "Почему это отклонено"
+    "rejectedReasonHeading": "Почему это отклонено",
+    "tableTruncated": "Показаны первые {shown} строк из {total}. Чтобы получить все, <download>скачайте набор данных</download>."
   },
   "Moderate": {
     "title": "Очередь модерации",

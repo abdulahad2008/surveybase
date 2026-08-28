@@ -261,7 +261,8 @@
     "reviewLoginPrompt": "Sharh qoldirish uchun tizimga kiring.",
     "visitCount": "{count} marta manbaga o‘tildi",
     "metadataPlatform": "Platforma",
-    "rejectedReasonHeading": "Nima uchun rad etilgan"
+    "rejectedReasonHeading": "Nima uchun rad etilgan",
+    "tableTruncated": "{total} qatordan dastlabki {shown} tasi koʻrsatilmoqda. Barchasi uchun <download>toʻplamni yuklab oling</download>."
   },
   "Moderate": {
     "title": "Moderatsiya navbati",

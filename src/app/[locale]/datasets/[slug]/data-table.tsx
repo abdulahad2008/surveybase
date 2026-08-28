@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useFormat } from "@/lib/use-format";
 import {
   type ColumnDef,
+  type Row,
   type SortingState,
   flexRender,
   getCoreRowModel,
@@ -12,8 +14,53 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-export function DataTable({ headers, rows }: { headers: string[]; rows: Record<string, string>[] }) {
+/**
+ * How many rows of a dataset are shipped to the browser.
+ *
+ * Every row used to be: the page serialised the whole parsed CSV into the RSC
+ * payload so this component could paginate 20 at a time, which meant a
+ * 5,000-row survey sent 5,000 rows to display 20. The table is a preview —
+ * anyone who wants the data downloads it, and that button is right there.
+ */
+export const TABLE_ROW_LIMIT = 100;
+
+/**
+ * Sorts a column of numbers by value rather than by digit.
+ *
+ * The default comparator is lexical, so an age column sorted "1, 10, 100, 2" —
+ * which looks like corrupted data in a table whose whole job is to show what
+ * the data looks like. Empty cells sort last in both directions: a missing
+ * answer is not a small one.
+ */
+function numericSort(a: Row<Record<string, string>>, b: Row<Record<string, string>>, id: string) {
+  const left = Number(a.getValue(id));
+  const right = Number(b.getValue(id));
+  const leftMissing = Number.isNaN(left);
+  const rightMissing = Number.isNaN(right);
+  if (leftMissing || rightMissing) {
+    if (leftMissing && rightMissing) return 0;
+    return leftMissing ? 1 : -1;
+  }
+  return left - right;
+}
+
+export function DataTable({
+  headers,
+  rows,
+  totalRows,
+  columnTypes,
+  downloadHref,
+}: {
+  headers: string[];
+  rows: Record<string, string>[];
+  /** Rows in the file, not in `rows` — the two differ once the cap bites. */
+  totalRows: number;
+  /** Column name → the type moderation inferred, so numbers sort as numbers. */
+  columnTypes: Record<string, string>;
+  downloadHref: string;
+}) {
   const t = useTranslations("Dataset");
+  const format = useFormat();
   const [sorting, setSorting] = useState<SortingState>([]);
 
   // A survey with 30 questions produces a table far wider than a phone. It has
@@ -35,6 +82,7 @@ export function DataTable({ headers, rows }: { headers: string[]; rows: Record<s
     id: header,
     header,
     accessorFn: (row) => row[header] ?? "",
+    ...(columnTypes[header] === "numeric" ? { sortingFn: numericSort } : {}),
   }));
 
   const table = useReactTable({
@@ -104,6 +152,19 @@ export function DataTable({ headers, rows }: { headers: string[]; rows: Record<s
           </tbody>
         </table>
       </div>
+      {totalRows > rows.length && (
+        <p className="text-xs leading-relaxed text-faint">
+          {t.rich("tableTruncated", {
+            shown: format.integer(rows.length),
+            total: format.integer(totalRows),
+            download: (chunks) => (
+              <a href={downloadHref} className="font-semibold text-brand hover:underline">
+                {chunks}
+              </a>
+            ),
+          })}
+        </p>
+      )}
       {overflowing && (
         <p aria-hidden className="text-xs font-medium text-faint">
           {t("tableScrollHint")}
