@@ -7,9 +7,8 @@ import {
   CheckIcon,
   ExternalLinkIcon,
   SparkleIcon,
-  XIcon,
 } from "@/components/icons";
-import { approveDataset, rejectDataset } from "./actions";
+import { ModerationActions } from "./moderation-actions";
 import {
   collectVocabSuggestions,
   hasVocabSuggestions,
@@ -128,33 +127,7 @@ export default async function ModeratePage({
                   value={new Date(dataset.created_at).toLocaleDateString(locale)}
                 />
               </dl>
-              <div className="flex gap-2.5">
-                <form
-                  action={async () => {
-                    "use server";
-                    await approveDataset(locale, dataset.id);
-                  }}
-                >
-                  <button type="submit" className="btn btn-sm bg-mint text-white hover:brightness-105">
-                    <CheckIcon size={14} />
-                    {t("approve")}
-                  </button>
-                </form>
-                <form
-                  action={async () => {
-                    "use server";
-                    await rejectDataset(locale, dataset.id);
-                  }}
-                >
-                  <button
-                    type="submit"
-                    className="btn btn-ghost btn-sm text-danger hover:bg-danger-soft"
-                  >
-                    <XIcon size={14} />
-                    {t("reject")}
-                  </button>
-                </form>
-              </div>
+              <ModerationActions locale={locale} datasetId={dataset.id} title={dataset.title} />
             </li>
           ))}
         </ul>

@@ -28,7 +28,7 @@ import {
   UsersIcon,
 } from "@/components/icons";
 import { ColumnCharts } from "./column-charts";
-import { DataTable } from "./data-table";
+import { DataTable, TABLE_ROW_LIMIT } from "./data-table";
 import { Reviews, type ReviewRow } from "./reviews";
 
 interface SurveyColumnRow {
@@ -64,7 +64,9 @@ interface DatasetRow {
   is_hosted: boolean;
   external_url: string | null;
   status: string;
+  rejection_reason: string | null;
   depositor_id: string | null;
+  source_organization: string | null;
   download_count: number;
   created_at: string;
   depositor: { id: string; name: string | null; affiliation: string | null } | null;
@@ -152,12 +154,17 @@ export default async function DatasetPage({
   const csvFile = dataset.files.find((f) => f.format === "csv");
   let headers: string[] = [];
   let rows: Record<string, string>[] = [];
+  let totalRows = 0;
 
   if (csvFile) {
     const { data: publicUrlData } = supabase.storage
       .from("dataset-files")
       .getPublicUrl(csvFile.storage_path);
-    const response = await fetch(publicUrlData.publicUrl, { cache: "no-store" });
+    // A published dataset's file never changes — a correction is a new deposit —
+    // so re-downloading and re-parsing the whole CSV on every request bought
+    // nothing. Five minutes is short enough that an approval shows up quickly
+    // and long enough that a dataset being read by a class is parsed once.
+    const response = await fetch(publicUrlData.publicUrl, { next: { revalidate: 300 } });
     if (response.ok) {
       const csvText = await response.text();
       const parsed = Papa.parse<Record<string, string>>(csvText, {
@@ -165,9 +172,21 @@ export default async function DatasetPage({
         skipEmptyLines: true,
       });
       headers = parsed.meta.fields ?? [];
-      rows = parsed.data;
+      totalRows = parsed.data.length;
+      // Only the first page-worth of rows crosses the wire. Every row used to
+      // be serialised into the RSC payload so the browser could paginate 20 at
+      // a time — a 5,000-row survey shipped 5,000 rows to show 20 of them, on
+      // connections where that is the whole cost of the page. The charts read
+      // `summary_json`, not this, so they still describe the entire dataset.
+      rows = parsed.data.slice(0, TABLE_ROW_LIMIT);
     }
   }
+
+  // Column name → inferred type, so the table can sort a numeric column by
+  // value. Built from the same rows the charts use, not re-inferred here.
+  const columnTypes = Object.fromEntries(
+    dataset.survey_columns.map((c) => [c.question_text, c.column_type]),
+  );
 
   const orderedColumns = headers
     .map((h) => dataset.survey_columns.find((c) => c.question_text === h))
@@ -177,6 +196,7 @@ export default async function DatasetPage({
     {
       title: dataset.title,
       author: dataset.depositor?.name ?? null,
+      sourceOrganization: dataset.source_organization,
       year: citationYear(dataset.fieldwork_start, new Date(dataset.created_at)),
     },
     dataset.slug,
@@ -228,9 +248,24 @@ export default async function DatasetPage({
       </Link>
 
       {dataset.status !== "published" && (
-        <p className="mt-4 rounded-2xl border border-sun/40 bg-sun-soft px-4 py-3 text-sm font-medium text-ink">
-          {t(dataset.status === "rejected" ? "rejectedBanner" : "pendingBanner")}
-        </p>
+        <div className="mt-4 rounded-2xl border border-sun/40 bg-sun-soft px-4 py-3 text-sm text-ink">
+          <p className="font-medium">
+            {t(dataset.status === "rejected" ? "rejectedBanner" : "pendingBanner")}
+          </p>
+          {/* The moderator's own words, when there are any. Rejections recorded
+              before the column existed have none, and the banner above still
+              says everything it used to. */}
+          {dataset.status === "rejected" && dataset.rejection_reason && (
+            <>
+              <p className="mt-3 text-xs font-semibold tracking-wide text-faint uppercase">
+                {t("rejectedReasonHeading")}
+              </p>
+              <p className="mt-1 leading-relaxed whitespace-pre-line">
+                {dataset.rejection_reason}
+              </p>
+            </>
+          )}
+        </div>
       )}
 
       {/* header */}
@@ -400,7 +435,13 @@ export default async function DatasetPage({
               <h2 className="font-display mb-5 text-2xl font-extrabold tracking-tight text-ink">
                 {t("dataHeading")}
               </h2>
-              <DataTable headers={headers} rows={rows} />
+              <DataTable
+                headers={headers}
+                rows={rows}
+                totalRows={totalRows}
+                columnTypes={columnTypes}
+                downloadHref={`/api/datasets/${dataset.slug}/download/csv`}
+              />
             </section>
           )}
 
@@ -432,7 +473,10 @@ export default async function DatasetPage({
                   {t("viewAtSourceButton")}
                 </a>
                 <p className="tnum text-center text-xs font-medium text-faint">
-                  {t("visitCount", { count: nf.format(dataset.download_count) })}
+                  {t("visitCount", {
+                    count: dataset.download_count,
+                    value: nf.format(dataset.download_count),
+                  })}
                 </p>
                 <p className="text-xs leading-relaxed text-faint">{t("viewAtSourceNote")}</p>
               </div>
@@ -450,7 +494,10 @@ export default async function DatasetPage({
                   ))}
                 </div>
                 <p className="tnum text-center text-xs font-medium text-faint">
-                  {t("downloadCount", { count: nf.format(dataset.download_count) })}
+                  {t("downloadCount", {
+                    count: dataset.download_count,
+                    value: nf.format(dataset.download_count),
+                  })}
                 </p>
               </div>
             ) : (
@@ -464,7 +511,7 @@ export default async function DatasetPage({
               <QuoteIcon size={17} className="text-brand" />
               {t("howToCiteHeading")}
             </h2>
-            <p className="mt-3 rounded-xl bg-card p-3.5 font-mono text-xs leading-relaxed break-words text-soft">
+            <p className="mt-3 rounded-xl bg-card p-3.5 font-mono text-xs leading-relaxed wrap-anywhere text-soft">
               {citation}
             </p>
             <div className="mt-3">

@@ -70,12 +70,23 @@ export async function DatasetCard({
         {dataset.sample_size != null && (
           <span className="inline-flex items-center gap-1.5 tnum">
             <UsersIcon size={13} />
-            {t("cardSampleSize", { count: nf.format(dataset.sample_size) })}
+            {t("cardSampleSize", {
+              count: dataset.sample_size,
+              value: nf.format(dataset.sample_size),
+            })}
           </span>
         )}
+        {/* The figure is the whole label here, so on its own it reaches a
+            screen reader as a bare number next to an icon it cannot read. */}
         <span className="inline-flex items-center gap-1.5 tnum">
           <DownloadIcon size={13} />
-          {nf.format(dataset.download_count)}
+          <span aria-hidden>{nf.format(dataset.download_count)}</span>
+          <span className="sr-only">
+            {t("cardDownloads", {
+              count: dataset.download_count,
+              value: nf.format(dataset.download_count),
+            })}
+          </span>
         </span>
       </div>
     </Link>

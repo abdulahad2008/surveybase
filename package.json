@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "node --env-file=.env.local scripts/seed.mts",
+    "reslug-seeds": "node --env-file=.env.local scripts/reslug-seeds.mts",
     "test": "node --import ./tests/alias.mjs --test 'tests/**/*.test.mts'"
   },
   "dependencies": {
@@ -22,7 +23,7 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "recharts": "^3.10.0",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+    "xlsx": "file:vendor/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

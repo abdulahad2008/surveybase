@@ -8,13 +8,17 @@ export interface TopicColor {
   solid: string;
 }
 
+// `text` is always the -ink variant, never the base accent: the base accents
+// are fills, and a chip that painted its label in one sat at 2.77:1 on its own
+// background. `bg` and `solid` keep the originals — the fill is not the part
+// that has to be readable.
 const PALETTES: TopicColor[] = [
   { bg: "var(--brand-soft)", text: "var(--brand-ink)", solid: "var(--brand)" },
-  { bg: "var(--coral-soft)", text: "var(--coral)", solid: "var(--coral)" },
-  { bg: "var(--mint-soft)", text: "var(--mint)", solid: "var(--mint)" },
-  { bg: "var(--sun-soft)", text: "var(--sun)", solid: "var(--sun)" },
-  { bg: "var(--rose-soft)", text: "var(--rose)", solid: "var(--rose)" },
-  { bg: "var(--sky-soft)", text: "var(--sky)", solid: "var(--sky)" },
+  { bg: "var(--coral-soft)", text: "var(--coral-ink)", solid: "var(--coral)" },
+  { bg: "var(--mint-soft)", text: "var(--mint-ink)", solid: "var(--mint)" },
+  { bg: "var(--sun-soft)", text: "var(--sun-ink)", solid: "var(--sun)" },
+  { bg: "var(--rose-soft)", text: "var(--rose-ink)", solid: "var(--rose)" },
+  { bg: "var(--sky-soft)", text: "var(--sky-ink)", solid: "var(--sky)" },
 ];
 
 export function topicColor(topic: string): TopicColor {

@@ -107,6 +107,23 @@ export default function SignupPage() {
           <button type="submit" disabled={pending} className="btn btn-primary w-full">
             {t("submitSignup")}
           </button>
+          {/* Under the button rather than beside a checkbox: the account is
+              created by pressing it, so this is the moment the agreement is
+              made, and both documents are one tap away from here. */}
+          <p className="text-center text-xs leading-relaxed text-faint">
+            {t.rich("consent", {
+              terms: (chunks) => (
+                <Link href="/terms" className="font-semibold text-brand hover:underline">
+                  {chunks}
+                </Link>
+              ),
+              privacy: (chunks) => (
+                <Link href="/privacy" className="font-semibold text-brand hover:underline">
+                  {chunks}
+                </Link>
+              ),
+            })}
+          </p>
         </form>
 
         <p className="text-center text-sm text-soft">

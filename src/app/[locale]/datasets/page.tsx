@@ -63,6 +63,7 @@ export default async function DatasetsPage({
   const sp = await searchParams;
   const t = await getTranslations("Browse");
   const v = await getTranslations("Vocab");
+  const nf = new Intl.NumberFormat(locale);
   const supabase = await createClient();
 
   const filters: DatasetFilters = {
@@ -103,7 +104,7 @@ export default async function DatasetsPage({
           <h1 className="font-display text-3xl font-extrabold tracking-tight text-ink">
             {t("heading")}
           </h1>
-          <p className="mt-1 text-sm text-soft">{t("resultsCount", { count: total })}</p>
+          <p className="mt-1 text-sm text-soft">{t("resultsCount", { count: total, value: nf.format(total) })}</p>
         </div>
       </div>
 

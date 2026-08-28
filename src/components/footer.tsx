@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { SITE_CONTACT_EMAIL } from "@/lib/site";
 import { Logo } from "./logo";
 import { ShieldIcon } from "./icons";
 
@@ -8,7 +9,7 @@ export async function Footer() {
 
   return (
     <footer className="mt-20 border-t border-line bg-card">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr]">
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div className="space-y-4">
           <Logo />
           <p className="max-w-sm text-sm leading-relaxed text-soft">{t("blurb")}</p>
@@ -43,6 +44,32 @@ export async function Footer() {
           <p className="font-display text-sm font-bold text-ink">{t("aboutHeading")}</p>
           <p className="leading-relaxed text-soft">{t("aboutText")}</p>
         </div>
+
+        <nav className="space-y-3 text-sm" aria-label={t("legalHeading")}>
+          <p className="font-display text-sm font-bold text-ink">{t("legalHeading")}</p>
+          <ul className="space-y-2 text-soft">
+            <li>
+              <Link href="/privacy" className="tap-target transition hover:text-brand">
+                {t("linkPrivacy")}
+              </Link>
+            </li>
+            <li>
+              <Link href="/terms" className="tap-target transition hover:text-brand">
+                {t("linkTerms")}
+              </Link>
+            </li>
+            <li>
+              {/* The only address on the site a visitor can write to — the
+                  privacy and terms pages both promise it answers. */}
+              <a
+                href={`mailto:${SITE_CONTACT_EMAIL}`}
+                className="tap-target transition hover:text-brand"
+              >
+                {t("linkContact")}
+              </a>
+            </li>
+          </ul>
+        </nav>
       </div>
       <div className="border-t border-line">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-xs text-faint sm:px-6">

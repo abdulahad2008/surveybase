@@ -16,23 +16,41 @@
     "languages": "string[]",
     "formats_available": "string[]",
     "fieldwork_year": "int | null",
-    "notes": "string"
+    "notes": "string",
+    "source_organization": "string — the body that ran the survey, credited in the citation and the JSON-LD creator"
   },
   "datasets": [
     {
       "record_type": "hosted",
       "title": "Central Asia Barometer Survey — Uzbekistan, Wave 1",
       "source_name": "Central Asia Barometer (via Discuss Data)",
+      "source_organization": "Central Asia Barometer",
       "source_url": "https://discuss-data.net/dataset/1afc5235-eb1f-4a23-80b6-036515ce1916/",
       "license": "Open Access (Discuss Data terms) — confirm before re-hosting",
       "attribution_required": true,
       "citation": "Central Asia Barometer (2024): Central Asia Barometer Survey Waves 1-9 (2017-2021), Discuss Data, https://doi.org/10.48320/1AFC5235-EB1F-4A23-80B6-036515CE1916",
       "country": "Uzbekistan",
-      "topics": ["political situation", "economic situation", "attitudes towards government", "ethnic relations", "media use", "public health"],
+      "topics": [
+        "political situation",
+        "economic situation",
+        "attitudes towards government",
+        "ethnic relations",
+        "media use",
+        "public health"
+      ],
       "collection_method": "Face-to-face cross-sectional survey",
       "sample_size": 1500,
-      "languages": ["uz", "ru", "en"],
-      "formats_available": ["xlsx", "sav", "dta", "pdf"],
+      "languages": [
+        "uz",
+        "ru",
+        "en"
+      ],
+      "formats_available": [
+        "xlsx",
+        "sav",
+        "dta",
+        "pdf"
+      ],
       "fieldwork_year": 2017,
       "notes": "Import the Uzbekistan Excel file from the Wave 1 zip; attach questionnaire PDF as codebook. Waves 1-7 = 1500 respondents/country."
     },
@@ -40,16 +58,32 @@
       "record_type": "hosted",
       "title": "Central Asia Barometer Survey — Uzbekistan, Wave 2",
       "source_name": "Central Asia Barometer (via Discuss Data)",
+      "source_organization": "Central Asia Barometer",
       "source_url": "https://discuss-data.net/dataset/1afc5235-eb1f-4a23-80b6-036515ce1916/",
       "license": "Open Access (Discuss Data terms) — confirm before re-hosting",
       "attribution_required": true,
       "citation": "Central Asia Barometer (2024), Discuss Data, https://doi.org/10.48320/1AFC5235-EB1F-4A23-80B6-036515CE1916",
       "country": "Uzbekistan",
-      "topics": ["political situation", "economic situation", "attitudes towards government", "ethnic relations", "media use"],
+      "topics": [
+        "political situation",
+        "economic situation",
+        "attitudes towards government",
+        "ethnic relations",
+        "media use"
+      ],
       "collection_method": "Face-to-face cross-sectional survey",
       "sample_size": 1500,
-      "languages": ["uz", "ru", "en"],
-      "formats_available": ["xlsx", "sav", "dta", "pdf"],
+      "languages": [
+        "uz",
+        "ru",
+        "en"
+      ],
+      "formats_available": [
+        "xlsx",
+        "sav",
+        "dta",
+        "pdf"
+      ],
       "fieldwork_year": 2018,
       "notes": "Wave 2 Uzbekistan file from same source."
     },
@@ -57,16 +91,32 @@
       "record_type": "hosted",
       "title": "Central Asia Barometer Survey — Uzbekistan, Waves 3-7",
       "source_name": "Central Asia Barometer (via Discuss Data)",
+      "source_organization": "Central Asia Barometer",
       "source_url": "https://discuss-data.net/dataset/1afc5235-eb1f-4a23-80b6-036515ce1916/",
       "license": "Open Access (Discuss Data terms) — confirm before re-hosting",
       "attribution_required": true,
       "citation": "Central Asia Barometer (2024), Discuss Data, https://doi.org/10.48320/1AFC5235-EB1F-4A23-80B6-036515CE1916",
       "country": "Uzbekistan",
-      "topics": ["political situation", "economic situation", "attitudes towards government", "opinions of leaders", "media use"],
+      "topics": [
+        "political situation",
+        "economic situation",
+        "attitudes towards government",
+        "opinions of leaders",
+        "media use"
+      ],
       "collection_method": "Face-to-face / telephone cross-sectional survey",
       "sample_size": 1500,
-      "languages": ["uz", "ru", "en"],
-      "formats_available": ["xlsx", "sav", "dta", "pdf"],
+      "languages": [
+        "uz",
+        "ru",
+        "en"
+      ],
+      "formats_available": [
+        "xlsx",
+        "sav",
+        "dta",
+        "pdf"
+      ],
       "fieldwork_year": 2020,
       "notes": "Loop over Waves 3,4,5,6,7 (each 1500, Uzbekistan file). CAB switched to telephone mode during COVID-19."
     },
@@ -74,16 +124,32 @@
       "record_type": "hosted",
       "title": "Central Asia Barometer Survey — Uzbekistan, Waves 8-9",
       "source_name": "Central Asia Barometer (via Discuss Data)",
+      "source_organization": "Central Asia Barometer",
       "source_url": "https://discuss-data.net/dataset/1afc5235-eb1f-4a23-80b6-036515ce1916/",
       "license": "Open Access (Discuss Data terms) — confirm before re-hosting",
       "attribution_required": true,
       "citation": "Central Asia Barometer (2024), Discuss Data, https://doi.org/10.48320/1AFC5235-EB1F-4A23-80B6-036515CE1916",
       "country": "Uzbekistan",
-      "topics": ["political situation", "economic situation", "attitudes towards government", "public health", "media use"],
+      "topics": [
+        "political situation",
+        "economic situation",
+        "attitudes towards government",
+        "public health",
+        "media use"
+      ],
       "collection_method": "Telephone cross-sectional survey",
       "sample_size": 2000,
-      "languages": ["uz", "ru", "en"],
-      "formats_available": ["xlsx", "sav", "dta", "pdf"],
+      "languages": [
+        "uz",
+        "ru",
+        "en"
+      ],
+      "formats_available": [
+        "xlsx",
+        "sav",
+        "dta",
+        "pdf"
+      ],
       "fieldwork_year": 2021,
       "notes": "Waves 8-9 = 2000 respondents/country (Uzbekistan files). Two dataset entries."
     },
@@ -91,16 +157,26 @@
       "record_type": "link_only",
       "title": "Listening to the Citizens of Uzbekistan Survey (L2CU) 2018-2025",
       "source_name": "World Bank Microdata Library",
+      "source_organization": "World Bank",
       "source_url": "https://microdata.worldbank.org/index.php/catalog/6412",
       "external_url": "https://microdata.worldbank.org/index.php/catalog/6412",
       "license": "World Bank Microdata Research License — no redistribution",
       "attribution_required": true,
       "citation": null,
       "country": "Uzbekistan",
-      "topics": ["socio-economic conditions", "migration", "employment", "public services", "income", "food security"],
+      "topics": [
+        "socio-economic conditions",
+        "migration",
+        "employment",
+        "public services",
+        "income",
+        "food security"
+      ],
       "collection_method": "Monthly phone survey (~1500 households)",
       "sample_size": 1500,
-      "languages": ["en"],
+      "languages": [
+        "en"
+      ],
       "formats_available": [],
       "fieldwork_year": 2018,
       "notes": "LINK ONLY. Do not store files. Catalog metadata + link to source."
@@ -109,16 +185,27 @@
       "record_type": "link_only",
       "title": "Uzbekistan Multiple Indicator Cluster Survey (MICS) 2021-2022",
       "source_name": "UNICEF / UZSTAT (via World Bank Microdata & mics.unicef.org)",
+      "source_organization": "UNICEF / UzStat",
       "source_url": "https://microdata.worldbank.org/index.php/catalog/5961/study-description",
       "external_url": "https://mics.unicef.org/surveys",
       "license": "UNICEF MICS terms — registration + request review required; no open redistribution",
       "attribution_required": true,
       "citation": null,
       "country": "Uzbekistan",
-      "topics": ["child health", "education", "nutrition", "water & sanitation", "women & children wellbeing"],
+      "topics": [
+        "child health",
+        "education",
+        "nutrition",
+        "water & sanitation",
+        "women & children wellbeing"
+      ],
       "collection_method": "Nationally representative household survey (MICS Round 6)",
       "sample_size": null,
-      "languages": ["en", "uz", "ru"],
+      "languages": [
+        "en",
+        "uz",
+        "ru"
+      ],
       "formats_available": [],
       "fieldwork_year": 2021,
       "notes": "LINK ONLY. Ref UZB_2021_MICS_v01_M. Requires registration; data request reviewed in ~3 business days."
@@ -127,16 +214,25 @@
       "record_type": "link_only",
       "title": "Life in Transition Survey (LiTS) — Uzbekistan (Rounds I-IV)",
       "source_name": "EBRD (via World Bank Microdata / IHSN)",
+      "source_organization": "EBRD",
       "source_url": "https://www.ebrd.com/home/what-we-do/office-of-the-chief-economist/lits/life-in-transition-survey-data.html",
       "external_url": "https://www.ebrd.com/home/what-we-do/office-of-the-chief-economist/lits/life-in-transition-survey-data.html",
       "license": "EBRD LiTS terms — verify; historical rounds via World Bank Microdata (registration)",
       "attribution_required": true,
       "citation": null,
       "country": "Uzbekistan",
-      "topics": ["life satisfaction", "attitudes to markets & democracy", "trust", "corruption", "household economy"],
+      "topics": [
+        "life satisfaction",
+        "attitudes to markets & democracy",
+        "trust",
+        "corruption",
+        "household economy"
+      ],
       "collection_method": "Representative household survey (~1000-1500 households/country)",
       "sample_size": 1500,
-      "languages": ["en"],
+      "languages": [
+        "en"
+      ],
       "formats_available": [],
       "fieldwork_year": 2016,
       "notes": "LINK ONLY. Uzbekistan included in LiTS I (2006), II (2010), III (2016), IV (2022-23). EBRD also has an interactive online explorer."
@@ -145,16 +241,23 @@
       "record_type": "link_only",
       "title": "Uzbekistan — Survey of Conflict Prevention and Cooperation 2004",
       "source_name": "World Bank Data Catalog",
+      "source_organization": "World Bank",
       "source_url": "https://datacatalog.worldbank.org/search/dataset/0050392/",
       "external_url": "https://datacatalog.worldbank.org/search/dataset/0050392/",
       "license": "World Bank terms — verify; treat as no-redistribution",
       "attribution_required": true,
       "citation": null,
       "country": "Uzbekistan",
-      "topics": ["conflict prevention", "cooperation", "social cohesion"],
+      "topics": [
+        "conflict prevention",
+        "cooperation",
+        "social cohesion"
+      ],
       "collection_method": "Household survey",
       "sample_size": null,
-      "languages": ["en"],
+      "languages": [
+        "en"
+      ],
       "formats_available": [],
       "fieldwork_year": 2004,
       "notes": "LINK ONLY."

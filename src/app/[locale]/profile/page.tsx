@@ -11,10 +11,29 @@ import {
   summarizeDatasets,
   type Profile,
 } from "@/lib/profiles";
+import { pageMetadata } from "@/lib/site";
 import { ArrowRightIcon, DownloadIcon, ExternalLinkIcon, UsersIcon } from "@/components/icons";
 import { ProfileForm } from "./profile-form";
 
-export const metadata: Metadata = { title: "Profile" };
+// Signed-in only, and the same URL for every account, so there is nothing here
+// for a search engine to index — but the tab title is read by the person whose
+// page it is, and it was in English for all of them.
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: raw } = await params;
+  const locale: Locale = hasLocale(routing.locales, raw) ? raw : routing.defaultLocale;
+  const t = await getTranslations({ locale, namespace: "Profile" });
+  return pageMetadata({
+    locale,
+    path: "/profile",
+    title: t("title"),
+    description: t("intro"),
+    index: false,
+  });
+}
 
 const statusChip: Record<string, string> = {
   published: "bg-mint-soft text-mint-ink",
@@ -63,6 +82,7 @@ export default async function ProfilePage({
   const t = await getTranslations("Profile");
   const datasets = await getProfileDatasets(supabase, user!.id, { publishedOnly: false });
   const stats = summarizeDatasets(datasets);
+  const nf = new Intl.NumberFormat(locale);
 
   return (
     <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6 sm:py-14">
@@ -86,11 +106,17 @@ export default async function ProfilePage({
             <div className="flex gap-4 text-sm text-soft">
               <span className="inline-flex items-center gap-1.5">
                 <DownloadIcon size={15} />
-                {t("statDownloads", { count: stats.totalDownloads })}
+                {t("statDownloads", {
+                  count: stats.totalDownloads,
+                  value: nf.format(stats.totalDownloads),
+                })}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <UsersIcon size={15} />
-                {t("statRespondents", { count: stats.totalRespondents })}
+                {t("statRespondents", {
+                  count: stats.totalRespondents,
+                  value: nf.format(stats.totalRespondents),
+                })}
               </span>
             </div>
           )}
@@ -109,16 +135,18 @@ export default async function ProfilePage({
             {datasets.map((d) => (
               <li key={d.id} className="card card-hover flex flex-wrap items-center gap-3 p-4">
                 <div className="min-w-[12rem] flex-1">
-                  {d.status === "published" ? (
-                    <Link
-                      href={`/datasets/${d.slug}`}
-                      className="font-semibold text-ink hover:text-brand"
-                    >
-                      {d.title}
-                    </Link>
-                  ) : (
-                    <span className="font-semibold text-ink">{d.title}</span>
-                  )}
+                  {/* Every row links, whatever its status. The dataset page
+                      already lets a depositor see their own unpublished work
+                      and is where the rejection reason is shown — leaving
+                      pending and rejected rows as dead text meant the one
+                      person who needed to read that reason could not reach
+                      it. */}
+                  <Link
+                    href={`/datasets/${d.slug}`}
+                    className="font-semibold text-ink hover:text-brand"
+                  >
+                    {d.title}
+                  </Link>
                   <p className="mt-0.5 text-xs text-faint">
                     {new Date(d.created_at).toLocaleDateString(locale)}
                     {d.sample_size ? ` · ${d.sample_size.toLocaleString(locale)}` : ""}
@@ -130,7 +158,12 @@ export default async function ProfilePage({
                 {d.status === "published" && (
                   <span className="inline-flex items-center gap-1.5 text-sm text-soft">
                     <DownloadIcon size={15} />
-                    <span className="tnum">{t("statDownloads", { count: d.download_count ?? 0 })}</span>
+                    <span className="tnum">
+                      {t("statDownloads", {
+                        count: d.download_count ?? 0,
+                        value: nf.format(d.download_count ?? 0),
+                      })}
+                    </span>
                   </span>
                 )}
                 <span className={`chip ${statusChip[d.status] ?? "bg-card-soft text-soft"}`}>

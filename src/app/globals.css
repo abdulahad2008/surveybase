@@ -26,6 +26,11 @@
   --brand-soft: #eceafd;
   --brand-wash: #f4f2fe;
   --on-brand: #ffffff;
+  /* For brand-coloured text on a surface that is white in BOTH themes — the
+     button on the closing call-to-action band. The -ink accents all lighten in
+     dark mode because they sit on dark surfaces there; this one cannot, so it
+     is deliberately defined once and never redefined below. */
+  --brand-on-white: #4536c9;
 
   /* accents */
   --coral: #f25c4d;
@@ -38,15 +43,22 @@
   /* Text/icon-safe accents for light mode. The base accents are tuned as fills
      and are too pale to carry text on any of our surfaces — --sun measured
      2.19:1 on --card. Fills keep the originals; anything rendered as text or
-     as a meaningful icon uses these. Dark mode aliases them to the base
-     accents, which already clear AA. */
+     as a meaningful icon uses these. Every one of them clears 4.5:1 against
+     its own -soft background and against --card, --card-soft and --canvas, so
+     a chip is legible wherever it is placed. Dark mode aliases them to the
+     base accents, which already clear AA — except --sky-ink, which does not.
+     --sun-ink was 3.59:1 on --card, which is large-text AA only; it now
+     carries the topic chips, so it is darker than it was. */
   --mint-ink: #0b7852;
   --warning-ink: #906200;
-  --sun-ink: #b37d00;
+  --sun-ink: #8f6400;
+  --coral-ink: #ce200f;
   --rose: #d6558a;
   --rose-soft: #fbe6ef;
+  --rose-ink: #c02e6a;
   --sky: #2a78d6;
   --sky-soft: #e2eefb;
+  --sky-ink: #246abd;
 
   /* status */
   --good: #0ca30c;
@@ -118,10 +130,15 @@
     --mint-ink: var(--mint);
     --warning-ink: var(--warning);
     --sun-ink: var(--sun);
+    --coral-ink: var(--coral);
     --rose: #e57ab0;
     --rose-soft: rgba(229, 122, 176, 0.14);
+    --rose-ink: var(--rose);
     --sky: #3987e5;
     --sky-soft: rgba(57, 135, 229, 0.15);
+    /* The one accent that cannot alias its base here: --sky on --sky-soft is
+       4.10:1 against this card, under AA. Lightened until it clears. */
+    --sky-ink: #4d93e8;
 
     --good: #0ca30c;
     --good-text: #4ade4a;
@@ -179,10 +196,15 @@
     --mint-ink: var(--mint);
     --warning-ink: var(--warning);
     --sun-ink: var(--sun);
+    --coral-ink: var(--coral);
     --rose: #e57ab0;
     --rose-soft: rgba(229, 122, 176, 0.14);
+    --rose-ink: var(--rose);
     --sky: #3987e5;
     --sky-soft: rgba(57, 135, 229, 0.15);
+    /* The one accent that cannot alias its base here: --sky on --sky-soft is
+       4.10:1 against this card, under AA. Lightened until it clears. */
+    --sky-ink: #4d93e8;
 
     --good: #0ca30c;
     --good-text: #4ade4a;
@@ -223,6 +245,7 @@
 
   --color-brand: var(--brand);
   --color-brand-deep: var(--brand-deep);
+  --color-brand-on-white: var(--brand-on-white);
   --color-brand-ink: var(--brand-ink);
   --color-brand-soft: var(--brand-soft);
   --color-brand-wash: var(--brand-wash);
@@ -237,10 +260,13 @@
   --color-mint-ink: var(--mint-ink);
   --color-warning-ink: var(--warning-ink);
   --color-sun-ink: var(--sun-ink);
+  --color-coral-ink: var(--coral-ink);
   --color-rose: var(--rose);
   --color-rose-soft: var(--rose-soft);
+  --color-rose-ink: var(--rose-ink);
   --color-sky: var(--sky);
   --color-sky-soft: var(--sky-soft);
+  --color-sky-ink: var(--sky-ink);
 
   --color-good: var(--good);
   --color-good-text: var(--good-text);
@@ -331,22 +357,18 @@ body {
   box-shadow: 0 12px 24px -8px color-mix(in srgb, var(--brand) 60%, transparent);
 }
 
+/* White on --coral measures 3.27:1, which is under AA for a 14px label — and
+   this is the deposit button, the one thing the homepage is asking for. Dark
+   mode already labelled it #2b0f0b; both themes now do, which clears 5.47:1
+   and leaves the coral fill exactly as it was. */
 .btn-coral {
   background: var(--coral);
-  color: #fff;
+  color: #2b0f0b;
   box-shadow: 0 8px 20px -8px color-mix(in srgb, var(--coral) 55%, transparent);
 }
 .btn-coral:hover:not(:disabled) {
   transform: translateY(-1px);
   filter: brightness(1.05);
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .btn-coral {
-    color: #2b0f0b;
-  }
-}
-:root[data-theme="dark"] .btn-coral {
-  color: #2b0f0b;
 }
 
 .btn-ghost {

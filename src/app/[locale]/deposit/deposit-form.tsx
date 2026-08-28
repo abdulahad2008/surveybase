@@ -1,6 +1,12 @@
 "use client";
 
-import { useActionState, useRef, useState, type ReactNode } from "react";
+import {
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useTranslations } from "next-intl";
 import { detectPiiColumns } from "@/lib/pii";
 import { inferFieldworkRange } from "@/lib/fieldwork";
@@ -12,6 +18,7 @@ import {
 } from "@/lib/spreadsheet";
 import { citationWithoutUrl, citationYear } from "@/lib/citation";
 import { splitList } from "@/lib/form-values";
+import { EARLIEST_PUBLICATION_YEAR } from "@/lib/url";
 import { OTHER } from "@/lib/survey-vocab";
 import { CopyButton } from "@/components/copy-button";
 import { submitDataset, type DepositState } from "./actions";
@@ -68,9 +75,16 @@ type Step = (typeof STEPS)[number];
 export function DepositForm({
   locale,
   depositorName,
+  maxPublicationYear,
 }: {
   locale: Locale;
   depositorName: string | null;
+  /**
+   * Computed on the server and passed down, so the year bound is one value
+   * rendered twice rather than two `new Date()` calls that could straddle a
+   * new year and make the markup hydrate into something different.
+   */
+  maxPublicationYear: number;
 }) {
   const t = useTranslations("Deposit");
   const boundAction = submitDataset.bind(null, locale);
@@ -82,13 +96,33 @@ export function DepositForm({
   /** Set when a file was refused in the browser for exceeding the size limit. */
   const [oversize, setOversize] = useState(false);
   const [step, setStep] = useState<Step>("data");
+  /**
+   * The two fieldwork dates are the one pair of fields whose validity depends
+   * on each other, which no single input can express on its own. Mirroring
+   * them into state keeps the `min` on the end date derived from whatever the
+   * start date currently holds, prefilled or typed.
+   */
+  const [fieldwork, setFieldwork] = useState({ start: "", end: "" });
   const [summary, setSummary] = useState<Summary | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const fieldworkEndRef = useRef<HTMLInputElement>(null);
   const dataRef = useRef<HTMLDivElement>(null);
   const describeRef = useRef<HTMLDivElement>(null);
   const publishRef = useRef<HTMLDivElement>(null);
 
   const stepIndex = STEPS.indexOf(step);
+
+  // `min` alone would report the browser's generic range message, which names
+  // a date without saying why it is the floor. The custom message rides on the
+  // same constraint-validation pass the step buttons already run.
+  const datesOutOfOrder = Boolean(
+    fieldwork.start && fieldwork.end && fieldwork.end < fieldwork.start,
+  );
+  useEffect(() => {
+    fieldworkEndRef.current?.setCustomValidity(
+      datesOutOfOrder ? t("errorDateOrder") : "",
+    );
+  }, [datesOutOfOrder, t]);
 
   function stepContainer(s: Step): HTMLDivElement | null {
     if (s === "data") return dataRef.current;
@@ -139,6 +173,9 @@ export function DepositForm({
       citation: citationWithoutUrl({
         title,
         author: depositorName,
+        // A deposit always has a depositor; the source-organization credit
+        // exists for the seeded archive records, which nobody deposited.
+        sourceOrganization: null,
         year: citationYear(fieldworkStart || null, new Date()),
       }),
     };
@@ -224,6 +261,9 @@ export function DepositForm({
       fieldworkEnd: fieldwork?.end ?? null,
       parseId: (prev?.parseId ?? 0) + 1,
     }));
+    // The date inputs remount on a new parse, so the mirrored values have to
+    // follow the prefill rather than wait for someone to edit the fields.
+    setFieldwork({ start: fieldwork?.start ?? "", end: fieldwork?.end ?? "" });
   }
 
   const stepLabels: Record<Step, string> = {
@@ -495,7 +535,8 @@ export function DepositForm({
                   id="f-sample_size"
                   name="sample_size"
                   type="number"
-                  min={0}
+                  min={1}
+                  step={1}
                   required
                   defaultValue={preview?.rowCount ?? ""}
                   className="input tnum"
@@ -528,6 +569,9 @@ export function DepositForm({
                   type="date"
                   required
                   defaultValue={preview?.fieldworkStart ?? ""}
+                  onChange={(e) =>
+                    setFieldwork((f) => ({ ...f, start: e.currentTarget.value }))
+                  }
                   className="input"
                 />
               </Field>
@@ -543,10 +587,15 @@ export function DepositForm({
                 <input
                   key={`fieldwork_end-${preview?.parseId ?? 0}`}
                   id="f-fieldwork_end"
+                  ref={fieldworkEndRef}
                   name="fieldwork_end"
                   type="date"
                   required
+                  min={fieldwork.start || undefined}
                   defaultValue={preview?.fieldworkEnd ?? ""}
+                  onChange={(e) =>
+                    setFieldwork((f) => ({ ...f, end: e.currentTarget.value }))
+                  }
                   className="input"
                 />
               </Field>
@@ -641,6 +690,9 @@ export function DepositForm({
                     id="f-publication_year"
                     name="publication_year"
                     type="number"
+                    min={EARLIEST_PUBLICATION_YEAR}
+                    max={maxPublicationYear}
+                    step={1}
                     className="input tnum"
                   />
                 </Field>
@@ -653,6 +705,7 @@ export function DepositForm({
                 <input
                   id="f-publication_url"
                   name="publication_url"
+                  type="url"
                   required
                   className="input"
                   placeholder="https://doi.org/…"
@@ -671,7 +724,7 @@ export function DepositForm({
                 <p className="hint">{t("reviewCitationHint")}</p>
               </div>
 
-              <p className="rounded-xl bg-brand-wash p-3.5 font-mono text-xs leading-relaxed break-words text-soft">
+              <p className="rounded-xl bg-brand-wash p-3.5 font-mono text-xs leading-relaxed wrap-anywhere text-soft">
                 {summary.citation}
               </p>
               {/* The slug carries a random suffix assigned at insert time, so

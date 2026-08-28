@@ -18,6 +18,24 @@ import { routing, type Locale } from "@/i18n/routing";
 export const SITE_URL = "https://surveybase.uz";
 export const SITE_NAME = "SurveyBase.uz";
 
+/**
+ * The one address on the site a visitor can write to: takedown requests, data
+ * requests and anything else on the privacy and terms pages. Kept here rather
+ * than in the message catalogs because it is the same in all three locales and
+ * a translated address is a typo waiting to happen.
+ *
+ * This has to be a mailbox that is actually read: the privacy policy promises
+ * an answer within 30 days and the terms page promises a takedown route.
+ */
+export const SITE_CONTACT_EMAIL = "hello@surveybase.uz";
+
+/**
+ * When the privacy policy and terms last changed, as `yyyy-mm-dd`. Both pages
+ * print it, so a reader can tell whether they are looking at the version they
+ * agreed to. Bump it whenever the `Legal` copy changes in substance.
+ */
+export const LEGAL_LAST_UPDATED = "2026-08-28";
+
 /** A real, 200-answering page URL. `path` is locale-agnostic, e.g. "/datasets". */
 export function localeUrl(locale: Locale, path: string = ""): string {
   return `${SITE_URL}/${locale}${path}`;

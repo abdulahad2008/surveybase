@@ -72,11 +72,46 @@ interface TextSummary {
 
 export type ColumnSummary = CategoricalSummary | NumericSummary | DateSummary | TextSummary;
 
+/**
+ * Words that would otherwise top every free-text chart without saying anything.
+ *
+ * The list was English and Russian only, on a site whose default language is
+ * Uzbek — so an Uzbek free-text column charted "uchun", "bilan" and "emas" as
+ * its most common answers. Uzbek is here in both alphabets, because a survey
+ * run in Uzbekistan gets answers in both.
+ *
+ * Kept as three lists rather than one flat set: "она" was in the old set twice,
+ * which nothing caught because a Set swallows it, and a translator adding a
+ * word can now see which language they are adding it to.
+ *
+ * Words shorter than three letters never reach here — the tokenizer drops them
+ * — so va, bu, ва and бу are absent on purpose.
+ */
 const STOPWORDS = new Set([
+  // English
   "the", "and", "for", "are", "was", "were", "with", "that", "this", "have",
-  "has", "not", "but", "you", "your", "from", "она", "или", "как", "что",
-  "это", "для", "его", "она", "они", "был", "была", "было", "были",
+  "has", "not", "but", "you", "your", "from",
+  // Russian
+  "или", "как", "что", "это", "для", "его", "она", "они", "был", "была",
+  "было", "были", "меня", "мне", "нас", "вас", "тоже", "чтобы", "если",
+  "очень", "там", "так", "уже", "еще", "ещё",
+  // Uzbek (Latin)
+  "shu", "ham", "ular", "bir", "uchun", "bilan", "emas", "lekin", "ammo",
+  "yoki", "kabi", "juda", "faqat", "yana", "hech", "keyin", "oldin", "men",
+  "biz", "siz", "uning", "meni", "bizga", "sizga", "qilib", "kerak", "yoʻq",
+  // Uzbek (Cyrillic)
+  "ҳам", "улар", "бир", "учун", "билан", "эмас", "лекин", "аммо",
+  "ёки", "каби", "жуда", "фақат", "яна", "ҳеч", "кейин", "олдин", "мен",
+  "биз", "сиз", "унинг", "мени", "керак", "йўқ",
 ]);
+
+/**
+ * Above this many distinct whole numbers a column is treated as continuous and
+ * binned into ranges. Twelve covers the discrete scales surveys actually use —
+ * 1–5 and 1–7 Likert, 0–10 net-promoter, household size, months of the year —
+ * and stops short of an axis nobody can read.
+ */
+const MAX_DISCRETE_BINS = 12;
 
 export function computeSummary(type: ColumnType, values: string[]): ColumnSummary {
   const nonEmpty = values.map((v) => (v ?? "").trim()).filter((v) => v !== "");
@@ -93,6 +128,30 @@ export function computeSummary(type: ColumnType, values: string[]): ColumnSummar
         ? (sorted[mid - 1] + sorted[mid]) / 2
         : sorted[mid]
       : 0;
+
+    // A Likert column is numeric but not continuous: five possible answers
+    // spread over ten range bins gives "1.0–1.4", three empty bins, "2.6–3.0"
+    // and so on — a chart that hides the shape of the answers it is drawing.
+    // When every value is a whole number and there are few enough of them to
+    // fit on an axis, each one gets its own bar, in numeric order.
+    const distinct = [...new Set(nums)].sort((a, b) => a - b);
+    if (
+      nums.length > 0 &&
+      distinct.length <= MAX_DISCRETE_BINS &&
+      distinct.every((n) => Number.isInteger(n))
+    ) {
+      const counts = new Map(distinct.map((n) => [n, 0]));
+      for (const n of nums) counts.set(n, (counts.get(n) ?? 0) + 1);
+      return {
+        type: "numeric",
+        min,
+        max,
+        mean,
+        median,
+        histogram: distinct.map((n) => ({ bin: String(n), count: counts.get(n) ?? 0 })),
+        responseCount: nums.length,
+      };
+    }
 
     const binCount = 10;
     const span = max - min || 1;

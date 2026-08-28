@@ -5,14 +5,15 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { routing, type Locale } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/server";
+import { pageMetadata } from "@/lib/site";
 import {
   PUBLIC_PROFILE_COLUMNS,
   getProfileDatasets,
-  normalizeWebsite,
   orcidUrl,
   summarizeDatasets,
   type Profile,
 } from "@/lib/profiles";
+import { normalizeWebsite } from "@/lib/url";
 import { topicLabel } from "@/lib/survey-vocab";
 import { Avatar } from "@/components/avatar";
 import { DatabaseIcon, DownloadIcon, LinkIcon, MailIcon, UsersIcon } from "@/components/icons";
@@ -23,15 +24,27 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ locale: string; id: string }>;
 }): Promise<Metadata> {
-  const { id } = await params;
-  if (!UUID.test(id)) return { title: "Researcher" };
+  const { locale: raw, id } = await params;
+  const locale: Locale = hasLocale(routing.locales, raw) ? raw : routing.defaultLocale;
+  const t = await getTranslations({ locale, namespace: "Profile" });
 
-  const supabase = await createClient();
-  const { data } = await supabase.from("profiles").select("name").eq("id", id).maybeSingle();
-  const name = (data as { name: string | null } | null)?.name;
-  return { title: name ?? "Researcher" };
+  // A depositor who left their name blank is credited as anonymous everywhere
+  // else on the site; the tab title said "Researcher", in English, to everyone.
+  let name = t("anonymousResearcher");
+  if (UUID.test(id)) {
+    const supabase = await createClient();
+    const { data } = await supabase.from("profiles").select("name").eq("id", id).maybeSingle();
+    name = (data as { name: string | null } | null)?.name?.trim() || name;
+  }
+
+  return pageMetadata({
+    locale,
+    path: `/users/${id}`,
+    title: name,
+    description: t("publicMetaDescription", { name }),
+  });
 }
 
 export default async function PublicProfilePage({
