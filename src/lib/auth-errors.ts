@@ -13,7 +13,11 @@ export const AUTH_ERROR_KEYS = [
   "errorEmailNotConfirmed",
   "errorUserExists",
   "errorWeakPassword",
+  "errorSamePassword",
   "errorOAuthUnavailable",
+  "errorResetLinkInvalid",
+  "errorRateLimited",
+  "errorPasswordMismatch",
   "errorGeneric",
 ] as const;
 

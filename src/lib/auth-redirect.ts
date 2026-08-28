@@ -28,9 +28,38 @@ export function publicOrigin(requestOrigin: string | null): string {
   return SITE_URL;
 }
 
-/** The URL Supabase redirects to after OAuth, or from an email confirmation link. */
-export function authCallbackUrl(locale: Locale, requestOrigin: string | null): string {
-  return `${publicOrigin(requestOrigin)}/auth/callback?locale=${locale}`;
+/**
+ * Where the callback sends the browser once it has a session.
+ *
+ * An allow-list rather than a path, because this value arrives from a link in
+ * an email and is echoed straight into a `Location` header — accepting an
+ * arbitrary `?next=` would make the callback an open redirect that Supabase
+ * itself would happily send the mail for.
+ */
+const NEXT_DESTINATIONS = {
+  "reset-password": "/reset-password",
+} as const;
+
+export type AuthNext = keyof typeof NEXT_DESTINATIONS;
+
+/** Narrow an untrusted `?next=` to a destination we actually serve. */
+export function resolveNext(value: string | null): AuthNext | null {
+  return value !== null && value in NEXT_DESTINATIONS ? (value as AuthNext) : null;
+}
+
+/** The locale-agnostic path a resolved `next` stands for; "" means the home page. */
+export function nextPath(next: AuthNext | null): string {
+  return next ? NEXT_DESTINATIONS[next] : "";
+}
+
+/** The URL Supabase redirects to after OAuth, or from an email link. */
+export function authCallbackUrl(
+  locale: Locale,
+  requestOrigin: string | null,
+  next?: AuthNext,
+): string {
+  const base = `${publicOrigin(requestOrigin)}/auth/callback?locale=${locale}`;
+  return next ? `${base}&next=${next}` : base;
 }
 
 /** Narrow an untrusted `?locale=` back to a locale we actually serve. */
