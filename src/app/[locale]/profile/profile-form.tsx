@@ -138,7 +138,7 @@ export function ProfileForm({ locale, profile }: { locale: Locale; profile: Prof
         </p>
       )}
       {state.saved && !state.error && (
-        <p role="status" className="flex items-center gap-2 rounded-xl bg-mint-soft px-4 py-3 text-sm font-semibold text-mint">
+        <p role="status" className="flex items-center gap-2 rounded-xl bg-mint-soft px-4 py-3 text-sm font-semibold text-mint-ink">
           <CheckIcon size={16} />
           {t("saved")}
         </p>

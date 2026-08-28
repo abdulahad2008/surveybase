@@ -8,7 +8,7 @@ import { headers } from "next/headers";
 import { authCallbackUrl } from "@/lib/auth-redirect";
 import type { AuthErrorKey } from "@/lib/auth-errors";
 
-type ActionState = { error: AuthErrorKey | null; needsConfirmation?: boolean };
+type ActionState = { error: AuthErrorKey | null; needsConfirmation?: boolean; done?: boolean };
 
 function authErrorKey(code: string | undefined, message?: string): AuthErrorKey {
   if (message && /provider is not enabled/i.test(message)) {
@@ -26,6 +26,8 @@ function authErrorKey(code: string | undefined, message?: string): AuthErrorKey 
       return "errorUserExists";
     case "weak_password":
       return "errorWeakPassword";
+    case "same_password":
+      return "errorSamePassword";
     default:
       return "errorGeneric";
   }
@@ -92,6 +94,82 @@ export async function signup(
 
   redirect({ href: "/", locale });
   return { error: null };
+}
+
+/**
+ * Step one of a password reset: mail a recovery link.
+ *
+ * The result is deliberately the same whether or not the address has an
+ * account. Reporting "no such user" here would turn this form into a free
+ * membership oracle for the archive — anyone could test whether a named
+ * researcher has deposited under a given address. Supabase already answers
+ * uniformly for this call; the point of the catch-all below is that our own
+ * error handling must not undo that.
+ *
+ * The one failure worth surfacing is rate limiting, which says nothing about
+ * the address — it is a property of the mail sender, not of the account.
+ */
+export async function requestPasswordReset(
+  locale: Locale,
+  _prevState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const supabase = await createClient();
+  const origin = (await headers()).get("origin");
+  const email = String(formData.get("email") ?? "").trim();
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    // Back through the callback so the recovery code is exchanged for a
+    // session; landing straight on /reset-password would arrive with nothing
+    // to authorise the password change.
+    redirectTo: authCallbackUrl(locale, origin, "reset-password"),
+  });
+
+  if (error) {
+    console.error(`[auth] password reset request failed: ${error.message}`);
+    if (error.code === "over_email_send_rate_limit" || error.status === 429) {
+      return { error: "errorRateLimited" };
+    }
+  }
+
+  return { error: null, done: true };
+}
+
+/**
+ * Step two: set the new password using the session the recovery link created.
+ *
+ * Confirmation is compared here rather than only in the browser — the two
+ * fields are a guard against a typo the user cannot see, and a guard that only
+ * exists in client JavaScript is not one.
+ */
+export async function updatePassword(
+  // Bound by the page for symmetry with the other auth actions; this one has
+  // nowhere to redirect to, so it never reads the locale.
+  _locale: Locale,
+  _prevState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const password = String(formData.get("password") ?? "");
+  const confirm = String(formData.get("confirm") ?? "");
+
+  if (password !== confirm) return { error: "errorPasswordMismatch" };
+
+  const supabase = await createClient();
+
+  // updateUser reports a missing session as a generic error, and "your link
+  // expired" is the only reading a user can act on, so check for the session
+  // first and say so plainly.
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "errorResetLinkInvalid" };
+
+  const { error } = await supabase.auth.updateUser({ password });
+
+  if (error) {
+    console.error(`[auth] password update failed: ${error.message}`);
+    return { error: authErrorKey(error.code, error.message) };
+  }
+
+  return { error: null, done: true };
 }
 
 export async function signOut() {

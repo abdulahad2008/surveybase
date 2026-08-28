@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { SITE_URL } from "@/lib/site";
@@ -35,6 +36,8 @@ export default async function LocaleLayout({
     notFound();
   }
 
+  const t = await getTranslations({ locale, namespace: "Nav" });
+
   return (
     // suppressHydrationWarning: the inline script below rewrites data-theme on
     // <html> before React hydrates, so the DOM legitimately differs from the
@@ -46,6 +49,15 @@ export default async function LocaleLayout({
       </head>
       <body className="flex min-h-full flex-col">
         <NextIntlClientProvider>
+          {/* Reaching the content by keyboard otherwise means tabbing past every
+              header control on every navigation. Hidden until focused, so it
+              costs sighted users nothing. */}
+          <a
+            href="#main-content"
+            className="sr-only rounded-full focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-on-brand focus:shadow-pop focus:outline-none"
+          >
+            {t("skipToContent")}
+          </a>
           <Header />
           {children}
           <Footer />

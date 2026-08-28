@@ -14,9 +14,9 @@ export const metadata: Metadata = {
 // so it has no reliable way to know the visitor's locale and shows all three
 // languages instead of picking one.
 const messages = [
-  { heading: "Sahifa topilmadi", message: "Siz izlayotgan sahifa mavjud emas yoki ko‘chirilgan.", backHome: "Bosh sahifaga qaytish", href: "/uz" },
-  { heading: "Страница не найдена", message: "Страница, которую вы ищете, не существует или была перемещена.", backHome: "На главную", href: "/ru" },
-  { heading: "Page not found", message: "The page you are looking for does not exist or has been moved.", backHome: "Back home", href: "/en" },
+  { lang: "uz", heading: "Sahifa topilmadi", message: "Siz izlayotgan sahifa mavjud emas yoki ko‘chirilgan.", backHome: "Bosh sahifaga qaytish", href: "/uz" },
+  { lang: "ru", heading: "Страница не найдена", message: "Страница, которую вы ищете, не существует или была перемещена.", backHome: "На главную", href: "/ru" },
+  { lang: "en", heading: "Page not found", message: "The page you are looking for does not exist or has been moved.", backHome: "Back home", href: "/en" },
 ];
 
 export default function GlobalNotFound() {
@@ -26,22 +26,30 @@ export default function GlobalNotFound() {
         <ThemeScript />
       </head>
       <body className="flex min-h-full flex-col">
-        <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-10 px-4 py-16 text-center">
+        <main id="main-content" tabIndex={-1} className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-10 px-4 py-16 text-center">
           <div aria-hidden className="flex items-end gap-2">
             <span className="h-10 w-4 rounded-full bg-brand-soft" />
             <span className="h-16 w-4 rounded-full bg-brand" />
             <span className="h-7 w-4 rounded-full bg-coral" />
             <span className="h-12 w-4 rounded-full bg-sun" />
           </div>
-          {messages.map((m) => (
-            <div key={m.href} className="flex flex-col items-center gap-2">
-              <h1 className="font-display text-xl font-bold text-ink">{m.heading}</h1>
-              <p className="text-sm text-soft">{m.message}</p>
-              <a href={m.href} className="btn btn-soft btn-sm mt-1">
-                {m.backHome}
-              </a>
-            </div>
-          ))}
+          {messages.map((m, i) => {
+            // One h1 per document, so the two translations of it are headings
+            // of the section they introduce rather than three competing page
+            // titles. The h1 is the Uzbek one because that is what <html lang>
+            // says the document is; each block carries its own lang so a screen
+            // reader switches voice instead of reading Russian as Uzbek.
+            const Heading = i === 0 ? "h1" : "h2";
+            return (
+              <div key={m.href} lang={m.lang} className="flex flex-col items-center gap-2">
+                <Heading className="font-display text-xl font-bold text-ink">{m.heading}</Heading>
+                <p className="text-sm text-soft">{m.message}</p>
+                <a href={m.href} className="btn btn-soft btn-sm mt-1">
+                  {m.backHome}
+                </a>
+              </div>
+            );
+          })}
         </main>
       </body>
     </html>

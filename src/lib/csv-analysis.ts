@@ -97,10 +97,16 @@ export function computeSummary(type: ColumnType, values: string[]): ColumnSummar
     const binCount = 10;
     const span = max - min || 1;
     const binSize = span / binCount;
+    // Ten bins of an age column produced labels like "18.0–24.4", and ten of
+    // those on a phone axis overlap into noise. A tenth of the span is the
+    // smallest difference a label has to express, so that is what sets the
+    // precision — whole numbers for ages and counts, decimals only where the
+    // bins are genuinely narrower than one unit.
+    const decimals = binSize >= 1 ? 0 : binSize >= 0.1 ? 1 : 2;
     const bins = Array.from({ length: binCount }, (_, i) => {
       const lo = min + i * binSize;
       const hi = i === binCount - 1 ? max : lo + binSize;
-      return { bin: `${lo.toFixed(1)}–${hi.toFixed(1)}`, count: 0 };
+      return { bin: `${lo.toFixed(decimals)}–${hi.toFixed(decimals)}`, count: 0 };
     });
     for (const n of nums) {
       const idx = Math.min(binCount - 1, Math.floor(((n - min) / span) * binCount));
@@ -141,4 +147,14 @@ export function computeSummary(type: ColumnType, values: string[]): ColumnSummar
     .map(([term, count]) => ({ term, count }));
 
   return { type: "text", topTerms, responseCount: nonEmpty.length };
+}
+
+/**
+ * Bin labels are baked into summary_json at deposit time, so datasets archived
+ * before the precision fix above still carry "18.0–24.4". Dropping a trailing
+ * ".0" at render time shortens those without a backfill, and is a no-op for
+ * bins that genuinely need a decimal.
+ */
+export function tidyBin(bin: string): string {
+  return bin.replace(/(\d)\.0(?=\s*[–-]|$)/g, "$1");
 }

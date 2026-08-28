@@ -2,7 +2,7 @@
 
 import Papa from "papaparse";
 import { createClient } from "@/lib/supabase/server";
-import { parseSpreadsheet } from "@/lib/spreadsheet";
+import { MAX_UPLOAD_BYTES, parseSpreadsheet } from "@/lib/spreadsheet";
 import { splitList as splitListValue } from "@/lib/form-values";
 import { OTHER } from "@/lib/survey-vocab";
 import { detectPiiColumns } from "@/lib/pii";
@@ -15,6 +15,7 @@ export type DepositErrorKey =
   | "errorAuth"
   | "errorConfirm"
   | "errorFile"
+  | "errorFileTooLarge"
   | "errorAllPii"
   | "errorMissingFields"
   | "errorPublicationIncomplete"
@@ -68,6 +69,12 @@ export async function submitDataset(
   const file = formData.get("csv");
   if (!(file instanceof File) || file.size === 0) {
     return { error: "errorFile" };
+  }
+  // The browser checks this too, and this is the check that counts: the action
+  // is a public endpoint and `required`-style limits in the form are a request
+  // to a cooperating client, not a rule.
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return { error: "errorFileTooLarge" };
   }
 
   const title = formData.get("title")?.toString().trim() ?? "";

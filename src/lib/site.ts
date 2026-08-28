@@ -12,6 +12,7 @@
 // redirect is the feature: the citation URL keeps working whatever we do to the
 // locale routing later.
 
+import type { Metadata } from "next";
 import { routing, type Locale } from "@/i18n/routing";
 
 export const SITE_URL = "https://surveybase.uz";
@@ -39,4 +40,38 @@ export function localeAlternates(path: string = ""): Record<string, string> {
 /** The permanent, locale-neutral identifier for a dataset. Redirects to the default locale. */
 export function datasetId(slug: string): string {
   return `${SITE_URL}/datasets/${slug}`;
+}
+
+/**
+ * Title, description, canonical, hreflang and Open Graph for one page.
+ *
+ * Every page but the dataset detail one inherited the layout's default title,
+ * so five tabs open on this site were indistinguishable and every URL shared
+ * on Telegram — the channel that matters here — unfurled as a bare link.
+ */
+export function pageMetadata({
+  locale,
+  path,
+  title,
+  description,
+  index = true,
+  absoluteTitle = false,
+}: {
+  locale: Locale;
+  path?: string;
+  title: string;
+  description: string;
+  index?: boolean;
+  /** Skip the layout's "%s · SurveyBase.uz" template — for titles already carrying the brand. */
+  absoluteTitle?: boolean;
+}): Metadata {
+  const url = localeUrl(locale, path);
+  return {
+    title: absoluteTitle ? { absolute: title } : title,
+    description,
+    alternates: { canonical: url, languages: localeAlternates(path) },
+    openGraph: { type: "website", siteName: SITE_NAME, title, description, url },
+    twitter: { card: "summary_large_image", title, description },
+    ...(index ? {} : { robots: { index: false, follow: false } }),
+  };
 }

@@ -1,4 +1,8 @@
+import type { Metadata } from "next";
+import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
+import { routing, type Locale } from "@/i18n/routing";
+import { pageMetadata } from "@/lib/site";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { queryDatasets, getFilterOptions, type DatasetFilters } from "@/lib/datasets";
@@ -30,6 +34,22 @@ function buildPageHref(sp: RawSearchParams, page: number): string {
   if (page > 1) params.set("page", String(page));
   const qs = params.toString();
   return qs ? `/datasets?${qs}` : "/datasets";
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: raw } = await params;
+  const locale: Locale = hasLocale(routing.locales, raw) ? raw : routing.defaultLocale;
+  const t = await getTranslations({ locale, namespace: "Browse" });
+  return pageMetadata({
+    locale,
+    path: "/datasets",
+    title: t("heading"),
+    description: t("metaDescription"),
+  });
 }
 
 export default async function DatasetsPage({
@@ -77,7 +97,7 @@ export default async function DatasetsPage({
   ].filter((v) => v != null).length;
 
   return (
-    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
+    <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl font-extrabold tracking-tight text-ink">
@@ -93,15 +113,15 @@ export default async function DatasetsPage({
           {/* -------- filter rail -------- */}
           <aside className="card space-y-5 p-5 lg:sticky lg:top-20">
             <div className="flex items-center justify-between">
-              <p className="font-display text-sm font-bold text-ink">
+              <h2 className="font-display text-sm font-bold text-ink">
                 {t("filtersHeading")}
                 {activeFilterCount > 0 && (
                   <span className="ml-2 rounded-full bg-brand px-2 py-0.5 text-xs font-bold text-on-brand">
                     {activeFilterCount}
                   </span>
                 )}
-              </p>
-              <Link href="/datasets" className="text-xs font-semibold text-brand hover:underline">
+              </h2>
+              <Link href="/datasets" className="tap-target text-xs font-semibold text-brand hover:underline">
                 {t("resetFilters")}
               </Link>
             </div>

@@ -1,4 +1,8 @@
+import type { Metadata } from "next";
+import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
+import { routing, type Locale } from "@/i18n/routing";
+import { pageMetadata } from "@/lib/site";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { queryDatasets, getArchiveStats, getFilterOptions } from "@/lib/datasets";
@@ -18,6 +22,22 @@ import {
   UsersIcon,
 } from "@/components/icons";
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: raw } = await params;
+  const locale: Locale = hasLocale(routing.locales, raw) ? raw : routing.defaultLocale;
+  const t = await getTranslations({ locale, namespace: "Home" });
+  return pageMetadata({
+    locale,
+    title: `${t("title")} — ${t("eyebrow")}`,
+    absoluteTitle: true,
+    description: t("subtitle").trim(),
+  });
+}
+
 export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const t = await getTranslations("Home");
@@ -35,7 +55,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   const popularTopics = options.topics.slice(0, 6);
 
   return (
-    <main className="flex-1">
+    <main id="main-content" tabIndex={-1} className="flex-1">
       {/* ---------------------------------------------------------------- */}
       {/* Hero                                                              */}
       {/* ---------------------------------------------------------------- */}
@@ -53,7 +73,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 pt-14 pb-16 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:pt-20">
           <div className="space-y-7">
             <p className="fade-up inline-flex items-center gap-2 rounded-full border border-line bg-card px-4 py-1.5 text-xs font-semibold text-soft shadow-card">
-              <SparkleIcon size={14} className="text-sun" />
+              <SparkleIcon size={14} className="text-sun-ink" />
               {t("eyebrow")}
             </p>
 
@@ -72,6 +92,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
                 <input
                   type="search"
                   name="q"
+                  aria-label={t("searchLabel")}
                   placeholder={t("searchPlaceholder")}
                   className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-faint"
                 />
@@ -406,7 +427,7 @@ function Shelf({
         <h2 className="font-display text-2xl font-extrabold tracking-tight text-ink">{heading}</h2>
         <Link
           href={viewAllHref}
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand transition hover:gap-2.5"
+          className="tap-target gap-1.5 text-sm font-semibold text-brand transition hover:gap-2.5"
         >
           {viewAllLabel}
           <ArrowRightIcon size={15} />

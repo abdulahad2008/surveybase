@@ -215,7 +215,7 @@ export default async function DatasetPage({
       : null;
 
   return (
-    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
+    <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
       {jsonLd && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       )}
@@ -256,7 +256,9 @@ export default async function DatasetPage({
           {dataset.title}
         </h1>
         {dataset.abstract && (
-          <p className="mt-3 text-base leading-relaxed text-soft">{dataset.abstract}</p>
+          <p className="mt-3 text-base leading-relaxed text-soft wrap-anywhere">
+            {dataset.abstract}
+          </p>
         )}
         {dataset.depositor?.name && (
           <p className="mt-3 text-sm text-faint">
@@ -358,7 +360,7 @@ export default async function DatasetPage({
               <h2 className="font-display text-lg font-bold text-ink">{t("publicationsHeading")}</h2>
               <ul className="mt-3 space-y-3 text-sm">
                 {publications.map((p, i) => (
-                  <li key={i} className="rounded-xl bg-card-soft p-3.5 leading-relaxed">
+                  <li key={i} className="rounded-xl bg-card-soft p-3.5 leading-relaxed wrap-anywhere">
                     <span className="font-semibold text-ink">{p.title}</span>
                     <span className="text-soft">
                       {p.authors ? ` — ${p.authors}` : ""}
@@ -369,9 +371,9 @@ export default async function DatasetPage({
                         href={p.doi_or_url}
                         target="_blank"
                         rel="noreferrer"
-                        className="mt-1 flex items-center gap-1 text-brand hover:underline"
+                        className="mt-1 flex min-w-0 items-center gap-1 text-brand hover:underline"
                       >
-                        <ExternalLinkIcon size={13} />
+                        <ExternalLinkIcon size={13} className="shrink-0" />
                         <span className="truncate">{p.doi_or_url}</span>
                       </a>
                     )}
@@ -497,8 +499,10 @@ function StatTile({
         {icon}
       </span>
       <div className="min-w-0">
-        <p className="font-display tnum truncate text-lg font-extrabold text-ink">{value}</p>
-        <p className="truncate text-[11px] font-semibold tracking-wide text-faint uppercase">{label}</p>
+        <p className="font-display tnum text-lg leading-tight font-extrabold text-ink wrap-anywhere">
+          {value}
+        </p>
+        <p className="mt-0.5 text-[11px] font-semibold tracking-wide text-faint uppercase">{label}</p>
       </div>
     </div>
   );

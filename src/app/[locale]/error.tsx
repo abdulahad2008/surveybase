@@ -6,7 +6,7 @@ export default function ErrorPage({ reset }: { error: Error & { digest?: string 
   const t = useTranslations("Error");
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-5 px-4 py-16 text-center">
+    <main id="main-content" tabIndex={-1} className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-5 px-4 py-16 text-center">
       <span aria-hidden className="font-display text-6xl font-extrabold text-brand-soft">
         :(
       </span>

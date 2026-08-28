@@ -6,6 +6,8 @@ import { detectPiiColumns } from "@/lib/pii";
 import { inferFieldworkRange } from "@/lib/fieldwork";
 import {
   ACCEPTED_UPLOAD_EXTENSIONS,
+  MAX_UPLOAD_BYTES,
+  megabytes,
   parseSpreadsheet,
 } from "@/lib/spreadsheet";
 import { citationWithoutUrl, citationYear } from "@/lib/citation";
@@ -31,6 +33,9 @@ import {
 } from "@/components/icons";
 
 const initialState: DepositState = { error: null };
+
+/** The upload limit as the depositor sees it, in megabytes. */
+const maxMb = megabytes(MAX_UPLOAD_BYTES);
 
 /** A read-only snapshot of what is about to be submitted, taken when the
  *  depositor reaches the review step. */
@@ -74,6 +79,8 @@ export function DepositForm({
     initialState,
   );
   const [preview, setPreview] = useState<Preview | null>(null);
+  /** Set when a file was refused in the browser for exceeding the size limit. */
+  const [oversize, setOversize] = useState(false);
   const [step, setStep] = useState<Step>("data");
   const [summary, setSummary] = useState<Summary | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -188,8 +195,21 @@ export function DepositForm({
     const file = e.target.files?.[0];
     if (!file) {
       setPreview(null);
+      setOversize(false);
       return;
     }
+    // Before parsing, not after: parsing is what would lock the tab up on a
+    // file this size, and the depositor would be watching a page that had
+    // stopped responding rather than reading why their file was refused.
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setPreview(null);
+      setOversize(true);
+      // Clear the selection so `required` still catches an attempt to submit
+      // with nothing attached.
+      e.target.value = "";
+      return;
+    }
+    setOversize(false);
     const { headers, rows } = await parseSpreadsheet(file);
     const columnValues = headers.map((h) => rows.map((r) => r[h] ?? ""));
     const flags = detectPiiColumns(headers, columnValues);
@@ -272,7 +292,7 @@ export function DepositForm({
             role="alert"
             className="rounded-2xl bg-danger-soft px-4 py-3 text-sm font-medium text-danger"
           >
-            {t(state.error)}
+            {t(state.error, { max: maxMb })}
           </p>
         )}
 
@@ -325,6 +345,15 @@ export function DepositForm({
               />
             </div>
 
+            {oversize && (
+              <p
+                role="alert"
+                className="rounded-2xl bg-danger-soft px-4 py-3 text-sm font-medium text-danger"
+              >
+                {t("errorFileTooLarge", { max: maxMb })}
+              </p>
+            )}
+
             {preview && preview.rowCount === 0 && (
               <p
                 role="alert"
@@ -350,7 +379,7 @@ export function DepositForm({
                   <ShieldIcon
                     size={16}
                     className={
-                      preview.piiHeaders.length === 0 ? "text-soft" : "text-sun"
+                      preview.piiHeaders.length === 0 ? "text-soft" : "text-sun-ink"
                     }
                   />
                   {t("piiHeading")}
@@ -695,7 +724,7 @@ export function DepositForm({
               {preview && preview.piiHeaders.length > 0 && (
                 <div className="border-t border-line pt-5">
                   <p className="flex items-center gap-2 text-sm font-bold text-ink">
-                    <ShieldIcon size={16} className="text-sun" />
+                    <ShieldIcon size={16} className="text-sun-ink" />
                     {t("reviewStripped")}
                   </p>
                   <ul className="mt-2 flex flex-wrap gap-1.5">

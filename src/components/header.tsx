@@ -68,43 +68,50 @@ export async function Header() {
           </Link>
         </nav>
 
-        {/* mobile nav */}
-        <div className="flex items-center gap-2 md:hidden">
-          <ThemeToggle label={t("toggleTheme")} />
-          <LocaleSwitcher />
-          <MobileNav label={t("menu")}>
-            <Link href="/datasets" className={sheetLink}>
-              {t("browse")}
+        {/* mobile nav
+
+            Theme and language sit inside the sheet rather than beside the menu
+            button. As three separate controls next to the logo they measured
+            33px wider than a 375px viewport, and because the header is sticky
+            that overflow scrolled every page on the site sideways — not just
+            this component. Collapsing them to one button removes the cause
+            rather than clipping the symptom. */}
+        <MobileNav label={t("menu")}>
+          <Link href="/datasets" className={sheetLink}>
+            {t("browse")}
+          </Link>
+          <Link href="/deposit" className={sheetLink}>
+            {t("deposit")}
+          </Link>
+          {isModerator && (
+            <Link href="/moderate" className={sheetLink}>
+              {t("moderate")}
             </Link>
-            <Link href="/deposit" className={sheetLink}>
-              {t("deposit")}
-            </Link>
-            {isModerator && (
-              <Link href="/moderate" className={sheetLink}>
-                {t("moderate")}
+          )}
+          {user ? (
+            <>
+              <Link href="/profile" className={sheetLink}>
+                {t("profile")}
               </Link>
-            )}
-            {user ? (
-              <>
-                <Link href="/profile" className={sheetLink}>
-                  {t("profile")}
-                </Link>
-                <div className="px-2">
-                  <SignOutButton label={t("logout")} />
-                </div>
-              </>
-            ) : (
-              <>
-                <Link href="/login" className={sheetLink}>
-                  {t("login")}
-                </Link>
-                <Link href="/signup" className={sheetLink}>
-                  {t("signup")}
-                </Link>
-              </>
-            )}
-          </MobileNav>
-        </div>
+              <div className="px-2">
+                <SignOutButton label={t("logout")} />
+              </div>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className={sheetLink}>
+                {t("login")}
+              </Link>
+              <Link href="/signup" className={sheetLink}>
+                {t("signup")}
+              </Link>
+            </>
+          )}
+          <div className="mt-1 flex items-center justify-between gap-2 border-t border-line px-2 pt-3">
+            <LocaleSwitcher />
+            <ThemeToggle label={t("toggleTheme")} />
+          </div>
+        </MobileNav>
       </div>
     </header>
   );

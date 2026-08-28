@@ -5,7 +5,7 @@ export default async function NotFound() {
   const t = await getTranslations("NotFound");
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-5 px-4 py-16 text-center">
+    <main id="main-content" tabIndex={-1} className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-5 px-4 py-16 text-center">
       <div aria-hidden className="flex items-end gap-2">
         <span className="h-10 w-4 rounded-full bg-brand-soft" />
         <span className="h-16 w-4 rounded-full bg-brand" />

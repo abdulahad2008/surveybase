@@ -79,7 +79,7 @@ export default async function ModeratePage({
   const t = await getTranslations("Moderate");
 
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 space-y-6 px-4 py-10 sm:px-6">
+    <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-3xl flex-1 space-y-6 px-4 py-10 sm:px-6">
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="font-display text-3xl font-extrabold tracking-tight text-ink">
           {t("title")}
@@ -93,7 +93,7 @@ export default async function ModeratePage({
 
       {pending.length === 0 ? (
         <div className="card flex flex-col items-center gap-3 p-12 text-center">
-          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-mint-soft text-mint">
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-mint-soft text-mint-ink">
             <CheckIcon size={26} />
           </span>
           <p className="font-display text-lg font-bold text-ink">{t("emptyHeading")}</p>

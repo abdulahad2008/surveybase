@@ -17,8 +17,8 @@ import { ProfileForm } from "./profile-form";
 export const metadata: Metadata = { title: "Profile" };
 
 const statusChip: Record<string, string> = {
-  published: "bg-mint-soft text-mint",
-  pending: "bg-sun-soft text-warning",
+  published: "bg-mint-soft text-mint-ink",
+  pending: "bg-sun-soft text-warning-ink",
   draft: "bg-card-soft text-soft",
   rejected: "bg-danger-soft text-danger",
 };
@@ -65,7 +65,7 @@ export default async function ProfilePage({
   const stats = summarizeDatasets(datasets);
 
   return (
-    <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6 sm:py-14">
+    <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6 sm:py-14">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl font-bold text-ink">{t("title")}</h1>

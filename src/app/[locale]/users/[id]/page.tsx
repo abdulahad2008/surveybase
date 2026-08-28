@@ -73,7 +73,7 @@ export default async function PublicProfilePage({
   });
 
   return (
-    <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6 sm:py-14">
+    <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6 sm:py-14">
       <header className="card flex flex-wrap items-start gap-6 p-6 sm:p-8">
         <Avatar name={profile.name} src={profile.avatar_url} size={88} />
 
@@ -108,7 +108,7 @@ export default async function PublicProfilePage({
                   href={orcid}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="chip bg-mint-soft text-mint transition hover:opacity-80"
+                  className="chip bg-mint-soft text-mint-ink transition hover:opacity-80"
                 >
                   ORCID {profile.orcid}
                 </a>

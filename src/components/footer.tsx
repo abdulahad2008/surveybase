@@ -12,7 +12,7 @@ export async function Footer() {
         <div className="space-y-4">
           <Logo />
           <p className="max-w-sm text-sm leading-relaxed text-soft">{t("blurb")}</p>
-          <p className="inline-flex items-center gap-2 rounded-full bg-mint-soft px-3 py-1.5 text-xs font-semibold text-mint">
+          <p className="inline-flex items-center gap-2 rounded-full bg-mint-soft px-3 py-1.5 text-xs font-semibold text-mint-ink">
             <ShieldIcon size={14} />
             {t("anonymizedBadge")}
           </p>
@@ -22,17 +22,17 @@ export async function Footer() {
           <p className="font-display text-sm font-bold text-ink">{t("exploreHeading")}</p>
           <ul className="space-y-2 text-soft">
             <li>
-              <Link href="/datasets" className="transition hover:text-brand">
+              <Link href="/datasets" className="tap-target transition hover:text-brand">
                 {t("linkBrowse")}
               </Link>
             </li>
             <li>
-              <Link href="/deposit" className="transition hover:text-brand">
+              <Link href="/deposit" className="tap-target transition hover:text-brand">
                 {t("linkDeposit")}
               </Link>
             </li>
             <li>
-              <Link href="/signup" className="transition hover:text-brand">
+              <Link href="/signup" className="tap-target transition hover:text-brand">
                 {t("linkSignup")}
               </Link>
             </li>
