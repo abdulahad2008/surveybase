@@ -64,6 +64,7 @@ interface DatasetRow {
   is_hosted: boolean;
   external_url: string | null;
   status: string;
+  rejection_reason: string | null;
   depositor_id: string | null;
   source_organization: string | null;
   download_count: number;
@@ -230,9 +231,24 @@ export default async function DatasetPage({
       </Link>
 
       {dataset.status !== "published" && (
-        <p className="mt-4 rounded-2xl border border-sun/40 bg-sun-soft px-4 py-3 text-sm font-medium text-ink">
-          {t(dataset.status === "rejected" ? "rejectedBanner" : "pendingBanner")}
-        </p>
+        <div className="mt-4 rounded-2xl border border-sun/40 bg-sun-soft px-4 py-3 text-sm text-ink">
+          <p className="font-medium">
+            {t(dataset.status === "rejected" ? "rejectedBanner" : "pendingBanner")}
+          </p>
+          {/* The moderator's own words, when there are any. Rejections recorded
+              before the column existed have none, and the banner above still
+              says everything it used to. */}
+          {dataset.status === "rejected" && dataset.rejection_reason && (
+            <>
+              <p className="mt-3 text-xs font-semibold tracking-wide text-faint uppercase">
+                {t("rejectedReasonHeading")}
+              </p>
+              <p className="mt-1 leading-relaxed whitespace-pre-line">
+                {dataset.rejection_reason}
+              </p>
+            </>
+          )}
+        </div>
       )}
 
       {/* header */}

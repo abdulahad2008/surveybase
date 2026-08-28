@@ -257,7 +257,8 @@
     "reviewErrorGeneric": "Что-то пошло не так. Попробуйте снова.",
     "reviewLoginPrompt": "Войдите, чтобы оставить отзыв.",
     "visitCount": "{count} переходов к источнику",
-    "metadataPlatform": "Платформа"
+    "metadataPlatform": "Платформа",
+    "rejectedReasonHeading": "Почему это отклонено"
   },
   "Moderate": {
     "title": "Очередь модерации",
@@ -276,7 +277,18 @@
     "vocabMethods": "Методы сбора",
     "vocabPlatforms": "Платформы",
     "vocabLicenses": "Лицензии",
-    "vocabDatasetCount": "{count, plural, one {# набор} few {# набора} many {# наборов} other {# набора}}"
+    "vocabDatasetCount": "{count, plural, one {# набор} few {# набора} many {# наборов} other {# набора}}",
+    "approving": "Публикуем…",
+    "rejecting": "Отклоняем…",
+    "rejectConfirm": "Отклонить «{title}»? Автор загрузки увидит это сразу.",
+    "rejectReasonLabel": "Причина (необязательно)",
+    "rejectReasonPlaceholder": "например: в столбце 3 остались номера телефонов — удалите его и загрузите снова.",
+    "rejectReasonHint": "Показывается автору на странице его набора. Пишите, что исправить, а не только что не так.",
+    "rejectConfirmButton": "Да, отклонить",
+    "cancel": "Отмена",
+    "errorAuth": "Сессия истекла или вы больше не модератор. Войдите заново.",
+    "errorGeneric": "Не получилось. Попробуйте ещё раз через минуту.",
+    "errorReasonTooLong": "Причина слишком длинная. Уложитесь в 1000 символов."
   },
   "Browse": {
     "heading": "Обзор наборов данных",

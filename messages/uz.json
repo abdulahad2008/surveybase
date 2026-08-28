@@ -257,7 +257,8 @@
     "reviewErrorGeneric": "Xatolik yuz berdi. Qayta urinib ko‘ring.",
     "reviewLoginPrompt": "Sharh qoldirish uchun tizimga kiring.",
     "visitCount": "{count} marta manbaga o‘tildi",
-    "metadataPlatform": "Platforma"
+    "metadataPlatform": "Platforma",
+    "rejectedReasonHeading": "Nima uchun rad etilgan"
   },
   "Moderate": {
     "title": "Moderatsiya navbati",
@@ -276,7 +277,18 @@
     "vocabMethods": "Ma'lumot yig‘ish usullari",
     "vocabPlatforms": "Platformalar",
     "vocabLicenses": "Litsenziyalar",
-    "vocabDatasetCount": "{count, plural, other {# ta to‘plam}}"
+    "vocabDatasetCount": "{count, plural, other {# ta to‘plam}}",
+    "approving": "Tasdiqlanmoqda…",
+    "rejecting": "Rad etilmoqda…",
+    "rejectConfirm": "“{title}” rad etilsinmi? Yuklovchi buni darhol koʻradi.",
+    "rejectReasonLabel": "Sabab (ixtiyoriy)",
+    "rejectReasonPlaceholder": "masalan, 3-ustunda hali ham telefon raqamlari bor — uni olib tashlab, qayta yuklang.",
+    "rejectReasonHint": "Yuklovchiga uning toʻplam sahifasida koʻrsatiladi. Nima notoʻgʻriligini emas, nimani tuzatish kerakligini yozing.",
+    "rejectConfirmButton": "Ha, rad etilsin",
+    "cancel": "Bekor qilish",
+    "errorAuth": "Sessiyangiz tugadi yoki siz endi moderator emassiz. Qaytadan kiring.",
+    "errorGeneric": "Amal bajarilmadi. Bir ozdan soʻng qayta urinib koʻring.",
+    "errorReasonTooLong": "Sabab juda uzun. 1000 belgidan oshmasin."
   },
   "Browse": {
     "heading": "Ma'lumotlar to‘plamlarini ko‘rish",

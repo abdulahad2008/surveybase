@@ -257,7 +257,8 @@
     "reviewErrorGeneric": "Something went wrong. Please try again.",
     "reviewLoginPrompt": "Log in to leave a review.",
     "visitCount": "{count} visits to source",
-    "metadataPlatform": "Platform"
+    "metadataPlatform": "Platform",
+    "rejectedReasonHeading": "Why this was rejected"
   },
   "Moderate": {
     "title": "Moderation queue",
@@ -276,7 +277,18 @@
     "vocabMethods": "Collection methods",
     "vocabPlatforms": "Platforms",
     "vocabLicenses": "Licences",
-    "vocabDatasetCount": "{count, plural, one {# dataset} other {# datasets}}"
+    "vocabDatasetCount": "{count, plural, one {# dataset} other {# datasets}}",
+    "approving": "Approving…",
+    "rejecting": "Rejecting…",
+    "rejectConfirm": "Reject “{title}”? The depositor sees this straight away.",
+    "rejectReasonLabel": "Reason (optional)",
+    "rejectReasonPlaceholder": "e.g. Column 3 still contains phone numbers — remove it and deposit again.",
+    "rejectReasonHint": "Shown to the depositor on their dataset page. Say what to fix, not just what is wrong.",
+    "rejectConfirmButton": "Yes, reject",
+    "cancel": "Cancel",
+    "errorAuth": "Your session expired, or you are no longer a moderator. Sign in again.",
+    "errorGeneric": "That did not go through. Try again in a moment.",
+    "errorReasonTooLong": "The reason is too long. Keep it under 1000 characters."
   },
   "Browse": {
     "heading": "Browse datasets",

@@ -4,11 +4,15 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { Locale } from "@/i18n/routing";
 
-export type ModerateErrorKey = "errorAuth" | "errorGeneric";
+export type ModerateErrorKey = "errorAuth" | "errorGeneric" | "errorReasonTooLong";
 
 export interface ModerateState {
   error: ModerateErrorKey | null;
 }
+
+/** Matches the textarea's `maxLength`, so a reason that reaches the server too
+ *  long got there by bypassing the form rather than by typing. */
+export const MAX_REJECTION_REASON = 1000;
 
 async function requireModerator() {
   const supabase = await createClient();
@@ -27,31 +31,55 @@ async function requireModerator() {
   return { supabase, user, isModerator };
 }
 
-export async function approveDataset(locale: Locale, datasetId: string): Promise<ModerateState> {
+export async function approveDataset(
+  locale: Locale,
+  datasetId: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- required by useActionState's action signature
+  _prev: ModerateState,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- required by useActionState's action signature
+  _formData: FormData,
+): Promise<ModerateState> {
   const { user, isModerator, supabase } = await requireModerator();
   if (!user || !isModerator) return { error: "errorAuth" };
 
   const { error } = await supabase
     .from("datasets")
-    .update({ status: "published" })
+    // Approving clears any earlier rejection reason: it described a version of
+    // the dataset that is no longer the one on the page.
+    .update({ status: "published", rejection_reason: null })
     .eq("id", datasetId);
 
-  if (error) return { error: "errorGeneric" };
+  if (error) {
+    console.error(`[moderate] approving ${datasetId} failed: ${error.message}`);
+    return { error: "errorGeneric" };
+  }
 
   revalidatePath(`/${locale}/moderate`);
   return { error: null };
 }
 
-export async function rejectDataset(locale: Locale, datasetId: string): Promise<ModerateState> {
+export async function rejectDataset(
+  locale: Locale,
+  datasetId: string,
+  _prev: ModerateState,
+  formData: FormData,
+): Promise<ModerateState> {
   const { user, isModerator, supabase } = await requireModerator();
   if (!user || !isModerator) return { error: "errorAuth" };
 
+  const raw = formData.get("reason");
+  const reason = typeof raw === "string" ? raw.trim() : "";
+  if (reason.length > MAX_REJECTION_REASON) return { error: "errorReasonTooLong" };
+
   const { error } = await supabase
     .from("datasets")
-    .update({ status: "rejected" })
+    .update({ status: "rejected", rejection_reason: reason || null })
     .eq("id", datasetId);
 
-  if (error) return { error: "errorGeneric" };
+  if (error) {
+    console.error(`[moderate] rejecting ${datasetId} failed: ${error.message}`);
+    return { error: "errorGeneric" };
+  }
 
   revalidatePath(`/${locale}/moderate`);
   return { error: null };
