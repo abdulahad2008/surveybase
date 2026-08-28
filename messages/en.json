@@ -262,7 +262,10 @@
     "visitCount": "{count} visits to source",
     "metadataPlatform": "Platform",
     "rejectedReasonHeading": "Why this was rejected",
-    "tableTruncated": "Showing the first {shown} rows of {total}. <download>Download the dataset</download> for all of them."
+    "tableTruncated": "Showing the first {shown} rows of {total}. <download>Download the dataset</download> for all of them.",
+    "ratingOutOfFive": "{rating} out of 5",
+    "reviewSaved": "Review saved.",
+    "reviewErrorTooLong": "That review is too long. Keep it under 2000 characters."
   },
   "Moderate": {
     "title": "Moderation queue",

@@ -10,3 +10,7 @@
 /** Longest rejection reason a moderator can write. Matches the textarea's
  *  `maxLength`, so a longer one reaching the server bypassed the form. */
 export const MAX_REJECTION_REASON = 1000;
+
+/** Longest review comment. Matches the textarea's `maxLength`; the column is
+ *  unbounded `text`, so without this one review could be a novel. */
+export const MAX_REVIEW_COMMENT = 2000;

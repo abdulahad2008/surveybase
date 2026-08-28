@@ -129,7 +129,11 @@ function Donut({ summary }: { summary: Categorical }) {
 
   return (
     <div className="flex flex-col items-center gap-5 sm:flex-row sm:gap-6">
-      <div className="h-52 w-52 shrink-0" aria-hidden="true">
+      {/* `inert` as well as aria-hidden: Recharts renders focusable SVG nodes,
+          and hiding them from the accessibility tree without removing them from
+          the tab order leaves a keyboard user stopping on elements a screen
+          reader will not announce. */}
+      <div className="h-52 w-52 shrink-0" aria-hidden="true" inert>
         <ResponsiveContainer>
           <PieChart>
             <Pie

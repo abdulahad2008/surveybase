@@ -262,7 +262,10 @@
     "visitCount": "{count} marta manbaga o‘tildi",
     "metadataPlatform": "Platforma",
     "rejectedReasonHeading": "Nima uchun rad etilgan",
-    "tableTruncated": "{total} qatordan dastlabki {shown} tasi koʻrsatilmoqda. Barchasi uchun <download>toʻplamni yuklab oling</download>."
+    "tableTruncated": "{total} qatordan dastlabki {shown} tasi koʻrsatilmoqda. Barchasi uchun <download>toʻplamni yuklab oling</download>.",
+    "ratingOutOfFive": "5 dan {rating}",
+    "reviewSaved": "Sharh saqlandi.",
+    "reviewErrorTooLong": "Sharh juda uzun. 2000 belgidan oshmasin."
   },
   "Moderate": {
     "title": "Moderatsiya navbati",

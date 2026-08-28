@@ -3,11 +3,16 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { Locale } from "@/i18n/routing";
+import { MAX_REVIEW_COMMENT } from "@/lib/moderation";
 
-export type ReviewErrorKey = "reviewErrorAuth" | "reviewErrorGeneric";
+export type ReviewErrorKey = "reviewErrorAuth" | "reviewErrorGeneric" | "reviewErrorTooLong";
 
 export interface ReviewState {
   error: ReviewErrorKey | null;
+  /** Set once a review has been written, so the form can say so. Saving used
+   *  to be silent: the page revalidates underneath, but nothing on the form
+   *  changed, which reads as a button that did nothing. */
+  saved?: boolean;
 }
 
 export async function submitReview(
@@ -27,6 +32,10 @@ export async function submitReview(
     return { error: "reviewErrorGeneric" };
   }
   const comment = formData.get("comment")?.toString().trim() || null;
+  // The textarea caps this too; a longer one got here around the form.
+  if (comment && comment.length > MAX_REVIEW_COMMENT) {
+    return { error: "reviewErrorTooLong" };
+  }
 
   const { data: dataset } = await supabase
     .from("datasets")
@@ -44,5 +53,5 @@ export async function submitReview(
   if (error) return { error: "reviewErrorGeneric" };
 
   revalidatePath(`/${locale}/datasets/${slug}`);
-  return { error: null };
+  return { error: null, saved: true };
 }

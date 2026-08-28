@@ -262,7 +262,10 @@
     "visitCount": "{count} переходов к источнику",
     "metadataPlatform": "Платформа",
     "rejectedReasonHeading": "Почему это отклонено",
-    "tableTruncated": "Показаны первые {shown} строк из {total}. Чтобы получить все, <download>скачайте набор данных</download>."
+    "tableTruncated": "Показаны первые {shown} строк из {total}. Чтобы получить все, <download>скачайте набор данных</download>.",
+    "ratingOutOfFive": "{rating} из 5",
+    "reviewSaved": "Отзыв сохранён.",
+    "reviewErrorTooLong": "Отзыв слишком длинный. Уложитесь в 2000 символов."
   },
   "Moderate": {
     "title": "Очередь модерации",

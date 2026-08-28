@@ -78,6 +78,14 @@ const STOPWORDS = new Set([
   "это", "для", "его", "она", "они", "был", "была", "было", "были",
 ]);
 
+/**
+ * Above this many distinct whole numbers a column is treated as continuous and
+ * binned into ranges. Twelve covers the discrete scales surveys actually use —
+ * 1–5 and 1–7 Likert, 0–10 net-promoter, household size, months of the year —
+ * and stops short of an axis nobody can read.
+ */
+const MAX_DISCRETE_BINS = 12;
+
 export function computeSummary(type: ColumnType, values: string[]): ColumnSummary {
   const nonEmpty = values.map((v) => (v ?? "").trim()).filter((v) => v !== "");
 
@@ -93,6 +101,30 @@ export function computeSummary(type: ColumnType, values: string[]): ColumnSummar
         ? (sorted[mid - 1] + sorted[mid]) / 2
         : sorted[mid]
       : 0;
+
+    // A Likert column is numeric but not continuous: five possible answers
+    // spread over ten range bins gives "1.0–1.4", three empty bins, "2.6–3.0"
+    // and so on — a chart that hides the shape of the answers it is drawing.
+    // When every value is a whole number and there are few enough of them to
+    // fit on an axis, each one gets its own bar, in numeric order.
+    const distinct = [...new Set(nums)].sort((a, b) => a - b);
+    if (
+      nums.length > 0 &&
+      distinct.length <= MAX_DISCRETE_BINS &&
+      distinct.every((n) => Number.isInteger(n))
+    ) {
+      const counts = new Map(distinct.map((n) => [n, 0]));
+      for (const n of nums) counts.set(n, (counts.get(n) ?? 0) + 1);
+      return {
+        type: "numeric",
+        min,
+        max,
+        mean,
+        median,
+        histogram: distinct.map((n) => ({ bin: String(n), count: counts.get(n) ?? 0 })),
+        responseCount: nums.length,
+      };
+    }
 
     const binCount = 10;
     const span = max - min || 1;
