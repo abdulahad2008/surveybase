@@ -101,3 +101,23 @@ test("a decimal column is binned even when it has few distinct values", () => {
   if (summary.type !== "numeric") return assert.fail("expected a numeric summary");
   assert.equal(summary.histogram.length, 10);
 });
+
+test("common Uzbek words are not charted as the answer", () => {
+  // Free-text answers in Uzbek: "uchun", "bilan" and "emas" appear in every
+  // sentence and topped the chart on a site whose default language is Uzbek.
+  const answers = [
+    "Dastur juda foydali, lekin narxi qimmat",
+    "Narxi uchun yaxshi emas",
+    "Men narxi bilan rozi emasman, dastur foydali",
+    "Нархи ҳам жуда қиммат",
+  ];
+  const summary = computeSummary("text", answers);
+  if (summary.type !== "text") return assert.fail("expected a text summary");
+
+  const terms = summary.topTerms.map((t) => t.term);
+  for (const stopword of ["uchun", "bilan", "emas", "lekin", "juda", "men", "ҳам", "жуда"]) {
+    assert.ok(!terms.includes(stopword), `"${stopword}" should not be a top term`);
+  }
+  assert.equal(summary.topTerms[0].term, "narxi");
+  assert.equal(summary.topTerms[0].count, 3);
+});

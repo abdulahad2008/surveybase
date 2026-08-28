@@ -72,10 +72,37 @@ interface TextSummary {
 
 export type ColumnSummary = CategoricalSummary | NumericSummary | DateSummary | TextSummary;
 
+/**
+ * Words that would otherwise top every free-text chart without saying anything.
+ *
+ * The list was English and Russian only, on a site whose default language is
+ * Uzbek — so an Uzbek free-text column charted "uchun", "bilan" and "emas" as
+ * its most common answers. Uzbek is here in both alphabets, because a survey
+ * run in Uzbekistan gets answers in both.
+ *
+ * Kept as three lists rather than one flat set: "она" was in the old set twice,
+ * which nothing caught because a Set swallows it, and a translator adding a
+ * word can now see which language they are adding it to.
+ *
+ * Words shorter than three letters never reach here — the tokenizer drops them
+ * — so va, bu, ва and бу are absent on purpose.
+ */
 const STOPWORDS = new Set([
+  // English
   "the", "and", "for", "are", "was", "were", "with", "that", "this", "have",
-  "has", "not", "but", "you", "your", "from", "она", "или", "как", "что",
-  "это", "для", "его", "она", "они", "был", "была", "было", "были",
+  "has", "not", "but", "you", "your", "from",
+  // Russian
+  "или", "как", "что", "это", "для", "его", "она", "они", "был", "была",
+  "было", "были", "меня", "мне", "нас", "вас", "тоже", "чтобы", "если",
+  "очень", "там", "так", "уже", "еще", "ещё",
+  // Uzbek (Latin)
+  "shu", "ham", "ular", "bir", "uchun", "bilan", "emas", "lekin", "ammo",
+  "yoki", "kabi", "juda", "faqat", "yana", "hech", "keyin", "oldin", "men",
+  "biz", "siz", "uning", "meni", "bizga", "sizga", "qilib", "kerak", "yoʻq",
+  // Uzbek (Cyrillic)
+  "ҳам", "улар", "бир", "учун", "билан", "эмас", "лекин", "аммо",
+  "ёки", "каби", "жуда", "фақат", "яна", "ҳеч", "кейин", "олдин", "мен",
+  "биз", "сиз", "унинг", "мени", "керак", "йўқ",
 ]);
 
 /**
