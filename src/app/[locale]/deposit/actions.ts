@@ -8,6 +8,7 @@ import { OTHER } from "@/lib/survey-vocab";
 import { detectPiiColumns } from "@/lib/pii";
 import { inferColumnType, computeSummary } from "@/lib/csv-analysis";
 import { slugify, randomSuffix } from "@/lib/slug";
+import { normalizeWebsite, plausiblePublicationYear } from "@/lib/url";
 import { redirect } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 
@@ -19,10 +20,49 @@ export type DepositErrorKey =
   | "errorAllPii"
   | "errorMissingFields"
   | "errorPublicationIncomplete"
+  | "errorPublicationUrl"
+  | "errorPublicationYear"
+  | "errorDateOrder"
+  | "errorUploadFailed"
   | "errorGeneric";
 
 export interface DepositState {
   error: DepositErrorKey | null;
+}
+
+type ServerClient = Awaited<ReturnType<typeof createClient>>;
+
+/**
+ * Undoes a deposit that failed after the dataset row was created.
+ *
+ * Without this, a failure anywhere downstream — storage unreachable, a column
+ * summary rejected — left a pending row behind while the depositor was told to
+ * "check the form and try again". They retried, and the archive collected one
+ * duplicate per attempt, some of them with no file at all for a moderator to
+ * look at.
+ *
+ * Deleting the dataset row is enough for `files`, `survey_columns` and
+ * `dataset_publications`, which all cascade from it. The stored object does
+ * not: nothing in Postgres knows it exists, so it is removed by hand first.
+ * Both failures are logged rather than raised — the deposit is already being
+ * reported as failed, and burying that under a cleanup error would tell the
+ * depositor even less.
+ */
+async function rollbackDeposit(
+  supabase: ServerClient,
+  datasetId: string,
+  storagePath: string | null,
+): Promise<void> {
+  if (storagePath) {
+    const { error } = await supabase.storage.from("dataset-files").remove([storagePath]);
+    if (error) {
+      console.error(`[deposit] rollback left an object at ${storagePath}: ${error.message}`);
+    }
+  }
+  const { error } = await supabase.from("datasets").delete().eq("id", datasetId);
+  if (error) {
+    console.error(`[deposit] rollback left dataset ${datasetId} in place: ${error.message}`);
+  }
 }
 
 function splitList(value: FormDataEntryValue | null): string[] {
@@ -116,10 +156,18 @@ export async function submitDataset(
     topics.length === 0 ||
     languages.length === 0 ||
     sampleSize === null ||
-    !Number.isFinite(sampleSize) ||
+    !Number.isInteger(sampleSize) ||
     sampleSize <= 0;
 
   if (incomplete) return { error: "errorMissingFields" };
+
+  // Both dates are <input type="date">, so they arrive as yyyy-mm-dd and sort
+  // correctly as strings. Comparing them as text avoids parsing them into Date
+  // objects, which would drag the server's timezone into a question that has
+  // nothing to do with time of day.
+  if (fieldworkEnd < fieldworkStart) {
+    return { error: "errorDateOrder" };
+  }
 
   // The link is the whole reason for asking, and `publications.title` is NOT
   // NULL, so an answer of "yes" missing either one cannot be stored at all.
@@ -131,11 +179,30 @@ export async function submitDataset(
     formData.get("has_publication")?.toString() === "yes";
   const publicationTitle =
     formData.get("publication_title")?.toString().trim() ?? "";
-  const publicationUrl =
+  const publicationUrlRaw =
     formData.get("publication_url")?.toString().trim() ?? "";
+  const publicationYearRaw =
+    formData.get("publication_year")?.toString().trim() ?? "";
 
-  if (hasPublication && (!publicationTitle || !publicationUrl)) {
+  if (hasPublication && (!publicationTitle || !publicationUrlRaw)) {
     return { error: "errorPublicationIncomplete" };
+  }
+
+  // The link is rendered as an `href` on a public page, so a `javascript:` or
+  // `data:` URL pasted here would become a live one. Anything without a scheme
+  // is treated as a bare host and gets https, which is what someone typing
+  // "doi.org/10.1234/x" means.
+  const publicationUrl = hasPublication ? normalizeWebsite(publicationUrlRaw) : null;
+  if (hasPublication && !publicationUrl) {
+    return { error: "errorPublicationUrl" };
+  }
+
+  const publicationYear = publicationYearRaw === "" ? null : Number(publicationYearRaw);
+  if (
+    publicationYear !== null &&
+    !plausiblePublicationYear(publicationYear, new Date())
+  ) {
+    return { error: "errorPublicationYear" };
   }
 
   // Accepts CSV and Excel alike; everything downstream still works in CSV, so
@@ -201,29 +268,22 @@ export async function submitDataset(
   }
 
   if (!dataset) {
+    console.error(`[deposit] dataset insert failed: ${insertError?.code ?? "unknown"}`);
     return { error: "errorGeneric" };
   }
 
-  if (hasPublication) {
-    const { data: publication } = await supabase
-      .from("publications")
-      .insert({
-        title: publicationTitle,
-        authors: nullableText(formData.get("publication_authors")),
-        year: (() => {
-          const y = formData.get("publication_year")?.toString().trim();
-          return y ? Number(y) : null;
-        })(),
-        doi_or_url: publicationUrl,
-      })
-      .select("id")
-      .single();
+  const { id: datasetId, slug: datasetSlug } = dataset;
 
-    if (publication) {
-      await supabase
-        .from("dataset_publications")
-        .insert({ dataset_id: dataset.id, publication_id: publication.id });
-    }
+  // From here on the dataset row exists, so every failure has to take it back
+  // out before reporting. `fail` is the only way out of this section.
+  async function fail(
+    error: DepositErrorKey,
+    why: string,
+    storagePath: string | null = null,
+  ): Promise<DepositState> {
+    console.error(`[deposit] ${why}`);
+    await rollbackDeposit(supabase, datasetId, storagePath);
+    return { error };
   }
 
   const columnsPayload = keptHeaders.map((header) => {
@@ -232,7 +292,7 @@ export async function submitDataset(
     const type = inferColumnType(values);
     const summary = computeSummary(type, values);
     return {
-      dataset_id: dataset.id,
+      dataset_id: datasetId,
       question_text: header,
       column_type: type,
       summary_json: summary,
@@ -240,7 +300,10 @@ export async function submitDataset(
   });
 
   if (columnsPayload.length > 0) {
-    await supabase.from("survey_columns").insert(columnsPayload);
+    const { error } = await supabase.from("survey_columns").insert(columnsPayload);
+    if (error) {
+      return fail("errorGeneric", `column summaries for ${datasetId} failed: ${error.message}`);
+    }
   }
 
   const cleanedRows = rows.map((row) => {
@@ -249,7 +312,7 @@ export async function submitDataset(
     return out;
   });
   const cleanedCsv = Papa.unparse(cleanedRows, { columns: keptHeaders });
-  const storagePath = `${dataset.id}/data.csv`;
+  const storagePath = `${datasetId}/data.csv`;
 
   const { error: uploadError } = await supabase.storage
     .from("dataset-files")
@@ -259,16 +322,61 @@ export async function submitDataset(
     });
 
   if (uploadError) {
-    return { error: "errorGeneric" };
+    return fail("errorUploadFailed", `upload for ${datasetId} failed: ${uploadError.message}`);
   }
 
-  await supabase.from("files").insert({
-    dataset_id: dataset.id,
+  const { error: fileError } = await supabase.from("files").insert({
+    dataset_id: datasetId,
     storage_path: storagePath,
     format: "csv",
     size_bytes: new Blob([cleanedCsv]).size,
   });
 
-  redirect({ href: `/datasets/${dataset.slug}`, locale });
+  if (fileError) {
+    // The object uploaded but nothing points at it, so it goes back too.
+    return fail("errorUploadFailed", `files row for ${datasetId} failed: ${fileError.message}`, storagePath);
+  }
+
+  // Last, because it is the only step whose own row does not cascade away with
+  // the dataset. Leaving it until everything else has succeeded means a
+  // rollback almost never has one to clean up.
+  if (hasPublication) {
+    const { data: publication, error: publicationError } = await supabase
+      .from("publications")
+      .insert({
+        title: publicationTitle,
+        authors: nullableText(formData.get("publication_authors")),
+        year: publicationYear,
+        doi_or_url: publicationUrl,
+      })
+      .select("id")
+      .single();
+
+    if (publicationError || !publication) {
+      return fail(
+        "errorGeneric",
+        `publication for ${datasetId} failed: ${publicationError?.message ?? "no row returned"}`,
+        storagePath,
+      );
+    }
+
+    const { error: linkError } = await supabase
+      .from("dataset_publications")
+      .insert({ dataset_id: datasetId, publication_id: publication.id });
+
+    if (linkError) {
+      // `publications` is shared and has no delete policy, so this may be a
+      // no-op. An unlinked publication row is invisible to every page; an
+      // unlinked dataset row is not, which is the one worth undoing.
+      await supabase.from("publications").delete().eq("id", publication.id);
+      return fail(
+        "errorGeneric",
+        `publication link for ${datasetId} failed: ${linkError.message}`,
+        storagePath,
+      );
+    }
+  }
+
+  redirect({ href: `/datasets/${datasetSlug}`, locale });
   return { error: null };
 }

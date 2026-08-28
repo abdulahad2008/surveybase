@@ -190,7 +190,11 @@
     "publicationYes": "Ha, nashr etilgan tadqiqotda foydalanilgan",
     "publicationNo": "Hali yo‘q",
     "publicationUrlHint": "DOI, jurnal sahifasi, dissertatsiya yozuvi, preprint yoki repozitoriy yozuvi — eng uzoq saqlanadigan havolani tanlang.",
-    "errorPublicationIncomplete": "Siz bu ma'lumotlar nashr etilgan tadqiqotda ishlatilganini bildirdingiz, shuning uchun nashr nomi ham, havola ham kerak. Orqaga qaytib ularni kiriting yoki javobni «Hali yo‘q»ga o‘zgartiring."
+    "errorPublicationIncomplete": "Siz bu ma'lumotlar nashr etilgan tadqiqotda ishlatilganini bildirdingiz, shuning uchun nashr nomi ham, havola ham kerak. Orqaga qaytib ularni kiriting yoki javobni «Hali yo‘q»ga o‘zgartiring.",
+    "errorPublicationUrl": "Nashr havolasi http:// yoki https:// bilan boshlanadigan veb-manzil bo‘lishi kerak.",
+    "errorPublicationYear": "Nashr yilini tekshiring — u 1900 yildan oldin bo‘lmagan to‘rt xonali yil bo‘lishi kerak.",
+    "errorDateOrder": "Dala ishlari boshlanishidan oldin tugay olmaydi. Ikkala sanani tekshiring.",
+    "errorUploadFailed": "Faylni saqlab bo‘lmadi, shuning uchun hech narsa yuborilmadi. Bir ozdan so‘ng qayta urinib ko‘ring — javoblaringiz formada saqlanib qoldi."
   },
   "Dataset": {
     "backToBrowse": "Barcha to‘plamlar",

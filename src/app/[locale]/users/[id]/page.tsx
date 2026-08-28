@@ -8,11 +8,11 @@ import { createClient } from "@/lib/supabase/server";
 import {
   PUBLIC_PROFILE_COLUMNS,
   getProfileDatasets,
-  normalizeWebsite,
   orcidUrl,
   summarizeDatasets,
   type Profile,
 } from "@/lib/profiles";
+import { normalizeWebsite } from "@/lib/url";
 import { topicLabel } from "@/lib/survey-vocab";
 import { Avatar } from "@/components/avatar";
 import { DatabaseIcon, DownloadIcon, LinkIcon, MailIcon, UsersIcon } from "@/components/icons";

@@ -190,7 +190,11 @@
     "publicationYes": "Yes, it has been used in published research",
     "publicationNo": "Not yet",
     "publicationUrlHint": "A DOI, journal page, thesis record, preprint, or repository entry — whichever link is most permanent.",
-    "errorPublicationIncomplete": "You said this data was used in published research, so the publication title and link are both needed. Go back and add them, or change the answer to “Not yet”."
+    "errorPublicationIncomplete": "You said this data was used in published research, so the publication title and link are both needed. Go back and add them, or change the answer to “Not yet”.",
+    "errorPublicationUrl": "The publication link must be a web address starting with http:// or https://.",
+    "errorPublicationYear": "Check the publication year — it should be a four-digit year, no earlier than 1900.",
+    "errorDateOrder": "Fieldwork cannot end before it starts. Check the two dates.",
+    "errorUploadFailed": "The file could not be stored, so nothing was submitted. Please try again in a moment — your answers are still on the form."
   },
   "Dataset": {
     "backToBrowse": "All datasets",

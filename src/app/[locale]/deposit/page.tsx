@@ -52,7 +52,11 @@ export default async function DepositPage({
 
   return (
     <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-3xl flex-1 px-4 py-12 sm:px-6">
-      <DepositForm locale={locale} depositorName={profile?.name ?? null} />
+      <DepositForm
+        locale={locale}
+        depositorName={profile?.name ?? null}
+        maxPublicationYear={new Date().getFullYear() + 1}
+      />
     </main>
   );
 }

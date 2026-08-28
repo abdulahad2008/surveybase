@@ -78,18 +78,6 @@ export function summarizeDatasets(datasets: ProfileDataset[]): ProfileStats {
   };
 }
 
-/** Turn a bare handle or a full URL into something safe to put in href. */
-export function normalizeWebsite(value: string | null): string | null {
-  if (!value) return null;
-  const trimmed = value.trim();
-  if (!trimmed) return null;
-  // Only http(s) — a stored "javascript:..." would otherwise become a live
-  // link on a public page that anyone can edit.
-  if (/^https?:\/\//i.test(trimmed)) return trimmed;
-  if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) return null;
-  return `https://${trimmed}`;
-}
-
 export function orcidUrl(orcid: string | null): string | null {
   return orcid ? `https://orcid.org/${orcid}` : null;
 }
