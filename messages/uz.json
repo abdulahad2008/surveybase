@@ -438,6 +438,7 @@
     "status_draft": "Qoralama",
     "status_rejected": "Rad etilgan",
     "anonymousResearcher": "Ismi ko‘rsatilmagan tadqiqotchi",
+    "publicMetaDescription": "{name} SurveyBase.uz saytida chop etgan maʼlumotlar toʻplamlari.",
     "memberSince": "{date} dan beri",
     "statDatasets": "To‘plamlar",
     "statDownloadsLabel": "Yuklab olishlar",

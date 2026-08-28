@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "@/i18n/navigation";
 import { redirect as redirectExternal } from "next/navigation";
-import { routing, type Locale } from "@/i18n/routing";
+import { type Locale } from "@/i18n/routing";
 import { headers } from "next/headers";
 import { authCallbackUrl } from "@/lib/auth-redirect";
 import type { AuthErrorKey } from "@/lib/auth-errors";
@@ -215,10 +215,13 @@ export async function updatePassword(
   return { error: null, done: true };
 }
 
-export async function signOut() {
+// Signing out sent everyone to the Uzbek homepage, so a Russian or English
+// reader was quietly switched into a language they had not chosen — the one
+// moment where the site overrides the visitor's own selection.
+export async function signOut(locale: Locale) {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect({ href: "/", locale: routing.defaultLocale });
+  redirect({ href: "/", locale });
 }
 
 export async function signInWithGoogle(

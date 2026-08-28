@@ -438,6 +438,7 @@
     "status_draft": "Черновик",
     "status_rejected": "Отклонён",
     "anonymousResearcher": "Исследователь без имени",
+    "publicMetaDescription": "Наборы данных, опубликованные пользователем {name} на SurveyBase.uz.",
     "memberSince": "С {date}",
     "statDatasets": "Наборы данных",
     "statDownloadsLabel": "Скачивания",

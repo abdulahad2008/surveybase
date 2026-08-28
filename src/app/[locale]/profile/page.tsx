@@ -11,10 +11,29 @@ import {
   summarizeDatasets,
   type Profile,
 } from "@/lib/profiles";
+import { pageMetadata } from "@/lib/site";
 import { ArrowRightIcon, DownloadIcon, ExternalLinkIcon, UsersIcon } from "@/components/icons";
 import { ProfileForm } from "./profile-form";
 
-export const metadata: Metadata = { title: "Profile" };
+// Signed-in only, and the same URL for every account, so there is nothing here
+// for a search engine to index — but the tab title is read by the person whose
+// page it is, and it was in English for all of them.
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: raw } = await params;
+  const locale: Locale = hasLocale(routing.locales, raw) ? raw : routing.defaultLocale;
+  const t = await getTranslations({ locale, namespace: "Profile" });
+  return pageMetadata({
+    locale,
+    path: "/profile",
+    title: t("title"),
+    description: t("intro"),
+    index: false,
+  });
+}
 
 const statusChip: Record<string, string> = {
   published: "bg-mint-soft text-mint-ink",

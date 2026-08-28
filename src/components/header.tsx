@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Logo } from "./logo";
@@ -15,6 +15,7 @@ const sheetLink =
 
 export async function Header() {
   const t = await getTranslations("Nav");
+  const locale = await getLocale();
   const supabase = await createClient();
   const {
     data: { user },
@@ -51,7 +52,7 @@ export async function Header() {
                 <UserIcon size={15} />
                 {t("profile")}
               </Link>
-              <SignOutButton label={t("logout")} />
+              <SignOutButton locale={locale} label={t("logout")} />
             </>
           ) : (
             <Link href="/login" className={navLink}>
@@ -94,7 +95,7 @@ export async function Header() {
                 {t("profile")}
               </Link>
               <div className="px-2">
-                <SignOutButton label={t("logout")} />
+                <SignOutButton locale={locale} label={t("logout")} />
               </div>
             </>
           ) : (
