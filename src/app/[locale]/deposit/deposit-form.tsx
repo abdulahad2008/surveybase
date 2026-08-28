@@ -173,6 +173,9 @@ export function DepositForm({
       citation: citationWithoutUrl({
         title,
         author: depositorName,
+        // A deposit always has a depositor; the source-organization credit
+        // exists for the seeded archive records, which nobody deposited.
+        sourceOrganization: null,
         year: citationYear(fieldworkStart || null, new Date()),
       }),
     };

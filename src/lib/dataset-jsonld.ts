@@ -29,6 +29,8 @@ export interface JsonLdDataset {
   is_hosted: boolean;
   external_url: string | null;
   created_at: string;
+  /** Set on archive records nobody deposited: the body that ran the survey. */
+  source_organization: string | null;
   depositor: { name: string | null; affiliation: string | null } | null;
   survey_columns: { question_text: string; column_type: string }[];
   files: { format: string }[];
@@ -120,7 +122,14 @@ function citations(dataset: JsonLdDataset) {
 
 function creator(dataset: JsonLdDataset) {
   const name = dataset.depositor?.name;
-  if (!name) return { "@type": "Organization", name: SITE_NAME, url: SITE_URL };
+  if (!name) {
+    // Same order as the citation block on the page: a seeded record credits
+    // the organization that ran the survey, and only a record with no known
+    // origin at all falls through to the archive itself.
+    const source = dataset.source_organization?.trim();
+    if (source) return { "@type": "Organization", name: source };
+    return { "@type": "Organization", name: SITE_NAME, url: SITE_URL };
+  }
 
   const affiliation = dataset.depositor?.affiliation;
   return {

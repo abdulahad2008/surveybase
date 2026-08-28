@@ -109,16 +109,18 @@ export default async function ProfilePage({
             {datasets.map((d) => (
               <li key={d.id} className="card card-hover flex flex-wrap items-center gap-3 p-4">
                 <div className="min-w-[12rem] flex-1">
-                  {d.status === "published" ? (
-                    <Link
-                      href={`/datasets/${d.slug}`}
-                      className="font-semibold text-ink hover:text-brand"
-                    >
-                      {d.title}
-                    </Link>
-                  ) : (
-                    <span className="font-semibold text-ink">{d.title}</span>
-                  )}
+                  {/* Every row links, whatever its status. The dataset page
+                      already lets a depositor see their own unpublished work
+                      and is where the rejection reason is shown — leaving
+                      pending and rejected rows as dead text meant the one
+                      person who needed to read that reason could not reach
+                      it. */}
+                  <Link
+                    href={`/datasets/${d.slug}`}
+                    className="font-semibold text-ink hover:text-brand"
+                  >
+                    {d.title}
+                  </Link>
                   <p className="mt-0.5 text-xs text-faint">
                     {new Date(d.created_at).toLocaleDateString(locale)}
                     {d.sample_size ? ` · ${d.sample_size.toLocaleString(locale)}` : ""}

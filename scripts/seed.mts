@@ -5,7 +5,8 @@
 // Reuses the exact PII-guard + column-analysis pipeline the deposit flow uses
 // (src/lib/pii.ts, src/lib/csv-analysis.ts) so seeded "hosted" files get the
 // same anonymization guarantees as user-submitted ones. Idempotent: re-running
-// skips any manifest entry whose deterministic slug already exists.
+// skips any manifest entry whose title is already in the table — slugs carry a
+// random suffix now, exactly like a deposit, so they cannot be recomputed.
 
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -13,7 +14,7 @@ import Papa from "papaparse";
 import { createClient } from "@supabase/supabase-js";
 import { detectPiiColumns } from "../src/lib/pii.ts";
 import { inferColumnType, computeSummary } from "../src/lib/csv-analysis.ts";
-import { slugify } from "../src/lib/slug.ts";
+import { slugify, randomSuffix } from "../src/lib/slug.ts";
 
 interface ManifestEntry {
   record_type: "hosted" | "link_only";
@@ -32,6 +33,8 @@ interface ManifestEntry {
   languages: string[];
   formats_available: string[];
   fieldwork_year: number | null;
+  /** The body that ran the survey. Credited in the citation and the JSON-LD. */
+  source_organization?: string | null;
   notes: string;
 }
 
@@ -62,17 +65,30 @@ function fieldworkStart(entry: ManifestEntry): string | null {
   return entry.fieldwork_year ? `${entry.fieldwork_year}-01-01` : null;
 }
 
-async function slugExists(slug: string): Promise<boolean> {
-  const { data } = await supabase.from("datasets").select("id").eq("slug", slug).maybeSingle();
+async function alreadySeeded(entry: ManifestEntry): Promise<boolean> {
+  const { data } = await supabase
+    .from("datasets")
+    .select("id")
+    .eq("title", entry.title)
+    .maybeSingle();
   return Boolean(data);
 }
 
+/**
+ * Same shape a deposit produces: no `seed-` prefix marking these as
+ * second-class, no truncation mid-word, and a random suffix so two waves of
+ * one survey cannot collide.
+ */
+function seedSlug(entry: ManifestEntry): string {
+  return `${slugify(entry.title)}-${randomSuffix()}`;
+}
+
 async function seedLinkOnly(entry: ManifestEntry) {
-  const slug = `seed-${slugify(entry.title)}`;
-  if (await slugExists(slug)) {
+  if (await alreadySeeded(entry)) {
     console.log(`  skip (exists): ${entry.title}`);
     return;
   }
+  const slug = seedSlug(entry);
 
   const { error } = await supabase.from("datasets").insert({
     title: entry.title,
@@ -89,6 +105,7 @@ async function seedLinkOnly(entry: ManifestEntry) {
     external_url: entry.external_url ?? entry.source_url,
     status: "published",
     depositor_id: null,
+    source_organization: entry.source_organization ?? null,
   });
 
   if (error) {
@@ -104,11 +121,11 @@ async function seedHosted(entry: ManifestEntry) {
     return;
   }
 
-  const slug = `seed-${slugify(entry.title)}`;
-  if (await slugExists(slug)) {
+  if (await alreadySeeded(entry)) {
     console.log(`  skip (exists): ${entry.title}`);
     return;
   }
+  const slug = seedSlug(entry);
 
   const status = needsLicenseHold(entry) ? "draft" : "published";
 
@@ -127,6 +144,7 @@ async function seedHosted(entry: ManifestEntry) {
     external_url: null,
     status,
     depositor_id: null,
+    source_organization: entry.source_organization ?? null,
   };
 
   if (!entry.download_url) {

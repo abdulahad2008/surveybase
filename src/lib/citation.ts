@@ -16,6 +16,12 @@ export const ANONYMOUS_AUTHOR = "SurveyBase.uz contributor";
 export interface CitationParts {
   title: string;
   author: string | null;
+  /**
+   * The body that ran the survey, for datasets nobody deposited — the seeded
+   * archive records. Crediting UNICEF's MICS to "SurveyBase.uz contributor"
+   * is not anonymity, it is a wrong citation.
+   */
+  sourceOrganization?: string | null;
   /** Fieldwork start is preferred: a survey is cited by when it was run, not
    *  by when it happened to be uploaded. Falls back to the deposit date. */
   year: number;
@@ -42,8 +48,17 @@ export function citationYear(fieldworkStart: string | null, fallback: Date): num
  * genuinely does not exist yet. This form is what the deposit preview shows;
  * showing a guessed URL that later 404s would be worse than showing none.
  */
-export function citationWithoutUrl({ title, author, year }: CitationParts): string {
-  return `${author?.trim() || ANONYMOUS_AUTHOR} (${year}). ${title} [Data set]. SurveyBase.uz.`;
+export function citationWithoutUrl({
+  title,
+  author,
+  sourceOrganization,
+  year,
+}: CitationParts): string {
+  // Depositor first, then the organization the data came from, then the
+  // anonymous fallback — most specific credit that exists, in that order.
+  const credit =
+    author?.trim() || sourceOrganization?.trim() || ANONYMOUS_AUTHOR;
+  return `${credit} (${year}). ${title} [Data set]. SurveyBase.uz.`;
 }
 
 /** The full citation, once a slug exists. */

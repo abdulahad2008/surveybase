@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "node --env-file=.env.local scripts/seed.mts",
+    "reslug-seeds": "node --env-file=.env.local scripts/reslug-seeds.mts",
     "test": "node --import ./tests/alias.mjs --test 'tests/**/*.test.mts'"
   },
   "dependencies": {

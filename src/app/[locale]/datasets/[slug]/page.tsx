@@ -65,6 +65,7 @@ interface DatasetRow {
   external_url: string | null;
   status: string;
   depositor_id: string | null;
+  source_organization: string | null;
   download_count: number;
   created_at: string;
   depositor: { id: string; name: string | null; affiliation: string | null } | null;
@@ -177,6 +178,7 @@ export default async function DatasetPage({
     {
       title: dataset.title,
       author: dataset.depositor?.name ?? null,
+      sourceOrganization: dataset.source_organization,
       year: citationYear(dataset.fieldwork_start, new Date(dataset.created_at)),
     },
     dataset.slug,
