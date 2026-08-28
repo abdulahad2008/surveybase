@@ -15,7 +15,7 @@ import {
 } from "recharts";
 import { useEffect, useRef, useState } from "react";
 import { useFormatter, useTranslations } from "next-intl";
-import type { ColumnSummary } from "@/lib/csv-analysis";
+import { tidyBin, type ColumnSummary } from "@/lib/csv-analysis";
 
 interface Column {
   question_text: string;
@@ -29,16 +29,6 @@ type DateSummary = Extract<ColumnSummary, { type: "date" }>;
 type TextSummary = Extract<ColumnSummary, { type: "text" }>;
 
 const AXIS_TICK = { fontSize: 11, fill: "var(--chart-axis)" };
-
-/**
- * Bin labels are baked into summary_json at deposit time, so datasets archived
- * before the precision fix still carry "18.0–24.4". Dropping a trailing ".0"
- * at render time shortens those without a backfill, and is a no-op for bins
- * that genuinely need a decimal.
- */
-function tidyBin(bin: string): string {
-  return bin.replace(/(\d)\.0(?=\s*[–-]|$)/g, "$1");
-}
 
 /**
  * Ten bin labels at -30° do not fit across a phone. Measuring the chart's own
@@ -380,7 +370,7 @@ function NumericChart({ summary }: { summary: Numeric }) {
         {[
           t("statMin", { value: summary.min }),
           t("statMax", { value: summary.max }),
-          t("statMean", { value: summary.mean.toFixed(2) }),
+          t("statMean", { value: Number(summary.mean.toFixed(2)) }),
           t("statMedian", { value: summary.median }),
         ].map((s) => (
           <span key={s} className="chip tnum bg-card-soft text-soft">

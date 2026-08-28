@@ -148,3 +148,13 @@ export function computeSummary(type: ColumnType, values: string[]): ColumnSummar
 
   return { type: "text", topTerms, responseCount: nonEmpty.length };
 }
+
+/**
+ * Bin labels are baked into summary_json at deposit time, so datasets archived
+ * before the precision fix above still carry "18.0–24.4". Dropping a trailing
+ * ".0" at render time shortens those without a backfill, and is a no-op for
+ * bins that genuinely need a decimal.
+ */
+export function tidyBin(bin: string): string {
+  return bin.replace(/(\d)\.0(?=\s*[–-]|$)/g, "$1");
+}
