@@ -136,6 +136,49 @@ export async function requestPasswordReset(
 }
 
 /**
+ * Mail a fresh confirmation link to someone who never opened the first one.
+ *
+ * Sign-in tells them "confirm your email first" and used to stop there, which
+ * is a dead end whenever the original message expired, went to spam, or was
+ * sent before the callback URL was fixed. Their only route back was to sign up
+ * again with the same address — which the enumeration guard in `signup`
+ * correctly refuses.
+ *
+ * Answers uniformly for the same reason `requestPasswordReset` does: a
+ * different response for "no such account" or "already confirmed" would turn
+ * the login page into a membership oracle. Rate limiting is the one failure
+ * worth showing, because it describes the mail sender rather than the address.
+ */
+export async function resendConfirmation(
+  locale: Locale,
+  _prevState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const supabase = await createClient();
+  const origin = (await headers()).get("origin");
+  const email = String(formData.get("email") ?? "").trim();
+
+  if (!email) return { error: null, done: true };
+
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email,
+    // Same destination as the original confirmation mail: the callback route
+    // that exchanges the code for a session.
+    options: { emailRedirectTo: authCallbackUrl(locale, origin) },
+  });
+
+  if (error) {
+    console.error(`[auth] resending confirmation failed: ${error.message}`);
+    if (error.code === "over_email_send_rate_limit" || error.status === 429) {
+      return { error: "errorRateLimited" };
+    }
+  }
+
+  return { error: null, done: true };
+}
+
+/**
  * Step two: set the new password using the session the recovery link created.
  *
  * Confirmation is compared here rather than only in the browser — the two

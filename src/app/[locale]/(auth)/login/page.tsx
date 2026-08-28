@@ -1,12 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { LogoGlyph } from "@/components/logo";
 import { GoogleIcon } from "@/components/icons";
 import { AuthAlert, CallbackError } from "../auth-alert";
-import { login, signInWithGoogle } from "../actions";
+import { login, resendConfirmation, signInWithGoogle } from "../actions";
 
 export default function LoginPage() {
   const t = useTranslations("Auth");
@@ -17,6 +17,13 @@ export default function LoginPage() {
   const [googleState, googleAction] = useActionState(signInWithGoogle.bind(null, locale), {
     error: null,
   });
+  // Mirrored into a hidden field below: the resend form cannot be nested
+  // inside the login form, so it needs its own copy of the address.
+  const [email, setEmail] = useState("");
+  const [resendState, resendAction, resending] = useActionState(
+    resendConfirmation.bind(null, locale),
+    { error: null },
+  );
 
   return (
     <main id="main-content" tabIndex={-1} className="relative mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-16">
@@ -57,7 +64,15 @@ export default function LoginPage() {
             <label className="label" htmlFor="login-email">
               {t("email")}
             </label>
-            <input id="login-email" name="email" type="email" required className="input" />
+            <input
+              id="login-email"
+              name="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.currentTarget.value)}
+              className="input"
+            />
           </div>
           <div>
             <div className="flex flex-wrap items-center justify-between gap-x-3">
@@ -85,6 +100,26 @@ export default function LoginPage() {
             {t("submitLogin")}
           </button>
         </form>
+
+        {/* Offered only once sign-in has said the address is unconfirmed —
+            before that it is an invitation to mail people who did not ask.
+            Kept mounted after it succeeds so the status message stays put. */}
+        {state.error === "errorEmailNotConfirmed" && (
+          <form action={resendAction} className="space-y-2">
+            <input type="hidden" name="email" value={email} />
+            <button
+              type="submit"
+              disabled={resending || resendState.done}
+              className="btn btn-ghost btn-sm w-full"
+            >
+              {resending ? t("resending") : t("resendConfirmation")}
+            </button>
+            {resendState.error && <AuthAlert>{t(resendState.error)}</AuthAlert>}
+            {resendState.done && !resendState.error && (
+              <AuthAlert tone="success">{t("confirmationResent")}</AuthAlert>
+            )}
+          </form>
+        )}
 
         <p className="text-center text-sm text-soft">
           {t("noAccount")}{" "}

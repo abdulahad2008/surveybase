@@ -110,7 +110,10 @@
     "errorRateLimited": "Too many requests. Please wait a few minutes and try again.",
     "errorPasswordMismatch": "The two passwords do not match.",
     "checkEmailToConfirm": "Account created! Check your email for a confirmation link before logging in.",
-    "consent": "By creating an account you agree to the <terms>Terms of Use</terms> and the <privacy>Privacy Policy</privacy>."
+    "consent": "By creating an account you agree to the <terms>Terms of Use</terms> and the <privacy>Privacy Policy</privacy>.",
+    "resendConfirmation": "Resend confirmation email",
+    "resending": "Sending…",
+    "confirmationResent": "If that address needs confirming, a new link is on its way. Check spam if it does not arrive."
   },
   "Deposit": {
     "title": "Give your survey a second life",

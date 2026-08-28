@@ -110,7 +110,10 @@
     "errorRateLimited": "So‘rovlar juda ko‘p. Bir necha daqiqadan so‘ng qayta urinib ko‘ring.",
     "errorPasswordMismatch": "Parollar mos kelmadi.",
     "checkEmailToConfirm": "Hisob yaratildi! Kirishdan oldin elektron pochtangizga yuborilgan tasdiqlash havolasini bosing.",
-    "consent": "Hisob yaratish orqali siz <terms>Foydalanish shartlari</terms> va <privacy>Maxfiylik siyosati</privacy>ga rozilik bildirasiz."
+    "consent": "Hisob yaratish orqali siz <terms>Foydalanish shartlari</terms> va <privacy>Maxfiylik siyosati</privacy>ga rozilik bildirasiz.",
+    "resendConfirmation": "Tasdiqlash xatini qayta yuborish",
+    "resending": "Yuborilmoqda…",
+    "confirmationResent": "Agar bu manzil tasdiqlanishi kerak boʻlsa, yangi havola yuborildi. Kelmasa, spam papkasini tekshiring."
   },
   "Deposit": {
     "title": "So‘rovnomangizga ikkinchi hayot bering",
