@@ -3,8 +3,19 @@ import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { routing, type Locale } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/server";
-import { CheckIcon, ExternalLinkIcon, XIcon } from "@/components/icons";
+import {
+  CheckIcon,
+  ExternalLinkIcon,
+  SparkleIcon,
+  XIcon,
+} from "@/components/icons";
 import { approveDataset, rejectDataset } from "./actions";
+import {
+  collectVocabSuggestions,
+  hasVocabSuggestions,
+  type VocabColumns,
+  type VocabSuggestion,
+} from "@/lib/vocab-suggestions";
 
 interface PendingDataset {
   id: string;
@@ -54,6 +65,17 @@ export default async function ModeratePage({
     .order("created_at", { ascending: true });
 
   const pending = (data ?? []) as unknown as PendingDataset[];
+
+  // Everything depositors typed in an "Other" box, read back out of the
+  // datasets themselves. Pending rows count: a topic worth adding to the form
+  // is worth seeing before the dataset carrying it is approved.
+  const { data: vocabRows } = await supabase
+    .from("datasets")
+    .select("topics, collection_method, collection_platform, license");
+  const suggestions = collectVocabSuggestions(
+    (vocabRows ?? []) as unknown as VocabColumns[],
+  );
+
   const t = await getTranslations("Moderate");
 
   return (
@@ -137,6 +159,48 @@ export default async function ModeratePage({
           ))}
         </ul>
       )}
+
+      {hasVocabSuggestions(suggestions) && (
+        <section className="card space-y-5 p-6">
+          <div>
+            <p className="font-display flex items-center gap-2 font-bold text-ink">
+              <SparkleIcon size={17} className="text-brand" />
+              {t("vocabHeading")}
+            </p>
+            <p className="hint">{t("vocabHint")}</p>
+          </div>
+
+          <SuggestionGroup
+            label={t("vocabTopics")}
+            items={suggestions.topics}
+            filter="topic"
+            locale={locale}
+            t={t}
+          />
+          <SuggestionGroup
+            label={t("vocabMethods")}
+            items={suggestions.methods}
+            filter="method"
+            locale={locale}
+            t={t}
+          />
+          {/* Platform and licence have no filter on the browse page, so these
+              rows carry no link rather than a link that would filter on
+              nothing and come back empty. */}
+          <SuggestionGroup
+            label={t("vocabPlatforms")}
+            items={suggestions.platforms}
+            locale={locale}
+            t={t}
+          />
+          <SuggestionGroup
+            label={t("vocabLicenses")}
+            items={suggestions.licenses}
+            locale={locale}
+            t={t}
+          />
+        </section>
+      )}
     </main>
   );
 }
@@ -146,6 +210,65 @@ function MetaItem({ label, value }: { label: string; value: string }) {
     <div>
       <dt className="text-[10px] font-semibold tracking-wide text-faint uppercase">{label}</dt>
       <dd className="mt-0.5 font-medium text-ink">{value}</dd>
+    </div>
+  );
+}
+
+/**
+ * One vocabulary's worth of depositor-typed values. Renders nothing when the
+ * vocabulary already covers everything, so the panel shows only what needs a
+ * decision.
+ */
+function SuggestionGroup({
+  label,
+  items,
+  filter,
+  locale,
+  t,
+}: {
+  label: string;
+  items: VocabSuggestion[];
+  filter?: "topic" | "method";
+  locale: Locale;
+  t: Awaited<ReturnType<typeof getTranslations<"Moderate">>>;
+}) {
+  if (items.length === 0) return null;
+
+  return (
+    <div>
+      <p className="text-[10px] font-semibold tracking-wide text-faint uppercase">
+        {label}
+      </p>
+      <ul className="mt-2 flex flex-col gap-1.5">
+        {items.map((item) => {
+          const count = (
+            <span className="text-xs text-soft tnum">
+              {t("vocabDatasetCount", { count: item.count })}
+            </span>
+          );
+          return (
+            <li
+              key={item.value}
+              className="flex items-center justify-between gap-3 rounded-xl bg-card-soft px-3.5 py-2"
+            >
+              <span className="text-sm font-medium text-ink">{item.value}</span>
+              {filter ? (
+                <a
+                  href={`/${locale}/datasets?${filter}=${encodeURIComponent(item.value)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex shrink-0 items-center gap-1.5 transition hover:text-brand"
+                >
+                  {count}
+                  <ExternalLinkIcon size={13} className="text-faint" />
+                </a>
+              ) : (
+                count
+              )}
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }
