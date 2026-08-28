@@ -23,7 +23,12 @@ export interface FieldworkRange {
 type Ordering = "dmy" | "mdy";
 
 const NUMERIC_DATE = /^(\d{1,2})[./-](\d{1,2})[./-](\d{4})\b/;
-const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})\b/;
+// Year-first, whichever of the three separators the export used: Google Sheets
+// writes 2026/03/14 in some locales, a database export writes 2026-03-14, and
+// either can be followed straight by a time — 2026-03-14T09:12:00 — with no
+// space to end the date on. A four-digit leading group cannot be a day or a
+// month, so this is unambiguous wherever it matches.
+const YEAR_FIRST_DATE = /^(\d{4})[./-](\d{1,2})[./-](\d{1,2})(?!\d)/;
 
 /**
  * 4/8/2026 is genuinely ambiguous on its own, but a column of them rarely is:
@@ -56,8 +61,10 @@ function toIsoDay(year: number, month: number, day: number): string | null {
 function parseDay(value: string, ordering: Ordering): string | null {
   const trimmed = value.trim();
 
-  const iso = ISO_DATE.exec(trimmed);
-  if (iso) return toIsoDay(Number(iso[1]), Number(iso[2]), Number(iso[3]));
+  const yearFirst = YEAR_FIRST_DATE.exec(trimmed);
+  if (yearFirst) {
+    return toIsoDay(Number(yearFirst[1]), Number(yearFirst[2]), Number(yearFirst[3]));
+  }
 
   const numeric = NUMERIC_DATE.exec(trimmed);
   if (!numeric) return null;
