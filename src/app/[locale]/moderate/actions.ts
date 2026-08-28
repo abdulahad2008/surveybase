@@ -3,16 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { Locale } from "@/i18n/routing";
+import { MAX_REJECTION_REASON } from "@/lib/moderation";
 
 export type ModerateErrorKey = "errorAuth" | "errorGeneric" | "errorReasonTooLong";
 
 export interface ModerateState {
   error: ModerateErrorKey | null;
 }
-
-/** Matches the textarea's `maxLength`, so a reason that reaches the server too
- *  long got there by bypassing the form rather than by typing. */
-export const MAX_REJECTION_REASON = 1000;
 
 async function requireModerator() {
   const supabase = await createClient();

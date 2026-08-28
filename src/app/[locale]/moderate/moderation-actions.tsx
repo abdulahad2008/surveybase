@@ -4,12 +4,8 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { Locale } from "@/i18n/routing";
 import { CheckIcon, XIcon } from "@/components/icons";
-import {
-  approveDataset,
-  rejectDataset,
-  MAX_REJECTION_REASON,
-  type ModerateState,
-} from "./actions";
+import { MAX_REJECTION_REASON } from "@/lib/moderation";
+import { approveDataset, rejectDataset, type ModerateState } from "./actions";
 
 const IDLE: ModerateState = { error: null };
 
