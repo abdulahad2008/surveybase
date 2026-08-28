@@ -59,9 +59,24 @@ async function rollbackDeposit(
       console.error(`[deposit] rollback left an object at ${storagePath}: ${error.message}`);
     }
   }
-  const { error } = await supabase.from("datasets").delete().eq("id", datasetId);
+  // `select()` so the delete reports which rows it actually removed. Without
+  // it a delete that RLS declines is indistinguishable from one that worked:
+  // PostgREST returns no error for a statement that matched no rows, so the
+  // orphan this function exists to prevent would be left behind silently.
+  // Caught exactly that way in verification, against a database where the
+  // delete policy in 0007_deposit_rollback.sql had not been applied yet.
+  const { data, error } = await supabase
+    .from("datasets")
+    .delete()
+    .eq("id", datasetId)
+    .select("id");
   if (error) {
     console.error(`[deposit] rollback left dataset ${datasetId} in place: ${error.message}`);
+  } else if (!data || data.length === 0) {
+    console.error(
+      `[deposit] rollback deleted no row for dataset ${datasetId}; ` +
+        "the delete policy from 0007_deposit_rollback.sql is probably missing",
+    );
   }
 }
 
