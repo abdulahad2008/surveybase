@@ -121,7 +121,7 @@ export default async function DatasetsPage({
                   </span>
                 )}
               </h2>
-              <Link href="/datasets" className="text-xs font-semibold text-brand hover:underline">
+              <Link href="/datasets" className="tap-target text-xs font-semibold text-brand hover:underline">
                 {t("resetFilters")}
               </Link>
             </div>

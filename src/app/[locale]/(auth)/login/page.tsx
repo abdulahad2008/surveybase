@@ -66,7 +66,7 @@ export default function LoginPage() {
               </label>
               <Link
                 href="/forgot-password"
-                className="mb-1.5 inline-flex min-h-6 items-center text-xs font-semibold text-brand hover:underline"
+                className="tap-target mb-1.5 text-xs font-semibold text-brand hover:underline"
               >
                 {t("forgotLink")}
               </Link>

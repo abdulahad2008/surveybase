@@ -22,17 +22,17 @@ export async function Footer() {
           <p className="font-display text-sm font-bold text-ink">{t("exploreHeading")}</p>
           <ul className="space-y-2 text-soft">
             <li>
-              <Link href="/datasets" className="inline-flex min-h-6 items-center transition hover:text-brand">
+              <Link href="/datasets" className="tap-target transition hover:text-brand">
                 {t("linkBrowse")}
               </Link>
             </li>
             <li>
-              <Link href="/deposit" className="inline-flex min-h-6 items-center transition hover:text-brand">
+              <Link href="/deposit" className="tap-target transition hover:text-brand">
                 {t("linkDeposit")}
               </Link>
             </li>
             <li>
-              <Link href="/signup" className="inline-flex min-h-6 items-center transition hover:text-brand">
+              <Link href="/signup" className="tap-target transition hover:text-brand">
                 {t("linkSignup")}
               </Link>
             </li>

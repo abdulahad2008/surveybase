@@ -427,7 +427,7 @@ function Shelf({
         <h2 className="font-display text-2xl font-extrabold tracking-tight text-ink">{heading}</h2>
         <Link
           href={viewAllHref}
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand transition hover:gap-2.5"
+          className="tap-target gap-1.5 text-sm font-semibold text-brand transition hover:gap-2.5"
         >
           {viewAllLabel}
           <ArrowRightIcon size={15} />

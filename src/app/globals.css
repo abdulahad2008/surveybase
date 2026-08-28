@@ -373,6 +373,15 @@ body {
   font-size: 0.8125rem;
 }
 
+/* Text-sized inline links come out around 17px tall, under the 24x24 CSS px
+   WCAG 2.2 AA 2.5.8 asks for. This grows the hit area without touching the
+   type scale, so the link looks exactly as it did. */
+.tap-target {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+}
+
 .chip {
   display: inline-flex;
   align-items: center;
