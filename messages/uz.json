@@ -13,6 +13,12 @@
     "toggleTheme": "Mavzuni almashtirish",
     "profile": "Profil"
   },
+  "Format": {
+    "decimal": ",",
+    "group": " ",
+    "monthsShort": "yan,fev,mar,apr,may,iyn,iyl,avg,sen,okt,noy,dek",
+    "dateShort": "{day}-{month}, {year}"
+  },
   "Home": {
     "title": "SurveyBase.uz",
     "eyebrow": "O‘zbekistonning ochiq so‘rovnomalar arxivi",
@@ -229,8 +235,8 @@
     "viewAtSourceNote": "Bu ma'lumotlar to‘plami SurveyBase.uz’da joylashtirilmagan — unga kirish asl manba orqali amalga oshiriladi.",
     "noFileYet": "Ushbu ma'lumotlar to‘plami uchun hali fayl yuklanmagan.",
     "downloadCount": "{count} marta yuklab olingan",
-    "responses": "{count} ta javob",
-    "moreOptions": "yana {count} ta variant",
+    "responses": "{count, plural, other {{value} ta javob}}",
+    "moreOptions": "{count, plural, other {yana {value} ta variant}}",
     "statMin": "min {value}",
     "statMax": "maks {value}",
     "statMean": "o‘rtacha {value}",

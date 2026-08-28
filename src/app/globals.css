@@ -38,15 +38,22 @@
   /* Text/icon-safe accents for light mode. The base accents are tuned as fills
      and are too pale to carry text on any of our surfaces — --sun measured
      2.19:1 on --card. Fills keep the originals; anything rendered as text or
-     as a meaningful icon uses these. Dark mode aliases them to the base
-     accents, which already clear AA. */
+     as a meaningful icon uses these. Every one of them clears 4.5:1 against
+     its own -soft background and against --card, --card-soft and --canvas, so
+     a chip is legible wherever it is placed. Dark mode aliases them to the
+     base accents, which already clear AA — except --sky-ink, which does not.
+     --sun-ink was 3.59:1 on --card, which is large-text AA only; it now
+     carries the topic chips, so it is darker than it was. */
   --mint-ink: #0b7852;
   --warning-ink: #906200;
-  --sun-ink: #b37d00;
+  --sun-ink: #8f6400;
+  --coral-ink: #ce200f;
   --rose: #d6558a;
   --rose-soft: #fbe6ef;
+  --rose-ink: #c02e6a;
   --sky: #2a78d6;
   --sky-soft: #e2eefb;
+  --sky-ink: #246abd;
 
   /* status */
   --good: #0ca30c;
@@ -118,10 +125,15 @@
     --mint-ink: var(--mint);
     --warning-ink: var(--warning);
     --sun-ink: var(--sun);
+    --coral-ink: var(--coral);
     --rose: #e57ab0;
     --rose-soft: rgba(229, 122, 176, 0.14);
+    --rose-ink: var(--rose);
     --sky: #3987e5;
     --sky-soft: rgba(57, 135, 229, 0.15);
+    /* The one accent that cannot alias its base here: --sky on --sky-soft is
+       4.10:1 against this card, under AA. Lightened until it clears. */
+    --sky-ink: #4d93e8;
 
     --good: #0ca30c;
     --good-text: #4ade4a;
@@ -179,10 +191,15 @@
     --mint-ink: var(--mint);
     --warning-ink: var(--warning);
     --sun-ink: var(--sun);
+    --coral-ink: var(--coral);
     --rose: #e57ab0;
     --rose-soft: rgba(229, 122, 176, 0.14);
+    --rose-ink: var(--rose);
     --sky: #3987e5;
     --sky-soft: rgba(57, 135, 229, 0.15);
+    /* The one accent that cannot alias its base here: --sky on --sky-soft is
+       4.10:1 against this card, under AA. Lightened until it clears. */
+    --sky-ink: #4d93e8;
 
     --good: #0ca30c;
     --good-text: #4ade4a;
@@ -237,10 +254,13 @@
   --color-mint-ink: var(--mint-ink);
   --color-warning-ink: var(--warning-ink);
   --color-sun-ink: var(--sun-ink);
+  --color-coral-ink: var(--coral-ink);
   --color-rose: var(--rose);
   --color-rose-soft: var(--rose-soft);
+  --color-rose-ink: var(--rose-ink);
   --color-sky: var(--sky);
   --color-sky-soft: var(--sky-soft);
+  --color-sky-ink: var(--sky-ink);
 
   --color-good: var(--good);
   --color-good-text: var(--good-text);

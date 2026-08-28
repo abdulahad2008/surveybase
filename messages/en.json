@@ -13,6 +13,12 @@
     "toggleTheme": "Switch theme",
     "profile": "Profile"
   },
+  "Format": {
+    "decimal": ".",
+    "group": ",",
+    "monthsShort": "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec",
+    "dateShort": "{month} {day}, {year}"
+  },
   "Home": {
     "title": "SurveyBase.uz",
     "eyebrow": "The open survey archive of Uzbekistan",
@@ -229,8 +235,8 @@
     "viewAtSourceNote": "This dataset is not hosted on SurveyBase.uz — the original source manages access.",
     "noFileYet": "No file has been uploaded for this dataset yet.",
     "downloadCount": "{count} downloads",
-    "responses": "{count} responses",
-    "moreOptions": "{count, plural, one {+# more option} other {+# more options}}",
+    "responses": "{count, plural, one {{value} response} other {{value} responses}}",
+    "moreOptions": "{count, plural, one {+{value} more option} other {+{value} more options}}",
     "statMin": "min {value}",
     "statMax": "max {value}",
     "statMean": "mean {value}",

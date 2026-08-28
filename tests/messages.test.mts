@@ -38,6 +38,13 @@ test("every locale defines exactly the same keys", () => {
   }
 });
 
+/**
+ * The thousands separator in Uzbek and Russian is a no-break space, so it trims
+ * away to nothing without being a missing translation. It is checked instead by
+ * tests/format.test.mts, which asserts every locale ships a non-empty one.
+ */
+const WHITESPACE_VALUED = new Set(["Format.group"]);
+
 test("no locale ships an empty string for a key another locale fills", () => {
   const values = routing.locales.map((locale) => {
     const messages = load(locale);
@@ -50,7 +57,9 @@ test("no locale ships an empty string for a key another locale fills", () => {
   });
 
   for (const [i, locale] of routing.locales.entries()) {
-    const blank = [...values[i]].filter(([, v]) => typeof v === "string" && v.trim() === "");
+    const blank = [...values[i]].filter(
+      ([k, v]) => typeof v === "string" && v.trim() === "" && !WHITESPACE_VALUED.has(k),
+    );
     assert.deepEqual(blank.map(([k]) => k), [], `${locale}.json has empty strings`);
   }
 });

@@ -464,7 +464,7 @@ export default async function DatasetPage({
               <QuoteIcon size={17} className="text-brand" />
               {t("howToCiteHeading")}
             </h2>
-            <p className="mt-3 rounded-xl bg-card p-3.5 font-mono text-xs leading-relaxed break-words text-soft">
+            <p className="mt-3 rounded-xl bg-card p-3.5 font-mono text-xs leading-relaxed wrap-anywhere text-soft">
               {citation}
             </p>
             <div className="mt-3">

@@ -13,6 +13,12 @@
     "toggleTheme": "Сменить тему",
     "profile": "Профиль"
   },
+  "Format": {
+    "decimal": ",",
+    "group": " ",
+    "monthsShort": "янв.,февр.,марта,апр.,мая,июня,июля,авг.,сент.,окт.,нояб.,дек.",
+    "dateShort": "{day} {month} {year} г."
+  },
   "Home": {
     "title": "SurveyBase.uz",
     "eyebrow": "Открытый архив опросов Узбекистана",
@@ -229,8 +235,8 @@
     "viewAtSourceNote": "Этот набор данных не размещён на SurveyBase.uz — доступ к нему предоставляет исходный источник.",
     "noFileYet": "Файл для этого набора данных ещё не загружен.",
     "downloadCount": "{count} скачиваний",
-    "responses": "{count} ответов",
-    "moreOptions": "ещё {count, plural, one {# вариант} few {# варианта} other {# вариантов}}",
+    "responses": "{count, plural, one {{value} ответ} few {{value} ответа} many {{value} ответов} other {{value} ответа}}",
+    "moreOptions": "{count, plural, one {ещё {value} вариант} few {ещё {value} варианта} many {ещё {value} вариантов} other {ещё {value} варианта}}",
     "statMin": "мин. {value}",
     "statMax": "макс. {value}",
     "statMean": "среднее {value}",

@@ -14,7 +14,8 @@ import {
   YAxis,
 } from "recharts";
 import { useEffect, useRef, useState } from "react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useFormat } from "@/lib/use-format";
 import { tidyBin, type ColumnSummary } from "@/lib/csv-analysis";
 
 interface Column {
@@ -50,14 +51,6 @@ function useNarrowChart() {
   return { ref, narrow };
 }
 
-/** Always one decimal. A right-aligned column of percentages should line up on
- *  the decimal point; letting it drop gives "35%" sitting beside "32.2%". */
-const PERCENT = {
-  style: "percent",
-  minimumFractionDigits: 1,
-  maximumFractionDigits: 1,
-} as const;
-
 // Colour by option, so the reader can match a slice to its legend row. Eight is
 // the whole palette; past six options we draw bars instead, and bars need one
 // colour, so the list never has to stretch.
@@ -82,6 +75,7 @@ const BAR_MAX = 12;
 
 export function ColumnCharts({ columns }: { columns: Column[] }) {
   const t = useTranslations("Dataset");
+  const format = useFormat();
 
   return (
     <div className="space-y-5">
@@ -89,7 +83,10 @@ export function ColumnCharts({ columns }: { columns: Column[] }) {
         <div key={col.question_text} className="card p-5">
           <h3 className="text-sm leading-snug font-bold text-ink">{col.question_text}</h3>
           <p className="tnum mt-1 text-xs font-medium text-faint">
-            {t("responses", { count: col.summary_json.responseCount })}
+            {t("responses", {
+              count: col.summary_json.responseCount,
+              value: format.integer(col.summary_json.responseCount),
+            })}
           </p>
           <div className="mt-4">
             <ColumnChart summary={col.summary_json} />
@@ -126,7 +123,7 @@ function CategoricalChart({ summary }: { summary: Categorical }) {
  * which are suppressed below 8% to stop them colliding.
  */
 function Donut({ summary }: { summary: Categorical }) {
-  const format = useFormatter();
+  const format = useFormat();
   const { counts, responseCount } = summary;
   const share = (n: number) => (responseCount > 0 ? n / responseCount : 0);
 
@@ -166,10 +163,10 @@ function Donut({ summary }: { summary: Categorical }) {
             />
             <span className="min-w-0 flex-1 break-words text-ink">{c.value}</span>
             <span className="tnum shrink-0 font-semibold text-soft">
-              {format.number(c.count)}
+              {format.integer(c.count)}
             </span>
             <span className="tnum w-14 shrink-0 text-right text-xs font-medium text-faint">
-              {format.number(share(c.count), PERCENT)}
+              {format.percent(share(c.count))}
             </span>
           </li>
         ))}
@@ -237,7 +234,7 @@ function SliceLabel({
  */
 function OptionBars({ summary }: { summary: Categorical }) {
   const t = useTranslations("Dataset");
-  const format = useFormatter();
+  const format = useFormat();
   const { counts, responseCount } = summary;
 
   const shown = counts.slice(0, BAR_MAX);
@@ -252,9 +249,9 @@ function OptionBars({ summary }: { summary: Categorical }) {
             <div className="flex items-baseline justify-between gap-3">
               <span className="min-w-0 break-words text-sm text-ink">{c.value}</span>
               <span className="tnum shrink-0 text-xs font-semibold whitespace-nowrap text-soft">
-                {format.number(c.count)}
+                {format.integer(c.count)}
                 <span className="ml-1.5 font-medium text-faint">
-                  {format.number(responseCount > 0 ? c.count / responseCount : 0, PERCENT)}
+                  {format.percent(responseCount > 0 ? c.count / responseCount : 0)}
                 </span>
               </span>
             </div>
@@ -276,7 +273,7 @@ function OptionBars({ summary }: { summary: Categorical }) {
 
       {hidden > 0 && (
         <p className="tnum mt-3 text-xs font-medium text-faint">
-          {t("moreOptions", { count: hidden })}
+          {t("moreOptions", { count: hidden, value: format.integer(hidden) })}
         </p>
       )}
     </>
@@ -293,7 +290,7 @@ function OptionBars({ summary }: { summary: Categorical }) {
  */
 function NumericChart({ summary }: { summary: Numeric }) {
   const t = useTranslations("Dataset");
-  const format = useFormatter();
+  const format = useFormat();
   const { histogram, responseCount } = summary;
 
   const { ref, narrow } = useNarrowChart();
@@ -301,10 +298,7 @@ function NumericChart({ summary }: { summary: Numeric }) {
   const rows = histogram.map((h) => ({
     ...h,
     bin: tidyBin(h.bin),
-    share:
-      responseCount > 0
-        ? format.number(h.count / responseCount, PERCENT)
-        : "",
+    share: responseCount > 0 ? format.percent(h.count / responseCount) : "",
   }));
 
   return (
@@ -313,7 +307,10 @@ function NumericChart({ summary }: { summary: Numeric }) {
         ref={ref}
         className="h-72 w-full"
         role="img"
-        aria-label={t("responses", { count: responseCount })}
+        aria-label={t("responses", {
+          count: responseCount,
+          value: format.integer(responseCount),
+        })}
       >
         <ResponsiveContainer>
           <BarChart data={rows} margin={{ top: 26, right: 4, left: -18, bottom: 0 }}>
@@ -368,10 +365,10 @@ function NumericChart({ summary }: { summary: Numeric }) {
 
       <div className="mt-2 flex flex-wrap gap-x-2 gap-y-1">
         {[
-          t("statMin", { value: summary.min }),
-          t("statMax", { value: summary.max }),
-          t("statMean", { value: Number(summary.mean.toFixed(2)) }),
-          t("statMedian", { value: summary.median }),
+          t("statMin", { value: format.number(summary.min) }),
+          t("statMax", { value: format.number(summary.max) }),
+          t("statMean", { value: format.number(summary.mean) }),
+          t("statMedian", { value: format.number(summary.median) }),
         ].map((s) => (
           <span key={s} className="chip tnum bg-card-soft text-soft">
             {s}
@@ -399,18 +396,19 @@ function SliceTooltip({
   payload?: { name?: string; value?: number; payload?: { value?: string; bin?: string } }[];
   total: number;
 }) {
+  const format = useFormat();
   if (!active || !payload?.length) return null;
 
   const entry = payload[0];
   const count = entry.value ?? 0;
   const label = entry.payload?.value ?? entry.payload?.bin ?? entry.name ?? "";
-  const share = total > 0 ? Math.round((count / total) * 1000) / 10 : 0;
+  const share = total > 0 ? count / total : 0;
 
   return (
     <div className="rounded-xl border border-line bg-card px-3 py-2 text-xs shadow-lift">
       <p className="max-w-[220px] font-semibold text-ink">{label}</p>
       <p className="tnum mt-0.5 text-soft">
-        {count} · {share}%
+        {format.integer(count)} · {format.percent(share)}
       </p>
     </div>
   );
@@ -419,14 +417,15 @@ function SliceTooltip({
 // ── Date & free text (unchanged in substance) ──────────────────────────────
 
 function DateRange({ summary }: { summary: DateSummary }) {
-  const format = useFormatter();
-  // Bare toLocaleDateString() resolves against the server's locale, not the
-  // visitor's, so a Russian or Uzbek reader was shown American month/day order.
-  const day = (iso: string) => format.dateTime(new Date(iso), { dateStyle: "medium" });
+  // Not `useFormatter().dateTime`: Chromium has no `uz` calendar data either,
+  // so a date this component renders came out as "2021 M11 14" in the browser
+  // and "14-noy, 2021" from the server. The month names live in the catalog.
+  const format = useFormat();
 
   return (
     <p className="tnum text-sm text-soft">
-      {summary.min ? day(summary.min) : "—"} – {summary.max ? day(summary.max) : "—"}
+      {summary.min ? format.day(summary.min) : "—"} –{" "}
+      {summary.max ? format.day(summary.max) : "—"}
     </p>
   );
 }

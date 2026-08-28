@@ -721,7 +721,7 @@ export function DepositForm({
                 <p className="hint">{t("reviewCitationHint")}</p>
               </div>
 
-              <p className="rounded-xl bg-brand-wash p-3.5 font-mono text-xs leading-relaxed break-words text-soft">
+              <p className="rounded-xl bg-brand-wash p-3.5 font-mono text-xs leading-relaxed wrap-anywhere text-soft">
                 {summary.citation}
               </p>
               {/* The slug carries a random suffix assigned at insert time, so
