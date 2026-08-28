@@ -13,6 +13,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useEffect, useRef, useState } from "react";
 import { useFormatter, useTranslations } from "next-intl";
 import type { ColumnSummary } from "@/lib/csv-analysis";
 
@@ -28,6 +29,36 @@ type DateSummary = Extract<ColumnSummary, { type: "date" }>;
 type TextSummary = Extract<ColumnSummary, { type: "text" }>;
 
 const AXIS_TICK = { fontSize: 11, fill: "var(--chart-axis)" };
+
+/**
+ * Bin labels are baked into summary_json at deposit time, so datasets archived
+ * before the precision fix still carry "18.0–24.4". Dropping a trailing ".0"
+ * at render time shortens those without a backfill, and is a no-op for bins
+ * that genuinely need a decimal.
+ */
+function tidyBin(bin: string): string {
+  return bin.replace(/(\d)\.0(?=\s*[–-]|$)/g, "$1");
+}
+
+/**
+ * Ten bin labels at -30° do not fit across a phone. Measuring the chart's own
+ * width rather than the viewport keeps this correct inside the narrower
+ * two-column layout on desktop as well.
+ */
+function useNarrowChart() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [narrow, setNarrow] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const check = () => setNarrow(el.clientWidth < 480);
+    check();
+    const observer = new ResizeObserver(check);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  return { ref, narrow };
+}
 
 /** Always one decimal. A right-aligned column of percentages should line up on
  *  the decimal point; letting it drop gives "35%" sitting beside "32.2%". */
@@ -275,8 +306,11 @@ function NumericChart({ summary }: { summary: Numeric }) {
   const format = useFormatter();
   const { histogram, responseCount } = summary;
 
+  const { ref, narrow } = useNarrowChart();
+
   const rows = histogram.map((h) => ({
     ...h,
+    bin: tidyBin(h.bin),
     share:
       responseCount > 0
         ? format.number(h.count / responseCount, PERCENT)
@@ -286,6 +320,7 @@ function NumericChart({ summary }: { summary: Numeric }) {
   return (
     <>
       <div
+        ref={ref}
         className="h-72 w-full"
         role="img"
         aria-label={t("responses", { count: responseCount })}
@@ -295,11 +330,11 @@ function NumericChart({ summary }: { summary: Numeric }) {
             <CartesianGrid vertical={false} stroke="var(--chart-grid)" />
             <XAxis
               dataKey="bin"
-              tick={{ ...AXIS_TICK, fontSize: 10 }}
-              interval={0}
-              angle={-30}
+              tick={{ ...AXIS_TICK, fontSize: narrow ? 9 : 10 }}
+              interval={narrow ? 1 : 0}
+              angle={narrow ? -45 : -30}
               textAnchor="end"
-              height={60}
+              height={narrow ? 68 : 60}
               tickLine={false}
               axisLine={{ stroke: "var(--chart-grid)" }}
             />

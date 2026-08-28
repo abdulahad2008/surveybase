@@ -196,6 +196,7 @@
     "questionsSubtitle": "So‘rovnomadagi har bir savol uchun avtomatik yaratilgan diagrammalar va statistika.",
     "dataHeading": "Ma'lumotlar",
     "tablePageLabel": "{total} sahifadan {page}-sahifa",
+    "tableScrollHint": "Barcha ustunlarni ko‘rish uchun yonga suring",
     "tablePrev": "Oldingi",
     "tableNext": "Keyingi",
     "downloadsHeading": "Yuklab olish",
@@ -247,6 +248,7 @@
   },
   "Browse": {
     "heading": "Ma'lumotlar to‘plamlarini ko‘rish",
+    "metaDescription": "Arxivni mavzu, to‘plash usuli, til, yil va tanlanma hajmi bo‘yicha qidiring va filtrlang.",
     "filtersHeading": "Filtrlar",
     "searchLabel": "Qidiruv",
     "searchPlaceholder": "Sarlavha, mazmun yoki mavzu",

@@ -196,6 +196,7 @@
     "questionsSubtitle": "Автоматические графики и статистика по каждому вопросу опроса.",
     "dataHeading": "Данные",
     "tablePageLabel": "Страница {page} из {total}",
+    "tableScrollHint": "Прокрутите вбок, чтобы увидеть все столбцы",
     "tablePrev": "Назад",
     "tableNext": "Далее",
     "downloadsHeading": "Скачать",
@@ -247,6 +248,7 @@
   },
   "Browse": {
     "heading": "Обзор наборов данных",
+    "metaDescription": "Ищите и фильтруйте архив по теме, методу сбора, языку, году и размеру выборки.",
     "filtersHeading": "Фильтры",
     "searchLabel": "Поиск",
     "searchPlaceholder": "Название, аннотация или тема",

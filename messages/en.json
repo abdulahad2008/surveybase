@@ -196,6 +196,7 @@
     "questionsSubtitle": "Auto-generated charts and stats for every question in the survey.",
     "dataHeading": "Data",
     "tablePageLabel": "Page {page} of {total}",
+    "tableScrollHint": "Scroll sideways to see every column",
     "tablePrev": "Prev",
     "tableNext": "Next",
     "downloadsHeading": "Downloads",
@@ -247,6 +248,7 @@
   },
   "Browse": {
     "heading": "Browse datasets",
+    "metaDescription": "Search and filter the archive by topic, collection method, language, year and sample size.",
     "filtersHeading": "Filters",
     "searchLabel": "Search",
     "searchPlaceholder": "Title, abstract, or topic",

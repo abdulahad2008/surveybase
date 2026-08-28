@@ -1,4 +1,8 @@
+import type { Metadata } from "next";
+import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
+import { routing, type Locale } from "@/i18n/routing";
+import { pageMetadata } from "@/lib/site";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { queryDatasets, getFilterOptions, type DatasetFilters } from "@/lib/datasets";
@@ -30,6 +34,22 @@ function buildPageHref(sp: RawSearchParams, page: number): string {
   if (page > 1) params.set("page", String(page));
   const qs = params.toString();
   return qs ? `/datasets?${qs}` : "/datasets";
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: raw } = await params;
+  const locale: Locale = hasLocale(routing.locales, raw) ? raw : routing.defaultLocale;
+  const t = await getTranslations({ locale, namespace: "Browse" });
+  return pageMetadata({
+    locale,
+    path: "/datasets",
+    title: t("heading"),
+    description: t("metaDescription"),
+  });
 }
 
 export default async function DatasetsPage({

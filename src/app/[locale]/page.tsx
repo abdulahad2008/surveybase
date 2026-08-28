@@ -1,4 +1,8 @@
+import type { Metadata } from "next";
+import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
+import { routing, type Locale } from "@/i18n/routing";
+import { pageMetadata } from "@/lib/site";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { queryDatasets, getArchiveStats, getFilterOptions } from "@/lib/datasets";
@@ -17,6 +21,22 @@ import {
   UploadIcon,
   UsersIcon,
 } from "@/components/icons";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: raw } = await params;
+  const locale: Locale = hasLocale(routing.locales, raw) ? raw : routing.defaultLocale;
+  const t = await getTranslations({ locale, namespace: "Home" });
+  return pageMetadata({
+    locale,
+    title: `${t("title")} — ${t("eyebrow")}`,
+    absoluteTitle: true,
+    description: t("subtitle").trim(),
+  });
+}
 
 export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

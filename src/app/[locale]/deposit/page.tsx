@@ -1,8 +1,28 @@
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import { pageMetadata } from "@/lib/site";
 import { redirect } from "@/i18n/navigation";
 import { hasLocale } from "next-intl";
 import { routing, type Locale } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/server";
 import { DepositForm } from "./deposit-form";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: raw } = await params;
+  const locale: Locale = hasLocale(routing.locales, raw) ? raw : routing.defaultLocale;
+  const t = await getTranslations({ locale, namespace: "Deposit" });
+  return pageMetadata({
+    locale,
+    path: "/deposit",
+    title: t("title"),
+    description: t("intro").slice(0, 155),
+    index: false,
+  });
+}
 
 export default async function DepositPage({
   params,

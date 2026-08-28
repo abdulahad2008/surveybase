@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   type ColumnDef,
@@ -15,6 +15,21 @@ import {
 export function DataTable({ headers, rows }: { headers: string[]; rows: Record<string, string>[] }) {
   const t = useTranslations("Dataset");
   const [sorting, setSorting] = useState<SortingState>([]);
+
+  // A survey with 30 questions produces a table far wider than a phone. It has
+  // always scrolled, but nothing said so: the columns were simply cut off at
+  // the card edge, which reads as broken data rather than as more data.
+  const scroller = useRef<HTMLDivElement>(null);
+  const [overflowing, setOverflowing] = useState(false);
+  useEffect(() => {
+    const el = scroller.current;
+    if (!el) return;
+    const check = () => setOverflowing(el.scrollWidth > el.clientWidth + 1);
+    check();
+    const observer = new ResizeObserver(check);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [headers.length, rows.length]);
 
   const columns: ColumnDef<Record<string, string>>[] = headers.map((header) => ({
     id: header,
@@ -35,17 +50,19 @@ export function DataTable({ headers, rows }: { headers: string[]; rows: Record<s
 
   return (
     <div className="space-y-3">
-      <div className="card overflow-x-auto">
+      <div ref={scroller} className="card relative overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-line bg-card-soft/70">
+          <thead className="border-b border-line bg-card-soft">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
+                {headerGroup.headers.map((header, i) => {
                   const sorted = header.column.getIsSorted();
                   return (
                     <th
                       key={header.id}
-                      className="px-4 py-3 font-semibold whitespace-nowrap text-ink"
+                      className={`px-4 py-3 font-semibold whitespace-nowrap text-ink ${
+                        i === 0 ? "sticky left-0 z-20 border-r border-line bg-card-soft" : ""
+                      }`}
                       aria-sort={sorted === "asc" ? "ascending" : sorted === "desc" ? "descending" : "none"}
                     >
                       <button
@@ -65,23 +82,33 @@ export function DataTable({ headers, rows }: { headers: string[]; rows: Record<s
             ))}
           </thead>
           <tbody>
-            {table.getRowModel().rows.map((row, i) => (
-              <tr
-                key={row.id}
-                className={`border-t border-line transition hover:bg-brand-wash ${
-                  i % 2 === 1 ? "bg-card-soft/40" : ""
-                }`}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="max-w-[280px] truncate px-4 py-2.5 whitespace-nowrap text-soft">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
+            {table.getRowModel().rows.map((row, i) => {
+              const stripe = i % 2 === 1 ? "bg-card-soft" : "bg-card";
+              return (
+                <tr key={row.id} className={`group border-t border-line transition hover:bg-brand-wash ${stripe}`}>
+                  {row.getVisibleCells().map((cell, j) => (
+                    <td
+                      key={cell.id}
+                      className={`max-w-[280px] truncate px-4 py-2.5 whitespace-nowrap text-soft ${
+                        j === 0
+                          ? `sticky left-0 z-10 border-r border-line ${stripe} transition group-hover:bg-brand-wash`
+                          : ""
+                      }`}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
+      {overflowing && (
+        <p aria-hidden className="text-xs font-medium text-faint">
+          {t("tableScrollHint")}
+        </p>
+      )}
       <div className="flex items-center justify-between text-sm">
         <span className="tnum font-medium text-faint">
           {t("tablePageLabel", {
