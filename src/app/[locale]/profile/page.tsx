@@ -63,6 +63,7 @@ export default async function ProfilePage({
   const t = await getTranslations("Profile");
   const datasets = await getProfileDatasets(supabase, user!.id, { publishedOnly: false });
   const stats = summarizeDatasets(datasets);
+  const nf = new Intl.NumberFormat(locale);
 
   return (
     <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6 sm:py-14">
@@ -86,11 +87,17 @@ export default async function ProfilePage({
             <div className="flex gap-4 text-sm text-soft">
               <span className="inline-flex items-center gap-1.5">
                 <DownloadIcon size={15} />
-                {t("statDownloads", { count: stats.totalDownloads })}
+                {t("statDownloads", {
+                  count: stats.totalDownloads,
+                  value: nf.format(stats.totalDownloads),
+                })}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <UsersIcon size={15} />
-                {t("statRespondents", { count: stats.totalRespondents })}
+                {t("statRespondents", {
+                  count: stats.totalRespondents,
+                  value: nf.format(stats.totalRespondents),
+                })}
               </span>
             </div>
           )}
@@ -132,7 +139,12 @@ export default async function ProfilePage({
                 {d.status === "published" && (
                   <span className="inline-flex items-center gap-1.5 text-sm text-soft">
                     <DownloadIcon size={15} />
-                    <span className="tnum">{t("statDownloads", { count: d.download_count ?? 0 })}</span>
+                    <span className="tnum">
+                      {t("statDownloads", {
+                        count: d.download_count ?? 0,
+                        value: nf.format(d.download_count ?? 0),
+                      })}
+                    </span>
                   </span>
                 )}
                 <span className={`chip ${statusChip[d.status] ?? "bg-card-soft text-soft"}`}>

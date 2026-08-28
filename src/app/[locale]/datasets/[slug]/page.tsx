@@ -473,7 +473,10 @@ export default async function DatasetPage({
                   {t("viewAtSourceButton")}
                 </a>
                 <p className="tnum text-center text-xs font-medium text-faint">
-                  {t("visitCount", { count: nf.format(dataset.download_count) })}
+                  {t("visitCount", {
+                    count: dataset.download_count,
+                    value: nf.format(dataset.download_count),
+                  })}
                 </p>
                 <p className="text-xs leading-relaxed text-faint">{t("viewAtSourceNote")}</p>
               </div>
@@ -491,7 +494,10 @@ export default async function DatasetPage({
                   ))}
                 </div>
                 <p className="tnum text-center text-xs font-medium text-faint">
-                  {t("downloadCount", { count: nf.format(dataset.download_count) })}
+                  {t("downloadCount", {
+                    count: dataset.download_count,
+                    value: nf.format(dataset.download_count),
+                  })}
                 </p>
               </div>
             ) : (

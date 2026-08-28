@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { submitReview, type ReviewState } from "./actions";
 import type { Locale } from "@/i18n/routing";
 import { StarIcon } from "@/components/icons";
+import { useFormat } from "@/lib/use-format";
 import { MAX_REVIEW_COMMENT } from "@/lib/moderation";
 
 export interface ReviewRow {
@@ -31,6 +32,7 @@ export function Reviews({
   currentUserId: string | null;
 }) {
   const t = useTranslations("Dataset");
+  const format = useFormat();
   const boundAction = submitReview.bind(null, locale, slug);
   const [state, formAction, pending] = useActionState(boundAction, initialState);
 
@@ -48,10 +50,23 @@ export function Reviews({
           {t("reviewsHeading")}
         </h2>
         {average != null && (
+          // A star, a number and a number in brackets say nothing out loud, and
+          // toFixed always writes a dot — a decimal separator no Uzbek or
+          // Russian reader uses, and one the server would have written
+          // differently.
           <span className="chip bg-sun-soft text-ink">
             <StarIcon size={13} filled className="text-sun-ink" />
-            <span className="tnum font-bold">{average.toFixed(1)}</span>
-            <span className="tnum text-soft">({sorted.length})</span>
+            <span aria-hidden className="tnum font-bold">{format.fixed(average, 1)}</span>
+            <span aria-hidden className="tnum text-soft">
+              ({format.integer(sorted.length)})
+            </span>
+            <span className="sr-only">
+              {t("averageRating", {
+                rating: format.fixed(average, 1),
+                count: sorted.length,
+                value: format.integer(sorted.length),
+              })}
+            </span>
           </span>
         )}
       </div>
