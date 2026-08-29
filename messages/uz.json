@@ -506,8 +506,10 @@
   "Vocab": {
     "education": "Taʼlim",
     "health": "Sogʻliqni saqlash",
+    "wellbeing": "Farovonlik va hayotdan qoniqish",
     "employment": "Bandlik va mehnat",
     "income": "Daromad va kambagʻallik",
+    "economy": "Iqtisodiyot va narxlar",
     "migration": "Migratsiya",
     "gender": "Gender",
     "youth": "Yoshlar",
@@ -516,6 +518,7 @@
     "business": "Biznes va tadbirkorlik",
     "politics": "Siyosat va jamoatchilik fikri",
     "governance": "Boshqaruv va korrupsiya",
+    "cohesion": "Ijtimoiy hamjihatlik va ishonch",
     "religion": "Din va qadriyatlar",
     "media": "Media va internet",
     "environment": "Ekologiya va iqlim",

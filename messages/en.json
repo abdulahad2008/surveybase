@@ -506,8 +506,10 @@
   "Vocab": {
     "education": "Education",
     "health": "Health",
+    "wellbeing": "Wellbeing & life satisfaction",
     "employment": "Employment & labour",
     "income": "Income & poverty",
+    "economy": "Economy & prices",
     "migration": "Migration",
     "gender": "Gender",
     "youth": "Youth",
@@ -516,6 +518,7 @@
     "business": "Business & entrepreneurship",
     "politics": "Politics & public opinion",
     "governance": "Governance & corruption",
+    "cohesion": "Social cohesion & trust",
     "religion": "Religion & values",
     "media": "Media & internet",
     "environment": "Environment & climate",
