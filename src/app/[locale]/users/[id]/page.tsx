@@ -70,6 +70,10 @@ export default async function PublicProfilePage({
   // <title> around a 404 body and looks half-alive rather than broken.
   if (error) console.error(`[users/${id}] loading public profile failed: ${error.message}`);
 
+  // Returning a real 404 here depends on nothing above this route rendering a
+  // Suspense fallback first: [locale]/loading.tsx used to, which committed the
+  // response to 200 and left every unknown URL a soft 404. Adding a loading.tsx
+  // to this segment or any ancestor brings that back silently.
   const profile = data as unknown as Profile | null;
   if (!profile) notFound();
 

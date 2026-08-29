@@ -142,6 +142,10 @@ export default async function DatasetPage({
     .eq("slug", slug)
     .maybeSingle();
 
+  // Returning a real 404 here depends on nothing above this route rendering a
+  // Suspense fallback first: [locale]/loading.tsx used to, which committed the
+  // response to 200 and left every unknown URL a soft 404. Adding a loading.tsx
+  // to this segment or any ancestor brings that back silently.
   const dataset = data as unknown as DatasetRow | null;
   if (!dataset) notFound();
 

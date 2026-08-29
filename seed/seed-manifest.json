@@ -23,6 +23,7 @@
     {
       "record_type": "hosted",
       "title": "Central Asia Barometer Survey — Uzbekistan, Wave 1",
+      "abstract": "The Central Asia Barometer is a repeated public opinion survey of adults across Central Asia. Wave 1 covers Uzbekistan in 2017, with 1,500 respondents interviewed face to face. It asks how people read the political and economic situation, what they make of government and public institutions, how ethnic groups get along, which media they use, and how they judge public health provision. Because the same core questions recur wave after wave, the value of any single wave is largely in the comparison with the others.\n\nSurveyBase holds a catalogue record only. Waves 1-9 (2017-2021) are published together by the Central Asia Barometer through Discuss Data under open-access terms that require attribution.",
       "source_name": "Central Asia Barometer (via Discuss Data)",
       "source_organization": "Central Asia Barometer",
       "source_url": "https://discuss-data.net/dataset/1afc5235-eb1f-4a23-80b6-036515ce1916/",
@@ -57,6 +58,7 @@
     {
       "record_type": "hosted",
       "title": "Central Asia Barometer Survey — Uzbekistan, Wave 2",
+      "abstract": "The Central Asia Barometer is a repeated public opinion survey of adults across Central Asia. Wave 2 covers Uzbekistan in 2018, with 1,500 respondents interviewed face to face, repeating the core questions on the political and economic situation, attitudes toward government, ethnic relations and media use so that answers can be compared with the wave before it.\n\nSurveyBase holds a catalogue record only. Waves 1-9 (2017-2021) are published together by the Central Asia Barometer through Discuss Data under open-access terms that require attribution.",
       "source_name": "Central Asia Barometer (via Discuss Data)",
       "source_organization": "Central Asia Barometer",
       "source_url": "https://discuss-data.net/dataset/1afc5235-eb1f-4a23-80b6-036515ce1916/",
@@ -90,6 +92,7 @@
     {
       "record_type": "hosted",
       "title": "Central Asia Barometer Survey — Uzbekistan, Waves 3-7",
+      "abstract": "The Central Asia Barometer is a repeated public opinion survey of adults across Central Asia. Waves 3 to 7 cover Uzbekistan through 2020, each with 1,500 respondents, on the political and economic situation, attitudes toward government and national leaders, and media use. These waves span the arrival of COVID-19, and the survey moved from face-to-face to telephone interviewing during the pandemic — a change of mode that is worth accounting for when comparing them with earlier waves.\n\nSurveyBase holds a catalogue record only. Waves 1-9 (2017-2021) are published together by the Central Asia Barometer through Discuss Data under open-access terms that require attribution.",
       "source_name": "Central Asia Barometer (via Discuss Data)",
       "source_organization": "Central Asia Barometer",
       "source_url": "https://discuss-data.net/dataset/1afc5235-eb1f-4a23-80b6-036515ce1916/",
@@ -123,6 +126,7 @@
     {
       "record_type": "hosted",
       "title": "Central Asia Barometer Survey — Uzbekistan, Waves 8-9",
+      "abstract": "The Central Asia Barometer is a repeated public opinion survey of adults across Central Asia. Waves 8 and 9 cover Uzbekistan in 2021, with a larger sample of 2,000 respondents each, interviewed by telephone. They carry the recurring questions on the political and economic situation, attitudes toward government, public health and media use.\n\nSurveyBase holds a catalogue record only. Waves 1-9 (2017-2021) are published together by the Central Asia Barometer through Discuss Data under open-access terms that require attribution.",
       "source_name": "Central Asia Barometer (via Discuss Data)",
       "source_organization": "Central Asia Barometer",
       "source_url": "https://discuss-data.net/dataset/1afc5235-eb1f-4a23-80b6-036515ce1916/",
@@ -156,6 +160,7 @@
     {
       "record_type": "link_only",
       "title": "Listening to the Citizens of Uzbekistan Survey (L2CU) 2018-2025",
+      "abstract": "Listening to the Citizens of Uzbekistan (L2CU) is a monthly telephone survey of roughly 1,500 households, run by the World Bank since 2018. It covers how households live between censuses: employment and income, internal and international labour migration, food security, and access to public services. The frequency is the point — the series is built to show how conditions move month to month rather than to give a single snapshot.\n\nSurveyBase holds a catalogue record only. The microdata are distributed by the World Bank Microdata Library under a research licence that does not permit redistribution; request access at the source link below.",
       "source_name": "World Bank Microdata Library",
       "source_organization": "World Bank",
       "source_url": "https://microdata.worldbank.org/index.php/catalog/6412",
@@ -184,6 +189,7 @@
     {
       "record_type": "link_only",
       "title": "Uzbekistan Multiple Indicator Cluster Survey (MICS) 2021-2022",
+      "abstract": "The Multiple Indicator Cluster Survey is UNICEF's household survey programme, and the 2021-2022 Uzbekistan round was carried out with the national statistics agency as part of MICS Round 6. It is nationally representative and concentrates on the wellbeing of women and children: child health and nutrition, early childhood development, education, and access to water and sanitation. MICS indicators are defined to stay comparable across countries and across rounds, which is what makes the series useful for tracking change over time.\n\nSurveyBase holds a catalogue record only. The dataset is filed as UZB_2021_MICS_v01_M and is released after registration and review of a data request; apply at the source link below.",
       "source_name": "UNICEF / UZSTAT (via World Bank Microdata & mics.unicef.org)",
       "source_organization": "UNICEF / UzStat",
       "source_url": "https://microdata.worldbank.org/index.php/catalog/5961/study-description",
@@ -213,6 +219,7 @@
     {
       "record_type": "link_only",
       "title": "Life in Transition Survey (LiTS) — Uzbekistan (Rounds I-IV)",
+      "abstract": "The Life in Transition Survey asks households across the former centrally planned economies how their lives have changed since the transition began. Uzbekistan is included in all four rounds — 2006, 2010, 2016 and 2022-23 — with roughly 1,000 to 1,500 households interviewed per country in each round. The questionnaire covers life satisfaction, household economic circumstances, trust in institutions and in other people, experience of corruption, and attitudes toward markets and democracy.\n\nSurveyBase holds a catalogue record only. The EBRD publishes the data and an interactive explorer at the source link below; historical rounds are also archived in the World Bank Microdata Library, which requires registration.",
       "source_name": "EBRD (via World Bank Microdata / IHSN)",
       "source_organization": "EBRD",
       "source_url": "https://www.ebrd.com/home/what-we-do/office-of-the-chief-economist/lits/life-in-transition-survey-data.html",
@@ -240,6 +247,7 @@
     {
       "record_type": "link_only",
       "title": "Uzbekistan — Survey of Conflict Prevention and Cooperation 2004",
+      "abstract": "A 2004 household survey in Uzbekistan on conflict prevention, cooperation and social cohesion, catalogued by the World Bank. This record carries the survey's metadata; the study description at the source link is the authoritative account of its sampling, fieldwork and questionnaire.\n\nSurveyBase holds a catalogue record only, and the reuse terms are unconfirmed — treat the data as not redistributable and check the World Bank Data Catalog entry before using it.",
       "source_name": "World Bank Data Catalog",
       "source_organization": "World Bank",
       "source_url": "https://datacatalog.worldbank.org/search/dataset/0050392/",

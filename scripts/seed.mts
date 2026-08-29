@@ -35,6 +35,9 @@ interface ManifestEntry {
   fieldwork_year: number | null;
   /** The body that ran the survey. Credited in the citation and the JSON-LD. */
   source_organization?: string | null;
+  /** Public description of the survey. This is what a visitor reads. */
+  abstract: string;
+  /** Internal acquisition notes. Never published — see buildAbstract. */
   notes: string;
 }
 
@@ -54,7 +57,11 @@ const isPlaceholder = (entry: ManifestEntry) => entry.notes?.startsWith("Placeho
 const needsLicenseHold = (entry: ManifestEntry) => /confirm before re-hosting/i.test(entry.license);
 
 function buildAbstract(entry: ManifestEntry): string {
-  const parts = [entry.notes];
+  // `notes` is the acquisition instruction to whoever runs this script ("LINK
+  // ONLY. Do not store files."), and it used to be the first paragraph of the
+  // abstract — which meant four published records opened with internal
+  // shorthand on a public page. Only `abstract` is published now.
+  const parts = [entry.abstract];
   parts.push(`Source: ${entry.source_name} — ${entry.source_url}`);
   if (entry.citation) parts.push(`Citation: ${entry.citation}`);
   parts.push(`License: ${entry.license}${entry.attribution_required ? " (attribution required)" : ""}`);

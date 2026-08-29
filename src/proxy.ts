@@ -16,7 +16,7 @@ const handleI18nRouting = createIntlMiddleware(routing);
  * a crawler, a link preview, a `curl`. Deciding here means the answer is a 307
  * before any of the page is rendered.
  */
-const PROTECTED_SEGMENTS = ["profile", "deposit", "moderate"];
+const PROTECTED_SEGMENTS = ["profile", "deposit", "moderate", "admin"];
 
 function protectedRequest(pathname: string): boolean {
   const [, locale, segment] = pathname.split("/");
