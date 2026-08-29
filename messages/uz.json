@@ -224,6 +224,8 @@
     "metadataTargetPopulation": "Maqsadli aholi guruhi",
     "metadataCollectionMethod": "Maʼlumot yigʻish usuli",
     "metadataFieldwork": "Yigʻish davri",
+    "fieldworkFrom": "{date} dan boshlab",
+    "fieldworkUntil": "{date} gacha",
     "metadataLanguages": "Tillar",
     "metadataLicense": "Litsenziya",
     "metadataQuestionnaire": "Anketa",

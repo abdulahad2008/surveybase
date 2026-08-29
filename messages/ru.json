@@ -224,6 +224,8 @@
     "metadataTargetPopulation": "Целевая группа",
     "metadataCollectionMethod": "Метод сбора данных",
     "metadataFieldwork": "Период сбора данных",
+    "fieldworkFrom": "с {date}",
+    "fieldworkUntil": "по {date}",
     "metadataLanguages": "Языки",
     "metadataLicense": "Лицензия",
     "metadataQuestionnaire": "Анкета",

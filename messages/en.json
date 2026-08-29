@@ -224,6 +224,8 @@
     "metadataTargetPopulation": "Target population",
     "metadataCollectionMethod": "Collection method",
     "metadataFieldwork": "Fieldwork",
+    "fieldworkFrom": "from {date}",
+    "fieldworkUntil": "until {date}",
     "metadataLanguages": "Languages",
     "metadataLicense": "License",
     "metadataQuestionnaire": "Questionnaire",
