@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useId } from "react";
+import { useActionState, useEffect, useId, useRef } from "react";
 import { useTranslations } from "next-intl";
 import type { Locale } from "@/i18n/routing";
 import { ROLES } from "@/lib/admin";
@@ -9,7 +9,7 @@ import { changeRole, type AdminState } from "./actions";
 // Lives here rather than beside the action: a "use server" module may only
 // export async functions, and exporting this constant from it made every
 // dispatch of changeRole fail with a 500 before the action ever ran.
-const IDLE: AdminState = { error: null, changedTo: null };
+const IDLE: AdminState = { error: null, changedTo: null, serverRole: null };
 
 /**
  * The role control for one user.
@@ -36,6 +36,18 @@ export function RoleSelect({
     IDLE,
   );
   const selectId = useId();
+  const select = useRef<HTMLSelectElement>(null);
+
+  // React 19 resets the form once the action settles, which puts the select
+  // back to the role the page was rendered with — so the row read "Saved:
+  // Moderator" beside a select saying User, and a refused change left the
+  // select offering a role nobody holds. Re-applying what the server reports
+  // it actually has is the narrowest fix available: giving the select a key
+  // instead remounts it, and the remount takes the message down with it.
+  useEffect(() => {
+    if (state.serverRole && select.current)
+      select.current.value = state.serverRole;
+  }, [state.serverRole, state.changedTo, state.error]);
 
   return (
     <form action={action} className="flex flex-wrap items-center gap-2">
@@ -43,6 +55,7 @@ export function RoleSelect({
         {t("roleFor", { name: userLabel })}
       </label>
       <select
+        ref={select}
         id={selectId}
         name="role"
         defaultValue={currentRole}
