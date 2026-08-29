@@ -525,26 +525,10 @@ select.input {
   animation: fade-up 500ms ease-out both;
 }
 
-/* loading dots */
-@keyframes bounce-bar {
-  0%,
-  100% {
-    transform: scaleY(0.4);
-  }
-  50% {
-    transform: scaleY(1);
-  }
-}
-.loading-bar {
-  transform-origin: bottom;
-  animation: bounce-bar 1s ease-in-out infinite;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .bar-grow,
   .float-soft,
-  .fade-up,
-  .loading-bar {
+  .fade-up {
     animation: none;
   }
   .card-hover,
