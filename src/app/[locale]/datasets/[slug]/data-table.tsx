@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/lib/use-format";
+import { numericValue } from "@/lib/table";
 import {
   type ColumnDef,
-  type Row,
   type SortingState,
   flexRender,
   getCoreRowModel,
@@ -13,36 +13,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-
-/**
- * How many rows of a dataset are shipped to the browser.
- *
- * Every row used to be: the page serialised the whole parsed CSV into the RSC
- * payload so this component could paginate 20 at a time, which meant a
- * 5,000-row survey sent 5,000 rows to display 20. The table is a preview —
- * anyone who wants the data downloads it, and that button is right there.
- */
-export const TABLE_ROW_LIMIT = 100;
-
-/**
- * Sorts a column of numbers by value rather than by digit.
- *
- * The default comparator is lexical, so an age column sorted "1, 10, 100, 2" —
- * which looks like corrupted data in a table whose whole job is to show what
- * the data looks like. Empty cells sort last in both directions: a missing
- * answer is not a small one.
- */
-function numericSort(a: Row<Record<string, string>>, b: Row<Record<string, string>>, id: string) {
-  const left = Number(a.getValue(id));
-  const right = Number(b.getValue(id));
-  const leftMissing = Number.isNaN(left);
-  const rightMissing = Number.isNaN(right);
-  if (leftMissing || rightMissing) {
-    if (leftMissing && rightMissing) return 0;
-    return leftMissing ? 1 : -1;
-  }
-  return left - right;
-}
 
 export function DataTable({
   headers,
@@ -78,12 +48,24 @@ export function DataTable({
     return () => observer.disconnect();
   }, [headers.length, rows.length]);
 
-  const columns: ColumnDef<Record<string, string>>[] = headers.map((header) => ({
-    id: header,
-    header,
-    accessorFn: (row) => row[header] ?? "",
-    ...(columnTypes[header] === "numeric" ? { sortingFn: numericSort } : {}),
-  }));
+  const columns: ColumnDef<Record<string, string>>[] = headers.map((header) => {
+    if (columnTypes[header] !== "numeric") {
+      return { id: header, header, accessorFn: (row) => row[header] ?? "" };
+    }
+    return {
+      id: header,
+      header,
+      accessorFn: (row) => numericValue(row[header]),
+      // Sorting sees the accessor; the cell keeps showing the original text, so
+      // a stray "n/a" in a numeric column is still displayed, just not ranked.
+      cell: ({ row }) => row.original[header] ?? "",
+      sortUndefined: "last",
+      // A number-valued accessor makes the table auto-pick descending for the
+      // first click. Every text column still starts ascending; one header out
+      // of six reversing itself reads as a bug, so pin them all the same way.
+      sortDescFirst: false,
+    };
+  });
 
   const table = useReactTable({
     data: rows,

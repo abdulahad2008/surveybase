@@ -10,8 +10,8 @@
     "attribution_required": "boolean",
     "citation": "string | null",
     "country": "Uzbekistan",
-    "topics": "string[]",
-    "collection_method": "string",
+    "topics": "string[] — canonical TOPICS values from src/lib/survey-vocab.ts, not prose; the browse page filters on them and localises the labels",
+    "collection_method": "string — a canonical COLLECTION_METHODS value from src/lib/survey-vocab.ts; sample sizes and design detail belong in the abstract",
     "sample_size": "int | null",
     "languages": "string[]",
     "formats_available": "string[]",
@@ -32,14 +32,14 @@
       "citation": "Central Asia Barometer (2024): Central Asia Barometer Survey Waves 1-9 (2017-2021), Discuss Data, https://doi.org/10.48320/1AFC5235-EB1F-4A23-80B6-036515CE1916",
       "country": "Uzbekistan",
       "topics": [
-        "political situation",
-        "economic situation",
-        "attitudes towards government",
-        "ethnic relations",
-        "media use",
-        "public health"
+        "Politics & public opinion",
+        "Economy & prices",
+        "Governance & corruption",
+        "Social cohesion & trust",
+        "Media & internet",
+        "Health"
       ],
-      "collection_method": "Face-to-face cross-sectional survey",
+      "collection_method": "Face-to-face interview",
       "sample_size": 1500,
       "languages": [
         "uz",
@@ -67,13 +67,13 @@
       "citation": "Central Asia Barometer (2024), Discuss Data, https://doi.org/10.48320/1AFC5235-EB1F-4A23-80B6-036515CE1916",
       "country": "Uzbekistan",
       "topics": [
-        "political situation",
-        "economic situation",
-        "attitudes towards government",
-        "ethnic relations",
-        "media use"
+        "Politics & public opinion",
+        "Economy & prices",
+        "Governance & corruption",
+        "Social cohesion & trust",
+        "Media & internet"
       ],
-      "collection_method": "Face-to-face cross-sectional survey",
+      "collection_method": "Face-to-face interview",
       "sample_size": 1500,
       "languages": [
         "uz",
@@ -101,13 +101,12 @@
       "citation": "Central Asia Barometer (2024), Discuss Data, https://doi.org/10.48320/1AFC5235-EB1F-4A23-80B6-036515CE1916",
       "country": "Uzbekistan",
       "topics": [
-        "political situation",
-        "economic situation",
-        "attitudes towards government",
-        "opinions of leaders",
-        "media use"
+        "Politics & public opinion",
+        "Economy & prices",
+        "Governance & corruption",
+        "Media & internet"
       ],
-      "collection_method": "Face-to-face / telephone cross-sectional survey",
+      "collection_method": "Mixed mode",
       "sample_size": 1500,
       "languages": [
         "uz",
@@ -135,13 +134,13 @@
       "citation": "Central Asia Barometer (2024), Discuss Data, https://doi.org/10.48320/1AFC5235-EB1F-4A23-80B6-036515CE1916",
       "country": "Uzbekistan",
       "topics": [
-        "political situation",
-        "economic situation",
-        "attitudes towards government",
-        "public health",
-        "media use"
+        "Politics & public opinion",
+        "Economy & prices",
+        "Governance & corruption",
+        "Health",
+        "Media & internet"
       ],
-      "collection_method": "Telephone cross-sectional survey",
+      "collection_method": "Telephone interview",
       "sample_size": 2000,
       "languages": [
         "uz",
@@ -170,14 +169,12 @@
       "citation": null,
       "country": "Uzbekistan",
       "topics": [
-        "socio-economic conditions",
-        "migration",
-        "employment",
-        "public services",
-        "income",
-        "food security"
+        "Income & poverty",
+        "Employment & labour",
+        "Migration",
+        "Social protection"
       ],
-      "collection_method": "Monthly phone survey (~1500 households)",
+      "collection_method": "Telephone interview",
       "sample_size": 1500,
       "languages": [
         "en"
@@ -199,13 +196,13 @@
       "citation": null,
       "country": "Uzbekistan",
       "topics": [
-        "child health",
-        "education",
-        "nutrition",
-        "water & sanitation",
-        "women & children wellbeing"
+        "Health",
+        "Education",
+        "Housing & infrastructure",
+        "Gender",
+        "Youth"
       ],
-      "collection_method": "Nationally representative household survey (MICS Round 6)",
+      "collection_method": "Face-to-face interview",
       "sample_size": null,
       "languages": [
         "en",
@@ -229,13 +226,13 @@
       "citation": null,
       "country": "Uzbekistan",
       "topics": [
-        "life satisfaction",
-        "attitudes to markets & democracy",
-        "trust",
-        "corruption",
-        "household economy"
+        "Wellbeing & life satisfaction",
+        "Politics & public opinion",
+        "Social cohesion & trust",
+        "Governance & corruption",
+        "Income & poverty"
       ],
-      "collection_method": "Representative household survey (~1000-1500 households/country)",
+      "collection_method": "Face-to-face interview",
       "sample_size": 1500,
       "languages": [
         "en"
@@ -257,11 +254,10 @@
       "citation": null,
       "country": "Uzbekistan",
       "topics": [
-        "conflict prevention",
-        "cooperation",
-        "social cohesion"
+        "Social cohesion & trust",
+        "Crime & safety"
       ],
-      "collection_method": "Household survey",
+      "collection_method": "Face-to-face interview",
       "sample_size": null,
       "languages": [
         "en"

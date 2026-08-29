@@ -9,6 +9,7 @@ import { routing, type Locale } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { SITE_NAME, localeAlternates, localeUrl } from "@/lib/site";
 import { citationYear, fullCitation } from "@/lib/citation";
+import { isoDateParts } from "@/lib/format";
 import {
   datasetDescription,
   datasetJsonLd,
@@ -16,6 +17,7 @@ import {
 } from "@/lib/dataset-jsonld";
 import { topicColor } from "@/lib/topic-colors";
 import { methodLabel, topicLabel } from "@/lib/survey-vocab";
+import { TABLE_ROW_LIMIT } from "@/lib/table";
 import { CopyButton } from "@/components/copy-button";
 import {
   ArrowLeftIcon,
@@ -28,7 +30,7 @@ import {
   UsersIcon,
 } from "@/components/icons";
 import { ColumnCharts } from "./column-charts";
-import { DataTable, TABLE_ROW_LIMIT } from "./data-table";
+import { DataTable } from "./data-table";
 import { Reviews, type ReviewRow } from "./reviews";
 
 interface SurveyColumnRow {
@@ -211,15 +213,41 @@ export default async function DatasetPage({
     .filter((p): p is PublicationRow => Boolean(p));
 
   const nf = new Intl.NumberFormat(locale);
-  const fieldworkYearRange =
-    dataset.fieldwork_start || dataset.fieldwork_end
-      ? [
-          dataset.fieldwork_start ? new Date(dataset.fieldwork_start).getFullYear() : "?",
-          dataset.fieldwork_end ? new Date(dataset.fieldwork_end).getFullYear() : "?",
-        ]
-          .filter((v, i, arr) => i === 0 || v !== arr[0])
-          .join("–")
-      : null;
+
+  // The server-side twin of useFormat().day. This page renders once and is
+  // never rehydrated, so it can read the catalog directly; what it must not do
+  // is print the raw ISO string, which is what an Uzbek reader used to get.
+  const fmt = await getTranslations("Format");
+  const monthsShort = fmt("monthsShort").split(",");
+  const day = (iso: string): string => {
+    const parts = isoDateParts(iso);
+    if (!parts) return iso;
+    return fmt("dateShort", {
+      day: parts.day,
+      month: monthsShort[parts.month - 1] ?? String(parts.month),
+      year: parts.year,
+    });
+  };
+
+  // Read the year off the string rather than through `new Date`, which parses
+  // a bare `yyyy-mm-dd` as UTC midnight and hands back the previous year to
+  // anyone west of it.
+  const fieldworkYears = [dataset.fieldwork_start, dataset.fieldwork_end]
+    .map((iso) => (iso ? isoDateParts(iso)?.year ?? null : null))
+    .filter((year): year is string => Boolean(year));
+  const fieldworkYearRange = fieldworkYears.length
+    ? [...new Set([fieldworkYears[0], fieldworkYears[fieldworkYears.length - 1]])].join("–")
+    : null;
+
+  // An open range is open, not unknown on both ends. "2021-01-01 – ?" said
+  // neither, in a date format nobody here writes.
+  const fieldworkRange = dataset.fieldwork_start
+    ? dataset.fieldwork_end
+      ? `${day(dataset.fieldwork_start)} – ${day(dataset.fieldwork_end)}`
+      : t("fieldworkFrom", { date: day(dataset.fieldwork_start) })
+    : dataset.fieldwork_end
+      ? t("fieldworkUntil", { date: day(dataset.fieldwork_end) })
+      : undefined;
 
   // Only published datasets are advertised as structured data — a draft is not a
   // dataset anyone can get. Escaping "<" is what keeps a depositor-supplied
@@ -369,11 +397,7 @@ export default async function DatasetPage({
               <Meta label={t("metadataPlatform")} value={dataset.collection_platform ?? null} />
               <Meta
                 label={t("metadataFieldwork")}
-                value={
-                  dataset.fieldwork_start || dataset.fieldwork_end
-                    ? `${dataset.fieldwork_start ?? "?"} – ${dataset.fieldwork_end ?? "?"}`
-                    : undefined
-                }
+                value={fieldworkRange}
               />
               <Meta label={t("metadataLanguages")} value={dataset.languages.join(", ")} />
               <Meta label={t("metadataLicense")} value={dataset.license} />

@@ -569,9 +569,15 @@ export function DepositForm({
                   type="date"
                   required
                   defaultValue={preview?.fieldworkStart ?? ""}
-                  onChange={(e) =>
-                    setFieldwork((f) => ({ ...f, start: e.currentTarget.value }))
-                  }
+                  onChange={(e) => {
+                    // Read the value here, not inside the updater. React nulls
+                    // `currentTarget` once the handler returns, and a functional
+                    // updater runs later, during the render it schedules — so
+                    // reading it in there threw and the error boundary replaced
+                    // the page, taking everything already typed with it.
+                    const value = e.currentTarget.value;
+                    setFieldwork((f) => ({ ...f, start: value }));
+                  }}
                   className="input"
                 />
               </Field>
@@ -593,9 +599,10 @@ export function DepositForm({
                   required
                   min={fieldwork.start || undefined}
                   defaultValue={preview?.fieldworkEnd ?? ""}
-                  onChange={(e) =>
-                    setFieldwork((f) => ({ ...f, end: e.currentTarget.value }))
-                  }
+                  onChange={(e) => {
+                    const value = e.currentTarget.value;
+                    setFieldwork((f) => ({ ...f, end: value }));
+                  }}
                   className="input"
                 />
               </Field>

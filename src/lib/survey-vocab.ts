@@ -48,8 +48,10 @@ export interface VocabOption {
 export const TOPICS: VocabOption[] = [
   { value: "Education", key: "education" },
   { value: "Health", key: "health" },
+  { value: "Wellbeing & life satisfaction", key: "wellbeing" },
   { value: "Employment & labour", key: "employment" },
   { value: "Income & poverty", key: "income" },
+  { value: "Economy & prices", key: "economy" },
   { value: "Migration", key: "migration" },
   { value: "Gender", key: "gender" },
   { value: "Youth", key: "youth" },
@@ -58,6 +60,7 @@ export const TOPICS: VocabOption[] = [
   { value: "Business & entrepreneurship", key: "business" },
   { value: "Politics & public opinion", key: "politics" },
   { value: "Governance & corruption", key: "governance" },
+  { value: "Social cohesion & trust", key: "cohesion" },
   { value: "Religion & values", key: "religion" },
   { value: "Media & internet", key: "media" },
   { value: "Environment & climate", key: "environment" },
