@@ -1,6 +1,7 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { isAdmin } from "@/lib/admin";
 import { Logo } from "./logo";
 import { LocaleSwitcher } from "./locale-switcher";
 import { SignOutButton } from "./sign-out-button";
@@ -22,6 +23,7 @@ export async function Header() {
   } = await supabase.auth.getUser();
 
   let isModerator = false;
+  let admin = false;
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
@@ -29,7 +31,12 @@ export async function Header() {
       .eq("id", user.id)
       .single();
     isModerator = profile?.role === "moderator" || profile?.role === "admin";
+    admin = isAdmin(profile?.role);
   }
+
+  // Staff carry one or two extra links, which is what pushes the inline nav past
+  // a 768px viewport. See MobileNav for the measurements.
+  const staff = isModerator || admin;
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-canvas/85 backdrop-blur-md">
@@ -37,7 +44,13 @@ export async function Header() {
         <Logo />
 
         {/* desktop nav */}
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav
+          className={
+            staff
+              ? "hidden items-center gap-1 lg:flex"
+              : "hidden items-center gap-1 md:flex"
+          }
+        >
           <Link href="/datasets" className={navLink}>
             {t("browse")}
           </Link>
@@ -46,9 +59,17 @@ export async function Header() {
               {t("moderate")}
             </Link>
           )}
+          {admin && (
+            <Link href="/admin" className={navLink}>
+              {t("admin")}
+            </Link>
+          )}
           {user ? (
             <>
-              <Link href="/profile" className={`${navLink} inline-flex items-center gap-1.5`}>
+              <Link
+                href="/profile"
+                className={`${navLink} inline-flex items-center gap-1.5`}
+              >
                 <UserIcon size={15} />
                 {t("profile")}
               </Link>
@@ -77,7 +98,7 @@ export async function Header() {
             that overflow scrolled every page on the site sideways — not just
             this component. Collapsing them to one button removes the cause
             rather than clipping the symptom. */}
-        <MobileNav label={t("menu")}>
+        <MobileNav label={t("menu")} wide={staff}>
           <Link href="/datasets" className={sheetLink}>
             {t("browse")}
           </Link>
@@ -87,6 +108,11 @@ export async function Header() {
           {isModerator && (
             <Link href="/moderate" className={sheetLink}>
               {t("moderate")}
+            </Link>
+          )}
+          {admin && (
+            <Link href="/admin" className={sheetLink}>
+              {t("admin")}
             </Link>
           )}
           {user ? (

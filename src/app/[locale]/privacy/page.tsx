@@ -12,6 +12,7 @@ const SECTIONS: LegalSection[] = [
   { heading: "privacyPublicHeading", body: "privacyPublicBody" },
   { heading: "privacyAnonHeading", body: "privacyAnonBody" },
   { heading: "privacyCookiesHeading", body: "privacyCookiesBody" },
+  { heading: "privacyAnalyticsHeading", body: "privacyAnalyticsBody" },
   { heading: "privacyStorageHeading", body: "privacyStorageBody" },
   { heading: "privacyRetentionHeading", body: "privacyRetentionBody" },
   { heading: "privacyRightsHeading", body: "privacyRightsBody" },

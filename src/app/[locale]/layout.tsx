@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -61,6 +62,11 @@ export default async function LocaleLayout({
           <Header />
           {children}
           <Footer />
+          {/* Page views. Cookieless and aggregate-only — no identifiers reach
+              Vercel, which is the only kind of measurement this site can take
+              while promising visitors it does not track them. Said out loud on
+              /privacy rather than left for someone to discover. */}
+          <Analytics />
         </NextIntlClientProvider>
       </body>
     </html>

@@ -12,8 +12,24 @@ import { MenuIcon, XIcon } from "./icons";
  * on a button that had just stopped describing what it did. The sheet sits
  * directly after the toggle in the DOM, so Tab reaches it without a focus trap
  * — what was missing was every way out.
+ *
+ * `wide` moves the phone/desktop switch from 768px up to 1024px. A signed-out
+ * visitor's inline nav fits at 768px; a moderator's does not — it measured 76px
+ * past the viewport before /admin existed, and an admin's 148px. Rather than
+ * overflow a sticky header (which scrolls every page on the site sideways, the
+ * same failure the paragraph above describes), staff keep this sheet for one
+ * breakpoint longer. Header decides who is staff; both class strings are spelled
+ * out because Tailwind reads source text, not values.
  */
-export function MobileNav({ label, children }: { label: string; children: ReactNode }) {
+export function MobileNav({
+  label,
+  wide = false,
+  children,
+}: {
+  label: string;
+  wide?: boolean;
+  children: ReactNode;
+}) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const sheetId = useId();
@@ -54,7 +70,7 @@ export function MobileNav({ label, children }: { label: string; children: ReactN
   }, [open]);
 
   return (
-    <div ref={container} className="md:hidden">
+    <div ref={container} className={wide ? "lg:hidden" : "md:hidden"}>
       <button
         ref={toggle}
         type="button"
