@@ -16,6 +16,7 @@ import {
 } from "@/lib/dataset-jsonld";
 import { topicColor } from "@/lib/topic-colors";
 import { methodLabel, topicLabel } from "@/lib/survey-vocab";
+import { TABLE_ROW_LIMIT } from "@/lib/table";
 import { CopyButton } from "@/components/copy-button";
 import {
   ArrowLeftIcon,
@@ -28,7 +29,7 @@ import {
   UsersIcon,
 } from "@/components/icons";
 import { ColumnCharts } from "./column-charts";
-import { DataTable, TABLE_ROW_LIMIT } from "./data-table";
+import { DataTable } from "./data-table";
 import { Reviews, type ReviewRow } from "./reviews";
 
 interface SurveyColumnRow {
