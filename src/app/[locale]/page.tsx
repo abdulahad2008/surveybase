@@ -142,7 +142,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
                   <div className="h-2.5 w-28 rounded-full bg-card-soft" />
                   <div className="h-2 w-20 rounded-full bg-card-soft" />
                 </div>
-                <span className="chip" style={{ background: "var(--mint-soft)", color: "var(--mint)" }}>
+                <span className="chip" style={{ background: "var(--mint-soft)", color: "var(--mint-ink)" }}>
                   <ShieldIcon size={12} />
                   {t("mockAnonymized")}
                 </span>
