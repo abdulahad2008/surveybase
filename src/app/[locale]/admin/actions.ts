@@ -1,9 +1,13 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { Locale } from "@/i18n/routing";
-import { isRole, refuseRoleChange, type Role, type RoleRefusal } from "@/lib/admin";
+import {
+  isRole,
+  refuseRoleChange,
+  type Role,
+  type RoleRefusal,
+} from "@/lib/admin";
 
 export type AdminErrorKey = RoleRefusal | "errorGeneric" | "errorMissing";
 
@@ -11,6 +15,13 @@ export interface AdminState {
   error: AdminErrorKey | null;
   /** Set on success so the row can confirm what it just did. */
   changedTo: Role | null;
+  /**
+   * The role the target actually holds once the attempt is over — the same on
+   * success, unchanged on a refusal. The select is put back to this, because
+   * after a refusal the value the admin picked is a lie and the value the page
+   * was rendered with may be several saves stale.
+   */
+  serverRole: Role | null;
 }
 
 /**
@@ -23,7 +34,9 @@ export interface AdminState {
  * user's row is instead granted by the admin update policy in 0010.
  */
 export async function changeRole(
-  locale: Locale,
+  // Bound by the caller and kept for symmetry with the site's other actions,
+  // which use it to build redirects.
+  _locale: Locale,
   targetId: string,
   // Unused, but useActionState's action signature requires it.
   _prev: AdminState,
@@ -33,7 +46,7 @@ export async function changeRole(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { error: "errorAuth", changedTo: null };
+  if (!user) return { error: "errorAuth", changedTo: null, serverRole: null };
 
   const raw = formData.get("role");
   const nextRole = typeof raw === "string" ? raw : "";
@@ -47,13 +60,16 @@ export async function changeRole(
     .in("id", [user.id, targetId]);
 
   if (readError) {
-    console.error(`[admin] reading roles for ${targetId} failed: ${readError.message}`);
-    return { error: "errorGeneric", changedTo: null };
+    console.error(
+      `[admin] reading roles for ${targetId} failed: ${readError.message}`,
+    );
+    return { error: "errorGeneric", changedTo: null, serverRole: null };
   }
 
   const actor = rows?.find((r) => r.id === user.id);
   const target = rows?.find((r) => r.id === targetId);
-  if (!target) return { error: "errorMissing", changedTo: null };
+  if (!target)
+    return { error: "errorMissing", changedTo: null, serverRole: null };
 
   const { count, error: countError } = await supabase
     .from("profiles")
@@ -62,7 +78,7 @@ export async function changeRole(
 
   if (countError) {
     console.error(`[admin] counting admins failed: ${countError.message}`);
-    return { error: "errorGeneric", changedTo: null };
+    return { error: "errorGeneric", changedTo: null, serverRole: null };
   }
 
   const refusal = refuseRoleChange({
@@ -73,10 +89,13 @@ export async function changeRole(
     nextRole,
     adminCount: count ?? 0,
   });
-  if (refusal) return { error: refusal, changedTo: null };
+  // A refusal still knows the truth, having just read it.
+  const held = isRole(target.role) ? target.role : null;
+  if (refusal) return { error: refusal, changedTo: null, serverRole: held };
   // refuseRoleChange has already rejected anything outside ROLES. Repeated
   // here only so the type narrows before the value reaches the database.
-  if (!isRole(nextRole)) return { error: "errorRole", changedTo: null };
+  if (!isRole(nextRole))
+    return { error: "errorRole", changedTo: null, serverRole: held };
 
   // `select()` so a write RLS declines is distinguishable from one that
   // worked. Without it PostgREST returns no error for a statement that matched
@@ -89,17 +108,24 @@ export async function changeRole(
     .select("id");
 
   if (error) {
-    console.error(`[admin] setting ${targetId} to ${nextRole} failed: ${error.message}`);
-    return { error: "errorGeneric", changedTo: null };
+    console.error(
+      `[admin] setting ${targetId} to ${nextRole} failed: ${error.message}`,
+    );
+    return { error: "errorGeneric", changedTo: null, serverRole: held };
   }
   if (!updated || updated.length === 0) {
     console.error(
       `[admin] setting ${targetId} to ${nextRole} changed no row; ` +
         "the admin update policy from 0010_admin_role_management.sql is probably missing",
     );
-    return { error: "errorGeneric", changedTo: null };
+    return { error: "errorGeneric", changedTo: null, serverRole: held };
   }
 
-  revalidatePath(`/${locale}/admin`);
-  return { error: null, changedTo: nextRole };
+  // No revalidatePath. It re-renders the route, which discards the state
+  // useActionState is holding — so the row silently lost its "Saved" line and
+  // a screen reader was told nothing at all. Nothing here needs it either:
+  // /admin is dynamic, its queries are cookie-bound and uncached, the client
+  // router cache treats dynamic entries as stale immediately, and a role
+  // appears nowhere on this page except the select the admin just set.
+  return { error: null, changedTo: nextRole, serverRole: nextRole };
 }
