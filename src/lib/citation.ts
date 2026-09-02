@@ -7,6 +7,7 @@
 // reason most people deposit at all.
 
 import { datasetId } from "@/lib/site";
+import { isoDateParts } from "@/lib/format";
 
 /** Shown when a depositor has not filled in their name. Matches the fallback
  *  the dataset page has always used, so the preview cannot promise a credit
@@ -34,8 +35,8 @@ export interface CitationParts {
  */
 export function citationYear(fieldworkStart: string | null, fallback: Date): number {
   if (fieldworkStart) {
-    const parsed = new Date(fieldworkStart);
-    if (!Number.isNaN(parsed.getTime())) return parsed.getFullYear();
+    const parts = isoDateParts(fieldworkStart);
+    if (parts) return Number(parts.year);
   }
   return fallback.getFullYear();
 }

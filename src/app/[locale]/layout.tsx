@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   // dropped from the rendered head rather than resolved.
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "SurveyBase.uz — the open survey archive of Uzbekistan",
+    default: "SurveyBase.uz — Open Survey Archive",
     template: "%s · SurveyBase.uz",
   },
   description:

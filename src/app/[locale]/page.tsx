@@ -311,6 +311,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
               viewAllLabel={t("viewAll")}
               viewAllHref="/datasets?sort=newest"
               datasets={newest}
+              locale={locale}
             />
             {mostDownloaded.length > 0 && (
               <Shelf
@@ -318,6 +319,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
                 viewAllLabel={t("viewAll")}
                 viewAllHref="/datasets?sort=downloads"
                 datasets={mostDownloaded}
+                locale={locale}
               />
             )}
           </>
@@ -414,11 +416,13 @@ function Shelf({
   viewAllLabel,
   viewAllHref,
   datasets,
+  locale,
 }: {
   heading: string;
   viewAllLabel: string;
   viewAllHref: string;
   datasets: Awaited<ReturnType<typeof queryDatasets>>["datasets"];
+  locale: string;
 }) {
   if (datasets.length === 0) return null;
   return (
@@ -435,7 +439,7 @@ function Shelf({
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {datasets.map((d) => (
-          <DatasetCard key={d.id} dataset={d} />
+          <DatasetCard key={d.id} dataset={d} locale={locale} />
         ))}
       </div>
     </section>

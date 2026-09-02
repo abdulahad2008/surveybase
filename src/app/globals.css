@@ -525,18 +525,6 @@ select.input {
   animation: fade-up 500ms ease-out both;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .bar-grow,
-  .float-soft,
-  .fade-up {
-    animation: none;
-  }
-  .card-hover,
-  .btn {
-    transition: none;
-  }
-}
-
 /* tabular numbers for stats/tables */
 .tnum {
   font-variant-numeric: tabular-nums;
